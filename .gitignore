@@ -1,0 +1,10 @@
+# uploads de usuario
+uploads/
+
+# dependencias frontend si aplica
+plantilla/node_modules/
+
+# archivos locales
+.env
+.DS_Store
+Thumbs.db

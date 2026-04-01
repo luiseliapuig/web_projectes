@@ -1,0 +1,37 @@
+RewriteEngine On
+
+# Evitar reescribir archivos y carpetas reales
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+
+
+# LISTADO DE PROYECTOS POR CICLO
+RewriteRule ^projectes/([A-Za-z0-9_-]+)$ /index.php?main=llistat-projectes&cicle=$1 [L,QSA]
+
+# FICHA EDICIÓN POR ID
+RewriteRule ^projecte/([0-9]+)/editar$ /index.php?main=ficha_form&id=$1 [L,QSA]
+
+# FICHA PÚBLICA POR ID
+RewriteRule ^projecte/([0-9]+)$ /index.php?main=ficha&id=$1 [L,QSA]
+
+# DEFENSAS
+RewriteRule ^calendari-defenses$ /index.php?main=calendari [L,QSA]
+RewriteRule ^les-meves-defenses$ /index.php?main=les-meves-defenses [L,QSA]
+
+
+# LOGIN 
+RewriteRule ^login/alumnes/([0-9a-fA-F\-]+)$ /login/alumnes.php?token=$1 [L,QSA]
+
+RewriteRule ^login/([0-9a-fA-F\-]+)$ /login/profesores.php?token=$1 [L,QSA]
+
+RewriteRule ^acces$ /index.php?main=login [L,QSA]
+
+
+
+# Pantalla integrada de password
+
+RewriteRule ^password$ /index.php?main=password-profesor [L,QSA]
+
+RewriteRule ^logout$ /login/logout.php [L,QSA]
+

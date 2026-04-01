@@ -1,0 +1,215 @@
+CONTEXTO · Panel interno de gestión (prototipo MVP)
+
+--------------------------------------------------
+DESCRIPCIÓN GENERAL
+
+Estoy construyendo una herramienta interna de gestión.
+
+No es el producto final.
+
+Es un panel técnico pensado para:
+- gestionar datos reales
+- validar la lógica del sistema
+- operar el día a día
+- iterar rápido
+
+El objetivo es tener un MVP funcional en pocos días,
+con base sólida para evolucionar el año siguiente.
+
+Tecnología:
+- PHP plano
+- sin frameworks
+- sin librerías externas
+- sin arquitectura enterprise
+
+--------------------------------------------------
+INFRAESTRUCTURA DEL PANEL
+
+Plantilla:
+- Panel admin basado en Bootstrap 5
+- Adaptado manualmente
+
+Estructura:
+
+/index.php
+- único punto de entrada
+- siempre imprime HTML (layout completo)
+- carga contenido mediante GET ?main=
+
+/inc/global/
+- header.php
+- menu.php
+- footer.php
+
+/inc/paginas/
+- páginas reales del sistema
+
+Ejemplos:
+- proyecto.php
+- proyecto_form.php
+- proyecto_accion.php
+- profesor.php
+- alumno.php
+- evaluacion.php
+
+--------------------------------------------------
+REGLA DE NOMENCLATURA (CRÍTICA)
+
+Siempre:
+
+- concepto.php
+- concepto_form.php
+- concepto_accion.php
+
+Ejemplo:
+- proyecto.php
+- proyecto_form.php
+- proyecto_accion.php
+
+Nunca:
+- form_proyecto.php
+- accion_proyecto.php
+
+Objetivo:
+- agrupación visual
+- navegación clara
+- mantenimiento simple
+
+--------------------------------------------------
+REGLAS DE TRABAJO
+
+- Máxima simplicidad
+- Nada de sobreingeniería
+- Nada de abstracciones innecesarias
+- Nada de capas artificiales
+- Nada de helpers genéricos
+
+- Código directo y legible
+- Sin validaciones redundantes
+- Sin “por si acaso”
+
+- Si algo se entiende leyendo → está bien hecho
+
+--------------------------------------------------
+BASE DE DATOS
+
+- PostgreSQL
+- Conexión ya disponible como:
+  $pdo
+
+Uso:
+
+- prepare
+- execute
+- fetch
+
+Reglas:
+
+- Consultas explícitas
+- Sin magia
+- Sin ORMs
+- SQL claro y legible
+
+--------------------------------------------------
+ENLACES INTERNOS
+
+Siempre:
+
+/index.php?main=archivo
+
+Ejemplos:
+- ?main=proyecto
+- ?main=proyecto_form
+
+--------------------------------------------------
+PATRÓN CRUD
+
+Para cada entidad:
+
+1) concepto.php
+- listado
+- tabla
+- acciones:
+  - nuevo
+  - editar
+  - borrar
+
+2) concepto_form.php
+- formulario único
+- modos:
+  - new
+  - edit
+  - delete
+- recibe:
+  - modo
+  - id (si aplica)
+
+3) concepto_accion.php
+- ejecuta:
+  - insert
+  - update
+  - delete
+
+- NO usa header()
+- redirección con JS
+
+Patrón:
+
+$to = '/index.php?main=' . urlencode($returnMain) . '&msg=' . urlencode($msg);
+
+echo '<script>location.href=' . json_encode($to) . ';</script>';
+echo '<noscript><meta http-equiv="refresh" content="0;url=' . htmlspecialchars($to, ENT_QUOTES) . '"></noscript>';
+exit;
+
+--------------------------------------------------
+ESTILO DE INTERFAZ
+
+- Bootstrap 5
+- Componentes simples:
+  - cards
+  - tablas
+  - botones
+
+Reglas:
+
+- HTML limpio
+- Legible
+- Funcional > bonito
+
+Indicadores:
+
+<span class="status-btn success-btn">X</span>
+
+--------------------------------------------------
+FILOSOFÍA DEL SISTEMA
+
+Este panel es:
+
+- una herramienta operativa real
+- un entorno de control
+- un sistema usable por personas normales
+
+No es:
+
+- un ejercicio académico
+- un sistema perfecto
+- una arquitectura final
+
+Se prioriza:
+
+- claridad
+- velocidad de implementación
+- control del dato
+- usabilidad real
+
+--------------------------------------------------
+ENFOQUE
+
+Primero:
+→ que funcione
+
+Después:
+→ que sea cómodo
+
+Más adelante:
+→ ya se mejorará

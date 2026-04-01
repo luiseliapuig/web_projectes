@@ -1,0 +1,81 @@
+erDiagram
+    PROYECTOS {
+        int id_proyecto PK
+        uuid uuid UK
+        varchar nombre
+        text resumen
+        text descripcion
+        text stack
+        text ruta_imagen
+        text ruta_funcional
+        text ruta_memoria
+        text ruta_ficha_entrega
+        text url_github
+        text url_proyecto
+        varchar curso_academico
+        varchar ciclo
+        varchar grupo
+        varchar estado
+        timestamp fecha_actualizacion
+        int tutor_id FK
+        smallint nota_tutor_funcional
+        smallint nota_tutor_memoria
+        smallint nota_tutor_proyecto
+        smallint nota_tutor_compromiso
+        text comentario_tutor
+        timestamp fecha_valoracion_tutor
+        int defensa_aula_id FK
+        timestamp defensa_fecha
+    }
+
+    ALUMNOS {
+        int id_alumno PK
+        varchar nombre
+        varchar apellidos
+        varchar email
+        varchar ciclo
+        varchar grupo
+        varchar curso_academico
+        boolean activo
+    }
+
+    PROFESORES {
+        int id_profesor PK
+        varchar nombre
+        varchar apellidos
+        varchar email
+        varchar departamento
+        boolean activo
+        uuid uuid_acceso UK
+        varchar rol
+    }
+
+    REL_PROYECTOS_ALUMNOS {
+        int proyecto_id PK, FK
+        int alumno_id PK, FK
+    }
+
+    EVALUACION_TRIBUNAL {
+        int id_evaluacion_tribunal PK
+        int proyecto_id FK
+        int profesor_id FK
+        smallint nota_memoria
+        smallint nota_proyecto
+        smallint nota_defensa
+        text comentario
+        timestamp fecha_valoracion
+    }
+
+    AULAS {
+        int id_aula PK
+        varchar codigo UK
+        varchar nombre
+        varchar piso
+    }
+
+    PROFESORES ||--o{ PROYECTOS : tutela
+    AULAS ||--o{ PROYECTOS : acoge_defensa
+    PROYECTOS ||--o{ REL_PROYECTOS_ALUMNOS : incluye
+    ALUMNOS ||--o{ REL_PROYECTOS_ALUMNOS : participa
+    PROYECTOS ||--o{ EVALUACION_TRIBUNAL : recibe
+    PROFESORES ||--o{ EVALUACION_TRIBUNAL : evalua

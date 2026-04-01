@@ -1,0 +1,214 @@
+# 📦 Modelo de datos — Web de Proyectos
+
+Este documento describe la estructura de la base de datos del sistema de gestión de proyectos del módulo de Proyecto.
+
+La base de datos está diseñada en PostgreSQL, utilizando un esquema propio (`app`) y siguiendo un enfoque práctico, claro y orientado a uso real en el aula.
+
+---
+
+# 🧱 Estructura general
+
+Base de datos: `web_proyectos`  
+Esquema: `app`
+
+Tablas principales:
+
+- `proyectos`
+- `alumnos`
+- `profesores`
+- `rel_proyectos_alumnos`
+- `evaluacion_tribunal`
+- `aulas`
+
+---
+
+# 📁 Tabla: `proyectos`
+
+Entidad central del sistema. Representa cada proyecto.
+
+## Campos clave
+
+- `id_proyecto` → PK
+- `uuid` → identificador público único (autogenerado)
+- `nombre`, `resumen`, `descripcion`
+- `stack` → tecnologías usadas
+- rutas (`ruta_funcional`, `ruta_memoria`, etc.)
+- URLs (`url_github`, `url_proyecto`)
+
+## Organización
+
+- `curso_academico`
+- `ciclo`
+- `grupo`
+- `estado` (por defecto: `borrador`)
+- `fecha_actualizacion`
+
+## Relación
+
+- `tutor_id` → FK a `profesores`
+- `defensa_aula_id` → FK a `aulas`
+- `defensa_fecha`
+
+## Evaluación del tutor
+
+- `nota_tutor_funcional`
+- `nota_tutor_memoria`
+- `nota_tutor_proyecto`
+- `nota_tutor_compromiso`
+- `comentario_tutor`
+- `fecha_valoracion_tutor`
+
+## Notas
+
+- `uuid` se genera automáticamente con `gen_random_uuid()`
+- Las notas están limitadas a valores entre 1 y 5
+
+---
+
+# 👨‍🎓 Tabla: `alumnos`
+
+Representa los alumnos del centro.
+
+## Campos
+
+- `id_alumno` → PK
+- `nombre`, `apellidos`
+- `email`
+- `ciclo`
+- `grupo`
+- `curso_academico`
+- `activo` (boolean)
+
+## Notas
+
+- Se permite redundancia con `proyectos` para facilitar filtros administrativos
+
+---
+
+# 👨‍🏫 Tabla: `profesores`
+
+Representa el profesorado.
+
+## Campos
+
+- `id_profesor` → PK
+- `nombre`, `apellidos`
+- `email`
+- `departamento`
+- `activo`
+- `uuid_acceso` → acceso directo sin login (autogenerado)
+- `rol` → actualmente solo usado para `superadmin`
+
+## Notas
+
+- `uuid_acceso` permite acceso mediante enlace único
+
+---
+
+# 🔗 Tabla: `rel_proyectos_alumnos`
+
+Tabla intermedia que relaciona proyectos con alumnos.
+
+## Campos
+
+- `proyecto_id` → FK a `proyectos`
+- `alumno_id` → FK a `alumnos`
+
+## Clave primaria
+
+- `(proyecto_id, alumno_id)`
+
+## Notas
+
+- Define relación muchos-a-muchos
+- Evita duplicados automáticamente
+
+---
+
+# 🧑‍⚖️ Tabla: `evaluacion_tribunal`
+
+Almacena las evaluaciones realizadas por el tribunal.
+
+## Campos
+
+- `id_evaluacion_tribunal` → PK
+- `proyecto_id` → FK
+- `profesor_id` → FK
+
+## Evaluación
+
+- `nota_memoria`
+- `nota_proyecto`
+- `nota_defensa`
+- `comentario`
+- `fecha_valoracion`
+
+## Restricciones
+
+- `UNIQUE (proyecto_id, profesor_id)` → un profesor evalúa una sola vez cada proyecto
+- Notas entre 1 y 5
+
+---
+
+# 🏫 Tabla: `aulas`
+
+Define los espacios físicos para las defensas.
+
+## Campos
+
+- `id_aula` → PK
+- `codigo` → identificador único
+- `nombre`
+- `piso`
+
+---
+
+# ⚡ Índices añadidos
+
+Se han creado índices para optimizar consultas habituales:
+
+## Proyectos
+
+- `(curso_academico, ciclo, grupo)` → filtros principales
+- `tutor_id` → proyectos por profesor
+- `defensa_fecha` → agenda de defensas
+- `defensa_aula_id` → organización por aula
+
+## Relación alumnos
+
+- `alumno_id` → buscar el proyecto de un alumno
+
+## Evaluación
+
+- `profesor_id` → evaluaciones realizadas por un profesor
+
+## Alumnos
+
+- `(curso_academico, ciclo, grupo)` → filtros administrativos
+
+---
+
+# 🧠 Filosofía del modelo
+
+Este modelo se ha diseñado con los siguientes principios:
+
+- Simplicidad estructural
+- Claridad pedagógica (entendible por alumnado)
+- Evitar sobreingeniería
+- Adaptado al flujo real del módulo de Proyecto
+- Preparado para crecer sin rehacer la base
+
+---
+
+# 🚀 Resultado
+
+El sistema permite:
+
+- Gestionar proyectos completos
+- Relacionar alumnos y profesores
+- Evaluar con tutor y tribunal
+- Organizar defensas por aula y horario
+- Construir vistas web rápidas y eficientes
+
+---
+
