@@ -1,3 +1,8 @@
+.autoevaluacion .fw-semibold {color: #D97706; margin-bottom: 6px !important;}
+.bg-orange {background: #FFF4E8}
+.autoevaluacion .border-start {
+  border-left-color: #F5C79A !important;
+}
 
 /* BANNER HOME */
 
@@ -580,6 +585,53 @@ span.birrete {
 }
 .btn-puig { border: 1px solid #970A2C; color: #970A2C; background: #fff; transition: background 0.2s ease; }
 .btn-puig:hover { border: 1px solid #970A2C; color: #970A2C; background: #f0dce2;   }
+
+
+.btn-orange {
+    background: #D97706;
+    border: 1px solid #D97706;
+    color: #fff;
+    transition: all 0.2s ease;
+}
+
+.btn-orange:hover {
+    background: #c66905;
+    border-color: #c66905;
+    color: #fff;
+}
+
+.btn-orange:active {
+    background: #b65d05;
+    border-color: #b65d05;
+}
+
+.btn-orange:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.25);
+}
+
+.btn-orange:disabled {
+    background: #f3d3b0;
+    border-color: #f3d3b0;
+    color: #fff;
+    cursor: not-allowed;
+    opacity: 0.8;
+}
+
+.btn-orange-o {
+    border: 1px solid #D97706;
+    color: #D97706;
+    background: #fff;
+    transition: all 0.2s ease;
+}
+
+.btn-orange-o:hover {
+    border-color: #D97706;
+    color: #D97706;
+    background: #FFF4E8;
+    box-shadow: 0 4px 10px rgba(217, 119, 6, 0.15);
+}
+
 a.text-muted span:first-child {
     opacity: 0.7;
 }
@@ -745,7 +797,7 @@ a.text-muted span:first-child {
     font-weight: 600;
     letter-spacing: 0.02em;
     text-transform: uppercase;
-    color: #9ca3af;
+    color: #212529bf;
     margin-bottom: 0.45rem;
 }
 
@@ -806,9 +858,20 @@ a.text-muted span:first-child {
     padding: 1rem 1.1rem;
 }
 
+.doc-block-primary {
+    border: 1px solid #ddc1ca;;
+    background: #f4e3e8;
+}
+
+.doc-block-secondary {
+    background: #fff;
+    border: 1px solid #e5e5e5;
+}
+
 .doc-link-current {
+    font-size: 14px;
     display: inline-block;
-    margin-bottom: 0.6rem;
+    margin-top: 0.6rem;
     color: #970A2C;
     text-decoration: none;
     font-weight: 500;
@@ -848,3 +911,138 @@ textarea {
     overflow: hidden;
     resize: none;
 }    
+
+
+
+.bloque-final {
+  background: #0F172A; /* azul muy oscuro elegante */
+  color: #E5E7EB;
+}
+
+.bloque-final .label {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #9CA3AF;
+}
+
+.bloque-final .valor {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #F9FAFB;
+}
+
+.bloque-final .nota-final {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #F59E0B; /* naranja acento */
+  line-height: 1;
+}
+
+.bloque-final .nota-max {
+  font-size: 1rem;
+  color: #9CA3AF;
+}
+
+.bloque-final .divider {
+  border-left: 1px solid rgba(255,255,255,0.1);
+}
+.notafinal { color: #fff !important;
+  font-size: 24px !important;
+  font-weight: 600 !important;
+}
+
+
+
+
+.doc-item-primary {
+    font-size:15px;
+    font-weight: 600;
+    padding-left: 10px;
+    border-left: 3px solid #7a0d25;
+}
+
+.doc-item-primary:hover {
+    text-decoration: underline;
+}
+.label-doc-prin { font-size:17px; color: #374151;
+    font-weight: 600; }
+
+/* TUTOR */
+.bg-tutor {
+  background-color: #E7F0FB;
+}
+.tutor .fw-semibold {
+  color: #1E3A8A;
+  margin-bottom: 6px !important;
+}
+.tutor .border-start {
+  border-left-color: #93C5FD !important;
+}
+
+/* TRIBUNAL */
+.bg-tribunal {
+  background-color: #f5f9ff;
+}
+.tribunal .fw-semibold {
+  color: #515782;
+  margin-bottom: 6px !important;
+}
+.tribunal .border-start {
+  border-left-color: #CBD5F5 !important;
+}
+
+/* ESTRELLAS */
+.star {
+  font-size: 25px;
+  color: #E5E7EB;
+}
+.star.filled {
+  color: #FACC15;
+}
+
+.rating-grid {
+  display: grid;
+  grid-template-columns: 110px auto;
+  column-gap: 12px;
+  row-gap: 10px;
+  margin-bottom:15px
+}
+
+.rating-label {
+ display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  font-weight: 600;
+  color: #334155;
+}
+
+.rating-stars {
+  white-space: nowrap;
+}
+
+.rating-label,
+.rating-stars {
+  display: flex;
+  align-items: center;
+}
+
+/* Separación vertical entre columnas */
+.tribunal-col {
+
+  position: relative;
+}
+
+.tribunal-col:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  right: 0;
+  width: 1px;
+  background-color: #E5E7EB;
+}
+
+.t-col-1 { padding-right: 24px !important;}
+.t-col-2 { padding-left: 24px !important; padding-right: 24px !important;}
+.t-col-3 { padding-left: 24px !important;}

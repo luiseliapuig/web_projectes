@@ -83,12 +83,29 @@ if (!empty($proyecto['stack'])) {
 $rutaImagen = absolutizePath($proyecto['ruta_imagen'] ?? '');
 $rutaFuncional = absolutizePath($proyecto['ruta_funcional'] ?? '');
 $rutaMemoria = absolutizePath($proyecto['ruta_memoria'] ?? '');
-$rutaFichaEntrega = absolutizePath($proyecto['ruta_ficha_entrega'] ?? '');
+
+// ── Adjunts extra ─────────────────────────────────────────────────
+try {
+    $stmtAdj = $pdo->prepare("
+        SELECT id, tipo, nom, ruta
+        FROM app.proyecto_adjuntos
+        WHERE proyecto_id = ?
+        ORDER BY created_at ASC
+    ");
+    $stmtAdj->execute([$idProyecto]);
+    $adjuntos = $stmtAdj->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $adjuntos = [];
+}
+$adjuntsArxiu  = array_filter($adjuntos, fn($a) => $a['tipo'] === 'arxiu');
+$adjuntsEnllac = array_filter($adjuntos, fn($a) => $a['tipo'] === 'enllaç');
 ?>
 
 <script>
 window.PAGE_TITLE = 'Ficha del projecte';
 </script>
+
+
 
 <div class="container-fluid ">
     <div class="row">
@@ -102,7 +119,7 @@ window.PAGE_TITLE = 'Ficha del projecte';
                     <span>Tornar als projectes de <?= h($proyecto['ciclo'] ?? '-') ?></span>
                 </a>
 
-                <?php if (esSuProyecto((int)$proyecto['id_proyecto']) && configuracion('permitir_editar')): ?>
+                <?php if (esSuProyectoAlumno((int)$proyecto['id_proyecto']) && configuracion('permitir_editar')): ?>
                     <a href="/projecte/<?= (int)$proyecto['id_proyecto'] ?>/editar"
                        class="btn btn-puig px-3">
                         Editar fitxa
@@ -110,6 +127,25 @@ window.PAGE_TITLE = 'Ficha del projecte';
                 <?php endif; ?>
 
             </div>
+
+
+
+
+
+            <?php 
+
+
+        
+
+
+        // si se permiten ver las valoraciones, se muestran las de su proyecto
+        if (esSuProyectoAlumno((int)$proyecto['id_proyecto']) && configuracion('mostrar_defensas') || esSuProyectoProfesor((int)$proyecto['id_proyecto']) && configuracion('mostrar_defensas')) {
+
+            include('bloque-defensa.php'); 
+        }
+    
+
+?>
 
             <div class="card-style mb-30 ">
 
@@ -163,6 +199,14 @@ window.PAGE_TITLE = 'Ficha del projecte';
 
                     <div class="col-lg-5">
 
+
+
+
+                 
+
+
+
+                    <!-- información general -->
                         <div class="puig-panel puig-panel-highlight mb-50">
                             <div class="puig-panel-header">
                                 <h3 class="puig-panel-title c-puig">Informació general</h3>
@@ -249,25 +293,28 @@ window.PAGE_TITLE = 'Ficha del projecte';
                         <div class="mb-50">
                             <h3 class="h3fichas">Documentació</h3>
                             <div class="inner-ficha">
+
+                                <?php if ($rutaMemoria !== ''): ?>
+                                  <div class="mb-10">
+                                    <a href="<?= h($rutaMemoria) ?>" target="_blank" class="doc-item doc-item-primary enlace ">
+                                        MEMÒRIA DEL PROJECTE
+                                    </a>
+                                </div>
+                                <?php endif; ?>
+
                                 <?php if ($rutaFuncional !== ''): ?>
                                     <a href="<?= h($rutaFuncional) ?>" target="_blank" class="enlace">
                                         Document funcional
                                     </a><br>
                                 <?php endif; ?>
 
-                                <?php if ($rutaMemoria !== ''): ?>
-                                    <a href="<?= h($rutaMemoria) ?>" target="_blank" class="enlace">
-                                        Memòria
+                                <?php foreach ($adjuntsArxiu as $adj): ?>
+                                    <a href="<?= h($adj['ruta']) ?>" target="_blank" class="enlace">
+                                        <?= h($adj['nom']) ?>
                                     </a><br>
-                                <?php endif; ?>
+                                <?php endforeach; ?>
 
-                                <?php if ($rutaFichaEntrega !== ''): ?>
-                                    <a href="<?= h($rutaFichaEntrega) ?>" target="_blank" class="enlace">
-                                        Fitxa d'entrega
-                                    </a><br>
-                                <?php endif; ?>
-
-                                <?php if ($rutaFuncional === '' && $rutaMemoria === '' && $rutaFichaEntrega === ''): ?>
+                                <?php if ($rutaFuncional === '' && $rutaMemoria === '' && empty($adjuntsArxiu)): ?>
                                     <p class="text-muted mb-0">Encara no hi ha documentació disponible.</p>
                                 <?php endif; ?>
                             </div>
@@ -288,7 +335,13 @@ window.PAGE_TITLE = 'Ficha del projecte';
                                     </a><br>
                                 <?php endif; ?>
 
-                                <?php if (empty($proyecto['url_github']) && empty($proyecto['url_proyecto'])): ?>
+                                <?php foreach ($adjuntsEnllac as $adj): ?>
+                                    <a href="<?= h($adj['ruta']) ?>" target="_blank" class="enlace">
+                                        <?= h($adj['nom']) ?>
+                                    </a><br>
+                                <?php endforeach; ?>
+
+                                <?php if (empty($proyecto['url_github']) && empty($proyecto['url_proyecto']) && empty($adjuntsEnllac)): ?>
                                     <p class="text-muted mb-0">Aquest projecte encara no té enllaços publicats.</p>
                                 <?php endif; ?>
                             </div>
@@ -305,7 +358,7 @@ window.PAGE_TITLE = 'Ficha del projecte';
 
 
 // si es su proyecto, ven este bloque
- if (esSuProyecto((int)$proyecto['id_proyecto'])): 
+ if (esSuProyectoProfesor((int)$proyecto['id_proyecto'])): 
 
         include('bloque-autoevaluacion.php');
 
@@ -318,12 +371,20 @@ window.PAGE_TITLE = 'Ficha del projecte';
                 include('bloque-tribunal.php');
 
                 include('bloque-nota-final.php');
+                include('eval_js.php');
 
         }
 
 endif;
 
+         
+
         ?>
+
+
+
+
+
 
     </div>
 </div>

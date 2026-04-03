@@ -38,24 +38,22 @@ if ($isAlumne && $id > 0) {
 /// Bloque alumnos, restricciones:
 // Solo puede guardar su propio proyecto
 if ($main === 'ficha_accion' && $method === 'POST') {
-
-    if (!$isAlumne) {
+    if (!$isAlumne && !esSuperadmin()) {
         exit;
     }
-
     // Además, la edición debe estar permitida globalmente
-    if (!configuracion('permitir_editar')) {
+    if (!configuracion('permitir_editar') && !esSuperadmin()) {
         exit;
     }
-
-    $idSesion = (int) $_SESSION['projecte_id'];
-    $uuidSesion = (string) $_SESSION['projecte_uuid'];
-
-    $idProyectoPost = isset($_POST['id_proyecto']) ? (int) $_POST['id_proyecto'] : 0;
-    $uuidPost = trim((string) ($_POST['uuid'] ?? ''));
-
-    if ($idProyectoPost !== $idSesion || $uuidPost !== $uuidSesion) {
-        exit;
+    // El superadmin no necesita validar proyecto propio
+    if (!esSuperadmin()) {
+        $idSesion       = (int)$_SESSION['projecte_id'];
+        $uuidSesion     = (string)$_SESSION['projecte_uuid'];
+        $idProyectoPost = isset($_POST['id_proyecto']) ? (int)$_POST['id_proyecto'] : 0;
+        $uuidPost       = trim((string)($_POST['uuid'] ?? ''));
+        if ($idProyectoPost !== $idSesion || $uuidPost !== $uuidSesion) {
+            exit;
+        }
     }
 }
 
@@ -63,6 +61,15 @@ if ($main === 'ficha_accion' && $method === 'POST') {
 // Profesores, fases del sistema y permisos avanzados
 
 
+
+// superadmin, acceso total
+function esProfesor(): bool
+{
+    return (
+        isset($_SESSION['auth_tipo']) &&
+        $_SESSION['auth_tipo'] === 'professor'
+    );
+}
 
 // superadmin, acceso total
 function esSuperadmin(): bool
@@ -83,7 +90,7 @@ function soloSuperadmin(): void
 
 
 // para que los alumnos solo editen su proyecto
-function esSuProyecto(int $idProjecte): bool
+function esSuProyectoAlumno(int $idProjecte): bool
 {
     // Superadmin → acceso total
     if (esSuperadmin()) {
@@ -102,6 +109,25 @@ function esSuProyecto(int $idProjecte): bool
     return (int) $_SESSION['projecte_id'] === $idProjecte;
 }
 
+// para que los alumnos y los profesores vean la valoracion
+function esSuProyectoProfesor(int $idProjecte): bool
+{
+    // Profesor → puede ver
+    if (esProfesor()) {
+        return true;
+    }
+
+    // Debe ser alumno autenticado
+    if (
+        !isset($_SESSION['auth_tipo'], $_SESSION['projecte_id']) ||
+        $_SESSION['auth_tipo'] !== 'alumne'
+    ) {
+        return false;
+    }
+
+    // Comparar con su proyecto
+    return (int) $_SESSION['projecte_id'] === $idProjecte;
+}
 
 
 // para permitir trozos segun configuración

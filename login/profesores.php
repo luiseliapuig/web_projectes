@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-
+$_SESSION = [];
 /**
  * ============================================================
  * LOGIN DE ACCESO POR ENLACE ÚNICO (PROFESORADO)
@@ -88,7 +88,7 @@ if (!$profesor) {
  * 'professor' será el acceso completo estándar.
  * ------------------------------------------------------------
  */
-$_SESSION['auth_tipo'] = 'professor_pending';
+$_SESSION['auth_tipo'] = 'professor';
 $_SESSION['professor_id'] = (int) $profesor['id_profesor'];
 $_SESSION['professor_uuid'] = (string) $profesor['uuid_acceso'];
 $_SESSION['professor_nom'] = trim(

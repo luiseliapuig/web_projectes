@@ -136,7 +136,7 @@ function nomDataLlarga(string $data): string {
                 <div class="card-body p-4">
                     <h3 class="h5 mb-2">Encara no tens cap defensa assignada</h3>
                     <p class="mb-0 text-muted">
-                        Apunta't als tribunals des del <a href="/index.php?main=calendari">calendari de defenses</a>.
+                        Apunta't als tribunals des del <a href="/calendari-defenses">calendari de defenses</a>.
                     </p>
                 </div>
             </div>

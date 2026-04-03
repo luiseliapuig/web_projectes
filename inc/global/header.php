@@ -22,18 +22,7 @@
         <div class="header-right d-flex align-items-center">
 
          
-
-
-
-
-
-
           <?php include('html-logica-login.php'); ?>
-
-
-
-
-
 
 
         </div>
@@ -85,6 +74,7 @@
             </ul>
             </li>
 
+             <?php if (esProfesor()): ?>
             <li class="nav-item">
               <a class="nav-link" href="/calendari-defenses">Calendari defenses</a>
             </li>
@@ -92,6 +82,7 @@
             <li class="nav-item">
               <a class="nav-link" href="/les-meves-defenses">Les meves defenses</a>
             </li>
+            <?php endif; ?>
 
 
             <?php if (esSuperadmin()): ?>
@@ -107,12 +98,16 @@
                 Administració
               </a>
               <ul class="dropdown-menu" aria-labelledby="adminDropdown">
-                <li><a class="dropdown-item" href="/index.php?main=proyecto">Projectes</a></li>
-                <li><a class="dropdown-item" href="/index.php?main=alumno">Alumnat</a></li>
+                <li><a class="dropdown-item" href="/index.php?main=configuracion">Configuració</a></li>
+                <li><a class="dropdown-item" href="/index.php?main=planificacio">Planificación defensas</a></li>
+                <hr>
                 <li><a class="dropdown-item" href="/index.php?main=profesor">Professorat</a></li>
                 <li><a class="dropdown-item" href="/index.php?main=aula">Aules</a></li>
-                <li><a class="dropdown-item" href="/index.php?main=planificacio">Planificación defensas</a></li>
-                <li><a class="dropdown-item" href="/index.php?main=configuracion">Configuració</a></li>
+                <hr>
+                <li><a class="dropdown-item" href="/index.php?main=proyecto">Projectes</a></li>
+                <li><a class="dropdown-item" href="/index.php?main=alumno">Alumnat</a></li>
+                
+                
               </ul>
             </li>
             <?php endif; ?>
