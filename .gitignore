@@ -1,10 +1,16 @@
-# uploads de usuario
-uploads/
-
-# dependencias frontend si aplica
-plantilla/node_modules/
-
 # archivos locales
 .env
 .DS_Store
 Thumbs.db
+
+# DB
+*.sql
+
+# uploads
+uploads/
+*.rar
+*.zip
+
+# editor
+*.sublime-workspace
+*.sublime-project
