@@ -23,6 +23,12 @@ if ($main === '') {
 }
 
 
+// se guarda la url para volver a ella tras el login
+if ($main != 'login' && $main != 'login_accion' ) {
+    $_SESSION['return_url'] = $_SERVER['REQUEST_URI'];
+}
+
+
 // para cuando quiero llamar a archivos de accion (no páginas de interfaz)
 if (isset($_GET['raw']) && $_GET['raw'] === '1') {
     ob_end_clean();
@@ -59,7 +65,7 @@ if (!is_file($filePagina)) {
   <body>
 
    
-      <?php include __DIR__ . '/inc/global/header.php'; ?>
+      <?php include __DIR__ . '/inc/global/header.php';  ?>
        <main class="main-wrapper">
        <section>
             <?php  include $filePagina; ?>

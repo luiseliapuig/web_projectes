@@ -55,7 +55,7 @@ function fmtNota(?float $v, float $max): string {
 }
 ?>
 
-<div class="container mb-30" id="bloque-nota-final">
+<div class=" mb-30" id="bloque-nota-final">
   <div class="bloque-final rounded-4 p-4 p-md-5">
     <div class="row align-items-center">
 

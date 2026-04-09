@@ -119,6 +119,10 @@ function nomDataLlarga(string $data): string {
 
 ?>
 
+<script>
+window.PAGE_TITLE = 'Les meves defenses';
+</script>
+
 <div class="container-fluid">
 
     <div class="projectes-header mb-4 mt-30">
@@ -135,9 +139,11 @@ function nomDataLlarga(string $data): string {
             <div class="card border-0 shadow-sm rounded-4">
                 <div class="card-body p-4">
                     <h3 class="h5 mb-2">Encara no tens cap defensa assignada</h3>
+                   <?php if ( configuracion('seleccionar_defensas')) { ?>
                     <p class="mb-0 text-muted">
                         Apunta't als tribunals des del <a href="/calendari-defenses">calendari de defenses</a>.
                     </p>
+                    <?php   } ?>
                 </div>
             </div>
         </div>

@@ -3,6 +3,7 @@
 
 declare(strict_types=1);
 
+if ( configuracion('seleccionar_defensas')) { } else { die(); }
 
 // ── Dies disponibles ─────────────────────────────────────────────
 try {
@@ -146,7 +147,9 @@ if (isset($_SESSION['professor_id'])) {
     }
 }
 ?>
-
+<script>
+window.PAGE_TITLE = 'Calendari defenses';
+</script>
 <style>
 .pill-btn {
     cursor: pointer;

@@ -88,6 +88,10 @@ if (!empty($projectes_per_grup)) {
 }
 ?>
 
+<script>
+window.PAGE_TITLE = '<?= htmlspecialchars($cicle) ?>';
+</script>
+
 <div class="container-fluid ">
 
     <div class="projectes-header mb-4 mt-30">
@@ -206,3 +210,4 @@ if (!empty($projectes_per_grup)) {
     <?php endif; ?>
 
 </div>
+

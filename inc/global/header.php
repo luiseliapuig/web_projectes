@@ -74,15 +74,17 @@
             </ul>
             </li>
 
-             <?php if (esProfesor()): ?>
+             <?php if (esProfesor()) { 
+
+               if ( configuracion('seleccionar_defensas')) { ?>
             <li class="nav-item">
               <a class="nav-link" href="/calendari-defenses">Calendari defenses</a>
             </li>
-
+              <?php } ?>
             <li class="nav-item">
               <a class="nav-link" href="/les-meves-defenses">Les meves defenses</a>
             </li>
-            <?php endif; ?>
+            <?php } ?>
 
 
             <?php if (esSuperadmin()): ?>

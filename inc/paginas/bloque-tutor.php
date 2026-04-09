@@ -22,7 +22,7 @@ $labelsTutor = [
 ];
 ?>
 
-<div class="container mb-30 tutor">
+<div class=" mb-30 tutor">
   <div class="border rounded-4 overflow-hidden">
 
     <!-- Capçalera -->

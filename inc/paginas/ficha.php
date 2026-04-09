@@ -102,7 +102,7 @@ $adjuntsEnllac = array_filter($adjuntos, fn($a) => $a['tipo'] === 'enllaç');
 ?>
 
 <script>
-window.PAGE_TITLE = 'Ficha del projecte';
+window.PAGE_TITLE = '<?= h($proyecto['nombre'] ?? '') ?> | <?= h($proyecto['ciclo'] ?? '') ?>';
 </script>
 
 

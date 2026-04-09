@@ -92,4 +92,7 @@ $_SESSION['professor_imatge'] = (string) ($profesor['imagen'] ?? '');
 $_SESSION['professor_rol'] = (string) ($profesor['rol'] ?? '');
 $_SESSION['professor_departament'] = (string) ($profesor['departamento'] ?? '');
 
-redirectTo('/');
+$returnUrl = $_SESSION['return_url'] ?? '/';
+unset($_SESSION['return_url']);
+header('Location: ' . $returnUrl);
+exit;

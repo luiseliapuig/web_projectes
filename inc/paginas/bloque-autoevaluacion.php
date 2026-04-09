@@ -9,7 +9,7 @@ $teAutoevaluacio = !empty($proyecto['autoev1'])
 if (!$teAutoevaluacio) return;
 ?>
 
-<div class="container mb-30 autoevaluacion">
+<div class=" mb-30 autoevaluacion">
   <div class="border rounded-4 overflow-hidden">
 
     <!-- Cabecera -->
