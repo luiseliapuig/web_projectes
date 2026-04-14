@@ -24,26 +24,18 @@ function actualitzarBlocFinal(data) {
         if (cfg.el) cfg.el.innerHTML = fmtNota(data[key], cfg.max);
     }
     const finalEl = bloc.querySelector('[data-slot="final"]');
-    if (finalEl) {
-        finalEl.textContent = data.final !== null
-            ? data.final.toFixed(1).replace('.', ',')
-            : '—';
+    if (finalEl && data.final !== null) {
+        finalEl.textContent = data.final.toFixed(1).replace('.', ',');
     }
-}
 
-async function recarregarBlocTribunal(proyectoId) {
-    const r    = await fetch('/index.php?main=eval_tribunal_html&raw=1&proyecto_id=' + proyectoId);
-    const text = await r.text();
-    console.log('tribunal_html resposta:', text.substring(0, 200));
-    const d = JSON.parse(text);
-    if (d.ok) {
-        const wrap = document.getElementById('bloque-tribunal-wrap');
-        if (wrap) {
-            wrap.outerHTML = d.html;
-            inicialitzarEstrelles();
-            inicialitzarComentaris();
-        }
-        if (d.nota) actualitzarBlocFinal(d.nota);
+    // Actualitzar notaBase global i recalcular notes individuals
+    if (data.final !== null) {
+        window._notaBaseProjecte = data.final;
+        bloc.querySelectorAll('.nota-alumne').forEach(function (span) {
+            const ajust = parseFloat(span.dataset.ajust ?? '0');
+            const nota  = Math.max(0, Math.min(10, Math.round((data.final + ajust) * 10) / 10));
+            span.textContent = nota.toFixed(1).replace('.', ',');
+        });
     }
 }
 
@@ -100,16 +92,11 @@ function inicialitzarEstrelles() {
 
                     if (data.ok) {
                         valorActual = nouValor;
-
-                        if (tipo === 'tribunal') {
-                            await recarregarBlocTribunal(proyecto);
-                        } else {
-                            stars.forEach(function (s) {
-                                s.classList.toggle('filled', parseInt(s.dataset.valor) <= valorActual);
-                            });
-                            if (data.nota_html) {
-                                actualitzarBlocFinal(JSON.parse(data.nota_html));
-                            }
+                        stars.forEach(function (s) {
+                            s.classList.toggle('filled', parseInt(s.dataset.valor) <= valorActual);
+                        });
+                        if (data.nota_html) {
+                            actualitzarBlocFinal(JSON.parse(data.nota_html));
                         }
                     } else {
                         alert(data.missatge || 'Error en guardar.');
@@ -198,30 +185,6 @@ function inicialitzarComentaris() {
 // ── Arrancar ──────────────────────────────────────────────────────
 inicialitzarEstrelles();
 inicialitzarComentaris();
-
-
-// ── Polling bloc tribunal ─────────────────────────────────────────
-const _pollProyectoId = document.querySelector('.rating-stars[data-tipo="tribunal"]')?.dataset.proyecto;
-if (_pollProyectoId) {
-    let _pollPausat = false;
-
-    document.addEventListener('focusin', function (e) {
-        if (e.target.closest('.comentari-wrap[data-tipo="tribunal"]')) {
-            _pollPausat = true;
-        }
-    });
-
-    document.addEventListener('focusout', function (e) {
-        if (e.target.closest('.comentari-wrap[data-tipo="tribunal"]')) {
-            _pollPausat = false;
-        }
-    });
-
-    setInterval(async function () {
-        if (_pollPausat) return;
-        await recarregarBlocTribunal(_pollProyectoId);
-    }, 5000);
-}
 
 })();
 </script>

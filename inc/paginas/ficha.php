@@ -97,8 +97,9 @@ try {
 } catch (PDOException $e) {
     $adjuntos = [];
 }
-$adjuntsArxiu  = array_filter($adjuntos, fn($a) => $a['tipo'] === 'arxiu');
-$adjuntsEnllac = array_filter($adjuntos, fn($a) => $a['tipo'] === 'enllaç');
+$adjuntsArxiu       = array_filter($adjuntos, fn($a) => $a['tipo'] === 'arxiu');
+$adjuntsEnllac      = array_filter($adjuntos, fn($a) => $a['tipo'] === 'enllac');
+$adjuntsPlanificacio = array_filter($adjuntos, fn($a) => $a['tipo'] === 'planificacio');
 ?>
 
 <script>
@@ -289,6 +290,19 @@ window.PAGE_TITLE = '<?= h($proyecto['nombre'] ?? '') ?> | <?= h($proyecto['cicl
                                 </div>
                             </div>
                         </div>
+
+                        <?php if (!empty($adjuntsPlanificacio)): ?>
+                        <div class="mb-50">
+                            <h3 class="h3fichas">Planificació i gestió</h3>
+                            <div class="inner-ficha">
+                                <?php foreach ($adjuntsPlanificacio as $adj): ?>
+                                    <a href="<?= h($adj['ruta']) ?>" target="_blank" class="enlace">
+                                        <?= h($adj['nom']) ?>
+                                    </a><br>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                        <?php endif; ?>
 
                         <div class="mb-50">
                             <h3 class="h3fichas">Documentació</h3>

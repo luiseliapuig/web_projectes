@@ -25,7 +25,7 @@ if ($accio === 'afegir') {
     $tipo       = trim($_POST['tipo'] ?? '');
     $nom        = trim($_POST['nom'] ?? '');
 
-    if (!$proyectoId || !in_array($tipo, ['arxiu', 'enllac'], true) || $nom === '') {
+    if (!$proyectoId || !in_array($tipo, ['arxiu', 'enllac', 'planificacio'], true) || $nom === '') {
         jsonOut(false, missatge: 'Dades incorrectes.');
     }
 
@@ -93,14 +93,14 @@ if ($accio === 'afegir') {
         try {
             $ins = $pdo->prepare("
                 INSERT INTO app.proyecto_adjuntos (proyecto_id, tipo, nom, ruta)
-                VALUES (?, 'enllaç', ?, ?)
+                VALUES (?, ?, ?, ?)
                 RETURNING id
             ");
-            $ins->execute([$proyectoId, $nom, $ruta]);
+            $ins->execute([$proyectoId, $tipo, $nom, $ruta]);
             $id = (int)$ins->fetchColumn();
-       } catch (PDOException $e) {
-    jsonOut(false, missatge: $e->getMessage());
-}
+        } catch (PDOException $e) {
+            jsonOut(false, missatge: 'Error en guardar a la base de dades.');
+        }
 
         jsonOut(true, ['id' => $id, 'nom' => $nom, 'ruta' => $ruta]);
     }

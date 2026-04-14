@@ -88,6 +88,13 @@
     letter-spacing: 0.02em;
 }*/
 
+span.btn-reset-ajust { color: #fff !important }
+
+.tutor .col-md-4{
+  display: flex;
+  align-items: center;
+}
+
 .home-hero__title {
 
 color: #fff;
@@ -1525,6 +1532,31 @@ textarea {
     .tribunal .rating-grid {
         margin-left: -40px !important;
     }
+}
+
+
+.btn-ajuste-circulo{
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid rgba(255,255,255,.28);
+  border-radius: 50%;
+  background: transparent;
+  color: rgba(255,255,255,.78);
+
+  font-size: 15px;
+  line-height: 1;
+
+  cursor: pointer;
+  transition: all .18s ease;
+  user-select: none;
+
+  /* 🔧 AJUSTE FINO */
+  padding-bottom: 5px;   /* mueve vertical */
+  padding-left: 0px;     /* mueve horizontal */
 }
 
 /* Separación vertical entre columnas */

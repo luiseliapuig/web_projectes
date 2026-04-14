@@ -93,8 +93,9 @@ try {
 } catch (PDOException $e) {
     $adjuntos = [];
 }
-$adjuntsArxiu  = array_filter($adjuntos, fn($a) => $a['tipo'] === 'arxiu');
-$adjuntsEnllac = array_filter($adjuntos, fn($a) => $a['tipo'] === 'enllaç');
+$adjuntsArxiu        = array_filter($adjuntos, fn($a) => $a['tipo'] === 'arxiu');
+$adjuntsEnllac       = array_filter($adjuntos, fn($a) => $a['tipo'] === 'enllac');
+$adjuntsPlanificacio = array_filter($adjuntos, fn($a) => $a['tipo'] === 'planificacio');
 ?>
 
 <script>
@@ -253,6 +254,36 @@ window.PAGE_TITLE = 'Editar fitxa del projecte';
                                             placeholder="PHP, PostgreSQL, Bootstrap, JavaScript"
                                         >
                                     </div>
+                                </div>
+                            </div>
+
+                            <div class="section-block">
+                                <h3 class="h3fichas">Planificació i gestió</h3>
+                                <div class="inner-ficha">
+
+                                    <!-- Adjunts planificació existents -->
+                                    <div id="llista-planificacio">
+                                        <?php foreach ($adjuntsPlanificacio as $adj): ?>
+                                        <div class="d-flex align-items-center justify-content-between gap-2 mb-2" id="adj-<?= (int)$adj['id'] ?>">
+                                            <a href="<?= h($adj['ruta']) ?>" target="_blank" class="doc-link-current flex-grow-1"><?= h($adj['nom']) ?></a>
+                                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="eliminarAdjunt(<?= (int)$adj['id'] ?>)">✕</button>
+                                        </div>
+                                        <?php endforeach; ?>
+                                    </div>
+
+                                    <!-- Formulari nou enllaç planificació -->
+                                    <div id="form-nou-planificacio" class="d-none">
+                                        <label class="edit-label-subtle">Nom de l'enllaç</label>
+                                        <input type="text" class="form-control meta-input mb-2" id="nou-planificacio-nom" placeholder="Trello, Notion, Jira...">
+                                        <input type="url" class="form-control meta-input mb-2" id="nou-planificacio-url" placeholder="https://...">
+                                        <button type="button" class="btn btn-puig btn-sm px-3" onclick="afegirPlanificacio()">+ Afegir</button>
+                                        <button type="button" class="btn btn-sm btn-link text-muted" onclick="cancelarNou('planificacio')">Cancel·lar</button>
+                                    </div>
+
+                                    <button type="button" id="btn-nou-planificacio" class="btn btn-sm btn-link text-muted ps-0 mt-1" onclick="mostrarNou('planificacio')">
+                                        + Afegir nou enllaç
+                                    </button>
+
                                 </div>
                             </div>
 
@@ -485,6 +516,9 @@ function mostrarNou(tipus) {
     if (tipus === 'arxiu') {
         document.getElementById('form-nou-arxiu').classList.remove('d-none');
         document.getElementById('btn-nou-arxiu').classList.add('d-none');
+    } else if (tipus === 'planificacio') {
+        document.getElementById('form-nou-planificacio').classList.remove('d-none');
+        document.getElementById('btn-nou-planificacio').classList.add('d-none');
     } else {
         document.getElementById('form-nou-enllac').classList.remove('d-none');
         document.getElementById('btn-nou-enllac').classList.add('d-none');
@@ -497,6 +531,11 @@ function cancelarNou(tipus) {
         document.getElementById('btn-nou-arxiu').classList.remove('d-none');
         document.getElementById('nou-arxiu-nom').value = '';
         document.getElementById('nou-arxiu-fitxer').value = '';
+    } else if (tipus === 'planificacio') {
+        document.getElementById('form-nou-planificacio').classList.add('d-none');
+        document.getElementById('btn-nou-planificacio').classList.remove('d-none');
+        document.getElementById('nou-planificacio-nom').value = '';
+        document.getElementById('nou-planificacio-url').value = '';
     } else {
         document.getElementById('form-nou-enllac').classList.add('d-none');
         document.getElementById('btn-nou-enllac').classList.remove('d-none');
@@ -553,6 +592,31 @@ async function afegirEnllac() {
         <button type="button" class="btn btn-sm btn-outline-danger" onclick="eliminarAdjunt(${data.id})">✕</button>`;
     document.getElementById('llista-enllacos').appendChild(div);
     cancelarNou('enllac');
+}
+
+async function afegirPlanificacio() {
+    const nom = document.getElementById('nou-planificacio-nom').value.trim();
+    const url = document.getElementById('nou-planificacio-url').value.trim();
+    if (!nom || !url) { alert('Cal indicar un nom i una URL.'); return; }
+
+    const fd = new FormData();
+    fd.append('accio',       'afegir');
+    fd.append('tipo',        'planificacio');
+    fd.append('proyecto_id', _adjIdProyecto);
+    fd.append('nom',         nom);
+    fd.append('ruta',        url);
+
+    const res  = await fetch(_adjuntUrl, { method: 'POST', body: fd });
+    const data = await res.json();
+    if (!data.ok) { alert(data.missatge || 'Error en afegir.'); return; }
+
+    const div = document.createElement('div');
+    div.className = 'd-flex align-items-center justify-content-between gap-2 mb-2';
+    div.id = 'adj-' + data.id;
+    div.innerHTML = `<a href="${data.ruta}" target="_blank" class="doc-link-current flex-grow-1">${data.nom}</a>
+        <button type="button" class="btn btn-sm btn-outline-danger" onclick="eliminarAdjunt(${data.id})">✕</button>`;
+    document.getElementById('llista-planificacio').appendChild(div);
+    cancelarNou('planificacio');
 }
 
 async function eliminarAdjunt(id) {
