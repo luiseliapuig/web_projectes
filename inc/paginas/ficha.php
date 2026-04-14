@@ -378,7 +378,7 @@ window.PAGE_TITLE = '<?= h($proyecto['nombre'] ?? '') ?> | <?= h($proyecto['cicl
 
 
         // si se permiten ver las valoraciones, se muestran las de su proyecto
-        if (configuracion('alumnos_ver_valoraciones')) {
+        if (esSuProyectoProfesor((int)$proyecto['id_proyecto']) || configuracion('alumnos_ver_valoraciones')) {
 
                 include('bloque-tutor.php');
 

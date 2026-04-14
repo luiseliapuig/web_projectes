@@ -186,5 +186,73 @@ function inicialitzarComentaris() {
 inicialitzarEstrelles();
 inicialitzarComentaris();
 
+// ── Recàrrega bloc tribunal ───────────────────────────────────────
+async function recarregarBlocTribunal(proyectoId) {
+    const r    = await fetch('/index.php?main=eval_tribunal_html&raw=1&proyecto_id=' + proyectoId);
+    const text = await r.text();
+    const d    = JSON.parse(text);
+    if (d.ok) {
+        const wrap = document.getElementById('bloque-tribunal-wrap');
+        if (wrap) {
+            wrap.outerHTML = d.html;
+            inicialitzarEstrelles();
+            inicialitzarComentaris();
+        }
+        if (d.nota) actualitzarBlocFinal(d.nota);
+
+        // Sincronitzar ajustos individuals d'altres usuaris
+        if (d.ajustos && d.nota?.final !== null) {
+            const notaBase = d.nota.final;
+            document.querySelectorAll('.nota-alumne').forEach(function (span) {
+                const alumnoId = parseInt(span.dataset.alumno);
+                const ajust    = d.ajustos[alumnoId] ?? 0;
+                const nota     = Math.max(0, Math.min(10, Math.round((notaBase + ajust) * 10) / 10));
+                span.dataset.ajust = ajust;
+                span.textContent   = nota.toFixed(1).replace('.', ',');
+
+                // Actualitzar etiqueta visual
+                const row     = span.closest('.d-flex.justify-content-between');
+                const label   = row?.querySelector('.label');
+                if (!label) return;
+                let etiqueta  = label.querySelector('.etiqueta-ajust');
+                if (ajust == 0) {
+                    etiqueta?.remove();
+                } else {
+                    if (!etiqueta) {
+                        etiqueta = document.createElement('span');
+                        etiqueta.className = 'etiqueta-ajust ms-1';
+                        etiqueta.style.cssText = 'font-size:.75em;opacity:.85;color:#F59E0B;';
+                        label.appendChild(etiqueta);
+                    }
+                    const signe = ajust > 0 ? '+' : '';
+                    etiqueta.dataset.ajust    = ajust;
+                    etiqueta.dataset.alumno   = alumnoId;
+                    etiqueta.dataset.proyecto = proyectoId;
+                    etiqueta.textContent = '(' + signe + ajust.toFixed(1).replace('.', ',') + ')';
+                }
+            });
+        }
+    }
+}
+
+// ── Polling cada 5 segons ─────────────────────────────────────────
+const _pollProyectoId = document.querySelector('.rating-stars[data-tipo="tribunal"]')?.dataset.proyecto;
+if (_pollProyectoId) {
+    let _pollPausat = false;
+
+    // Pausar quan s'edita un comentari del tribunal
+    document.addEventListener('focusin', function (e) {
+        if (e.target.closest('.comentari-wrap[data-tipo="tribunal"]')) _pollPausat = true;
+    });
+    document.addEventListener('focusout', function (e) {
+        if (e.target.closest('.comentari-wrap[data-tipo="tribunal"]')) _pollPausat = false;
+    });
+
+    setInterval(async function () {
+        if (_pollPausat) return;
+        await recarregarBlocTribunal(_pollProyectoId);
+    }, 5000);
+}
+
 })();
 </script>

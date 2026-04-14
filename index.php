@@ -24,7 +24,16 @@ if ($main === '') {
 
 
 // se guarda la url para volver a ella tras el login
-if ($main != 'login' && $main != 'login_accion' ) {
+$raw  = isset($_GET['raw']) ? (int)$_GET['raw'] : 0;
+
+if (
+    $_SERVER['REQUEST_METHOD'] === 'GET'
+    && $main !== 'login'
+    && $main !== 'login_accion'
+    && $raw !== 1
+    && strpos($main, 'accio') === false
+    && strpos($main, 'ajax') === false
+) {
     $_SESSION['return_url'] = $_SERVER['REQUEST_URI'];
 }
 

@@ -86,10 +86,25 @@ if ($avgProj     !== null) { $suma += $avgProj     * 0.30; $pesos += 0.30; }
 if ($avgDef      !== null) { $suma += $avgDef      * 0.20; $pesos += 0.20; }
 $notaFinal = $pesos > 0 ? round($suma, 2) : null;
 
+// ── Ajustos individuals ───────────────────────────────────────────
+$ajustos = [];
+try {
+    $stmtAj = $pdo->prepare("
+        SELECT alumno_id, ajuste
+        FROM app.ajustes_nota_individual
+        WHERE proyecto_id = ?
+    ");
+    $stmtAj->execute([$idProyecto]);
+    foreach ($stmtAj->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        $ajustos[(int)$row['alumno_id']] = (float)$row['ajuste'];
+    }
+} catch (PDOException $e) {}
+
 echo json_encode([
-    'ok'   => true,
-    'html' => $html,
-    'nota' => [
+    'ok'      => true,
+    'html'    => $html,
+    'ajustos' => $ajustos,
+    'nota'    => [
         'tutor'    => $notaTutor10 !== null ? round($notaTutor10 * 0.20, 2) : null,
         'memoria'  => $avgMem      !== null ? round($avgMem * 0.30, 2)      : null,
         'proyecto' => $avgProj     !== null ? round($avgProj * 0.30, 2)     : null,
