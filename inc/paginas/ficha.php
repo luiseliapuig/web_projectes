@@ -368,7 +368,41 @@ window.PAGE_TITLE = '<?= h($proyecto['nombre'] ?? '') ?> | <?= h($proyecto['cicl
             </div>
         </div>
 
-        <?php
+
+
+
+
+        <?php   
+
+        // modo valoración estrellas
+        if ( configuracion('estrellas')) { 
+        } else { 
+            echo "<style> .star {
+  position: relative;
+  display: inline-block;
+  width: 1.25em;
+  text-align: center;
+  font-size: 1.2rem;
+  color: transparent;
+}
+
+.star::before {
+  content: '💩';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  filter: grayscale(1) brightness(1.05);
+  opacity: 0.28;
+  transition: filter 0.2s, opacity 0.2s;
+}
+
+.star.filled::before {
+  filter: none;
+  opacity: 1;
+}</style>"
+                ;
+        }
 
 
 // si es su proyecto, ven este bloque
@@ -387,6 +421,13 @@ window.PAGE_TITLE = '<?= h($proyecto['nombre'] ?? '') ?> | <?= h($proyecto['cicl
                 include('bloque-nota-final.php');
                 include('eval_js.php');
 
+                echo '<p style="margin-top: 15px; font-size: 0.95rem; text-align:center">
+  Qualsevol observació o incidència durant els tribunals es pot registrar a <br>
+  <a href="https://docs.google.com/spreadsheets/d/1dy5COudIZpO7mBq6qlCjafnVfIden2zQb8pzIaLRsOM/edit?usp=sharing" target="_blank" style="color: #1E3A8A;">
+    <strong>Observacions / Incidències tribunals 2025-2026</strong>
+  </a>.
+</p>';
+
         }
 
 endif;
@@ -402,3 +443,23 @@ endif;
 
     </div>
 </div>
+
+<script>
+// Fuera del DOMContentLoaded — función global
+function initAutoGrow(container) {
+    container = container || document;
+    container.querySelectorAll('.js-autogrow').forEach(function (textarea) {
+        textarea.style.height = 'auto';
+        textarea.style.height = textarea.scrollHeight + 'px';
+        if (!textarea._autoGrowInit) {
+            textarea._autoGrowInit = true;
+            textarea.addEventListener('input', function () {
+                textarea.style.height = 'auto';
+                textarea.style.height = textarea.scrollHeight + 'px';
+            });
+        }
+    });
+}
+
+
+</script>

@@ -66,7 +66,6 @@ if ($avgProj     !== null) { $sumaFinal += $avgProj     * 0.30; $pesosTenemos +=
 if ($avgDef      !== null) { $sumaFinal += $avgDef      * 0.20; $pesosTenemos += 0.20; }
 
 $notaFinal   = $pesosTenemos > 0 ? round($sumaFinal, 2) : null;
-$notaParcial = $pesosTenemos > 0 && $pesosTenemos < 1.0;
 
 // ── Ajustos individuals per alumne ────────────────────────────────
 try {
@@ -137,9 +136,7 @@ function notaAmbAjust(?float $base, float $ajust): string {
             <?= $notaFinal !== null ? number_format($notaFinal, 1, ',', '.') : '—' ?>
           </div>
 
-          <div class="nota-max mb-3">
-            sobre 10<?= $notaParcial ? ' <span style="font-size:.75em;opacity:.7">(parcial)</span>' : '' ?>
-          </div>
+          <div class="nota-max mb-3">sobre 10</div>
 
           <?php if (!empty($alumnesNota)): ?>
           <div class="mt-4 text-start">
@@ -161,9 +158,9 @@ function notaAmbAjust(?float $base, float $ajust): string {
                 <?php endif; ?>
               </div>
               <div class="d-flex align-items-center gap-2">
-                <?php if ($potAjustar && $notaFinal !== null): ?>
+                <?php if ($potAjustar): ?>
                 <span class="btn-ajuste-circulo"
-                      style="cursor:pointer;user-select:none;"
+                      style="cursor:pointer;user-select:none;<?= $notaFinal === null ? 'display:none;' : '' ?>"
                       data-alumno="<?= (int)$al['id_alumno'] ?>"
                       data-proyecto="<?= (int)$idProyecto ?>"
                       data-step="-<?= $salto ?>">−</span>
@@ -172,13 +169,13 @@ function notaAmbAjust(?float $base, float $ajust): string {
                 <span class="valor nota-alumne"
                       data-alumno="<?= (int)$al['id_alumno'] ?>"
                       data-ajust="<?= $ajust ?>"
-                      style="<?= ($potAjustar && $notaFinal !== null) ? 'cursor:pointer;' : '' ?>">
+                      style="<?= $potAjustar ? 'cursor:pointer;' : '' ?>">
                   <?= $notaAlumne !== null ? number_format($notaAlumne, 1, ',', '.') : '—' ?>
                 </span>
 
-                <?php if ($potAjustar && $notaFinal !== null): ?>
+                <?php if ($potAjustar): ?>
                 <span class="btn-ajuste-circulo"
-                      style="cursor:pointer;user-select:none;"
+                      style="cursor:pointer;user-select:none;<?= $notaFinal === null ? 'display:none;' : '' ?>"
                       data-alumno="<?= (int)$al['id_alumno'] ?>"
                       data-proyecto="<?= (int)$idProyecto ?>"
                       data-step="<?= $salto ?>">+</span>
@@ -200,12 +197,21 @@ function notaAmbAjust(?float $base, float $ajust): string {
 (function () {
     let notaBase = <?= $notaFinal !== null ? $notaFinal : 'null' ?>;
     window._notaBaseProjecte = notaBase;
-    const salto    = <?= (float)$salto ?>;
-    if (notaBase === null) return;
+    const salto = <?= (float)$salto ?>;
+
+    function mostrarBotonsAjust() {
+        document.querySelectorAll('.btn-ajuste-circulo').forEach(function (btn) {
+            btn.style.display = '';
+        });
+    }
+
+    if (notaBase !== null) mostrarBotonsAjust();
+    window._mostrarBotonsAjust = mostrarBotonsAjust;
 
     // ── Ajust ─────────────────────────────────────────────────────
     document.querySelectorAll('.btn-ajuste-circulo').forEach(function (btn) {
         btn.addEventListener('click', async function () {
+            if (window._notaBaseProjecte === null) return;
             const alumnoId   = parseInt(btn.dataset.alumno);
             const proyectoId = parseInt(btn.dataset.proyecto);
             const step       = parseFloat(btn.dataset.step);

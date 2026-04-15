@@ -31,6 +31,7 @@ function actualitzarBlocFinal(data) {
     // Actualitzar notaBase global i recalcular notes individuals
     if (data.final !== null) {
         window._notaBaseProjecte = data.final;
+        if (window._mostrarBotonsAjust) window._mostrarBotonsAjust();
         bloc.querySelectorAll('.nota-alumne').forEach(function (span) {
             const ajust = parseFloat(span.dataset.ajust ?? '0');
             const nota  = Math.max(0, Math.min(10, Math.round((data.final + ajust) * 10) / 10));
@@ -133,6 +134,15 @@ function inicialitzarComentaris() {
             textEl.classList.add('d-none');
             editor.classList.remove('d-none');
             textarea.focus();
+            textarea.style.height = 'auto';
+            textarea.style.height = textarea.scrollHeight + 'px';
+            if (!textarea._autoGrowInit) {
+                textarea._autoGrowInit = true;
+                textarea.addEventListener('input', function () {
+                    textarea.style.height = 'auto';
+                    textarea.style.height = textarea.scrollHeight + 'px';
+                });
+            }
         });
 
         btnCancelar.addEventListener('click', function () {

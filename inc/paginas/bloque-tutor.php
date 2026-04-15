@@ -41,6 +41,9 @@ $labelsTutor = [
     <div class="bg-white p-4">
       <div class="row g-4">
 
+
+
+
         <!-- Estrellas -->
         <div class="col-md-4">
           <div class="rating-grid mx-auto">
@@ -82,6 +85,7 @@ $labelsTutor = [
               <button class="btn btn-puig btn-sm px-3 btn-guardar-comentari">Guardar</button>
               <button class="btn btn-sm btn-link text-muted btn-cancelar-comentari">Cancel·lar</button>
             </div>
+            
             <?php endif; ?>
           </div>
         </div>
