@@ -120,7 +120,9 @@ window.PAGE_TITLE = '<?= h($proyecto['nombre'] ?? '') ?> | <?= h($proyecto['cicl
                     <span>Tornar als projectes de <?= h($proyecto['ciclo'] ?? '-') ?></span>
                 </a>
 
-                <?php if (esSuProyectoAlumno((int)$proyecto['id_proyecto']) && configuracion('permitir_editar')): ?>
+                <?php 
+                // solo pueden editar los alumnos propietarios y si está permitido
+                if (esSuProyectoAlumno((int)$proyecto['id_proyecto']) && configuracion('permitir_editar')): ?>
                     <a href="/projecte/<?= (int)$proyecto['id_proyecto'] ?>/editar"
                        class="btn btn-puig px-3">
                         Editar fitxa
@@ -139,9 +141,11 @@ window.PAGE_TITLE = '<?= h($proyecto['nombre'] ?? '') ?> | <?= h($proyecto['cicl
         
 
 
-        // si se permiten ver las valoraciones, se muestran las de su proyecto
-        if (esSuProyectoAlumno((int)$proyecto['id_proyecto']) && configuracion('mostrar_defensas') || esSuProyectoProfesor((int)$proyecto['id_proyecto']) && configuracion('mostrar_defensas')) {
-
+        // mostrar fecha de defensas a los alumnos interesados y a cualquier profesor si se deciden mostrar
+        if (
+            configuracion('mostrar_defensas') &&
+            (esSuProyectoAlumno((int)$proyecto['id_proyecto']) || esProfesor())
+        ) {
             include('bloque-defensa.php'); 
         }
     
@@ -374,66 +378,44 @@ window.PAGE_TITLE = '<?= h($proyecto['nombre'] ?? '') ?> | <?= h($proyecto['cicl
 
         <?php   
 
-        // modo valoración estrellas
-        if ( configuracion('estrellas')) { 
-        } else { 
-            echo "<style> .star {
-  position: relative;
-  display: inline-block;
-  width: 1.25em;
-  text-align: center;
-  font-size: 1.2rem;
-  color: transparent;
-}
 
-.star::before {
-  content: '💩';
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  filter: grayscale(1) brightness(1.05);
-  opacity: 0.28;
-  transition: filter 0.2s, opacity 0.2s;
-}
 
-.star.filled::before {
-  filter: none;
-  opacity: 1;
-}</style>"
-                ;
+
+        // La autoevaluación la ven los alumnos si es su proyecto y los profesores
+         if (esSuProyectoAlumno((int)$proyecto['id_proyecto']) || esProfesor()) { 
+                include('bloque-autoevaluacion.php');
         }
 
 
-// si es su proyecto, ven este bloque
- if (esSuProyectoProfesor((int)$proyecto['id_proyecto'])): 
-
-        include('bloque-autoevaluacion.php');
-
-
-        // si se permiten ver las valoraciones, se muestran las de su proyecto
-        if (esSuProyectoProfesor((int)$proyecto['id_proyecto']) || configuracion('alumnos_ver_valoraciones')) {
-
-                include('bloque-tutor.php');
-
-                include('bloque-tribunal.php');
-
-                include('bloque-nota-final.php');
-                include('eval_js.php');
-
-                echo '<p style="margin-top: 15px; font-size: 0.95rem; text-align:center">
-  Qualsevol observació o incidència durant els tribunals es pot registrar a <br>
-  <a href="https://docs.google.com/spreadsheets/d/1dy5COudIZpO7mBq6qlCjafnVfIden2zQb8pzIaLRsOM/edit?usp=sharing" target="_blank" style="color: #1E3A8A;">
-    <strong>Observacions / Incidències tribunals 2025-2026</strong>
-  </a>.
-</p>';
-
+        // las valoraciones las ven los alumnos si se permite y los profesores siempre
+        if (
+            (esSuProyectoAlumno((int)$proyecto['id_proyecto']) && configuracion('alumnos_ver_valoraciones'))
+            || esProfesor()
+        ) {
+            include('bloque-tutor.php');
+            include('bloque-tribunal.php');
         }
 
-endif;
+        // la nota final la ven los alumnos si se permite y los profesores siempre
+        if (
+            (esSuProyectoAlumno((int)$proyecto['id_proyecto']) && configuracion('nota_final'))
+            || esProfesor()
+        ) {
+            include('bloque-nota-final.php');
+            
+        }
 
+        include('eval_js.php');
+
+        // el enlace de incidencias solo lo ven los profesores
+        if(esProfesor()) {  echo '<p style="margin-top: 15px; font-size: 0.95rem; text-align:center">
+                  Qualsevol observació o incidència durant els tribunals es pot registrar a <br>
+                  <a href="https://docs.google.com/spreadsheets/d/1dy5COudIZpO7mBq6qlCjafnVfIden2zQb8pzIaLRsOM/edit?usp=sharing" target="_blank" style="color: #1E3A8A;">
+                    <strong>Observacions / Incidències tribunals 2025-2026</strong>
+                  </a>.
+                </p>'; 
+        }
          
-
         ?>
 
 

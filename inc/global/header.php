@@ -103,6 +103,9 @@
                 <li><a class="dropdown-item" href="/index.php?main=configuracion">Configuració</a></li>
                 <li><a class="dropdown-item" href="/index.php?main=planificacio">Planificación defensas</a></li>
                 <hr>
+                <li><a class="dropdown-item" href="/index.php?main=emails-profesores">Emails professorat</a></li>
+                <li><a class="dropdown-item" href="/index.php?main=emails-alumnos">Emails alumnes</a></li>
+                <hr>
                 <li><a class="dropdown-item" href="/index.php?main=profesor">Professorat</a></li>
                 <li><a class="dropdown-item" href="/index.php?main=aula">Aules</a></li>
                 <hr>

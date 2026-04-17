@@ -110,25 +110,36 @@ function esSuProyectoAlumno(int $idProjecte): bool
 }
 
 // para que los alumnos y los profesores vean la valoracion
-function esSuProyectoProfesor(int $idProjecte): bool
+function esTutorDelProyecto(int $idProjecte): bool
 {
-    // Profesor → puede ver
-    if (esProfesor()) {
-        return true;
-    }
-
-    // Debe ser alumno autenticado
+    // Debe ser profesor autenticado
     if (
-        !isset($_SESSION['auth_tipo'], $_SESSION['projecte_id']) ||
-        $_SESSION['auth_tipo'] !== 'alumne'
+        !isset($_SESSION['auth_tipo'], $_SESSION['professor_id']) ||
+        $_SESSION['auth_tipo'] !== 'professor'
     ) {
         return false;
     }
 
-    // Comparar con su proyecto
-    return (int) $_SESSION['projecte_id'] === $idProjecte;
-}
+    $idProfessor = (int) $_SESSION['professor_id'];
 
+    global $pdo;
+
+    $sql = "
+        SELECT 1
+        FROM proyectos
+        WHERE id_proyecto = :id_proyecto
+          AND tutor_id = :tutor_id
+        LIMIT 1
+    ";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([
+        ':id_proyecto' => $idProjecte,
+        ':tutor_id'    => $idProfessor
+    ]);
+
+    return (bool) $stmt->fetchColumn();
+}
 
 // para permitir trozos segun configuración
 

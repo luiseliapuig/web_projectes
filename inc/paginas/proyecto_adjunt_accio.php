@@ -12,6 +12,32 @@ function jsonOut(bool $ok, array $extra = [], string $missatge = ''): never
     exit;
 }
 
+function comprimirPdf(string $rutaAbs): void
+{
+    $rutaTmp = $rutaAbs . '.tmp.pdf';
+
+    $cmd = sprintf(
+        'gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook ' .
+        '-dNOPAUSE -dQUIET -dBATCH ' .
+        '-sOutputFile=%s %s 2>/dev/null',
+        escapeshellarg($rutaTmp),
+        escapeshellarg($rutaAbs)
+    );
+
+    shell_exec($cmd);
+
+    // Solo sustituir si la compresión generó un archivo válido y más pequeño
+    if (
+        file_exists($rutaTmp) &&
+        filesize($rutaTmp) > 0 &&
+        filesize($rutaTmp) < filesize($rutaAbs)
+    ) {
+        rename($rutaTmp, $rutaAbs);
+    } else {
+        @unlink($rutaTmp);
+    }
+}
+
 if (!isset($_SESSION['professor_id']) && !esSuperadmin() && !isset($_SESSION['alumne_id'])) {
     jsonOut(false, missatge: 'No autoritzat.');
 }
@@ -67,6 +93,8 @@ if ($accio === 'afegir') {
         if (!move_uploaded_file($file['tmp_name'], $rutaAbs)) {
             jsonOut(false, missatge: 'No s\'ha pogut guardar el fitxer.');
         }
+
+        comprimirPdf($rutaAbs);
 
         try {
             $ins = $pdo->prepare("

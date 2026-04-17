@@ -8,6 +8,32 @@ if ($idProyecto <= 0) {
     return;
 }
 
+function comprimirPdf(string $rutaAbs): void
+{
+    $rutaTmp = $rutaAbs . '.tmp.pdf';
+
+    $cmd = sprintf(
+        'gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook ' .
+        '-dNOPAUSE -dQUIET -dBATCH ' .
+        '-sOutputFile=%s %s 2>/dev/null',
+        escapeshellarg($rutaTmp),
+        escapeshellarg($rutaAbs)
+    );
+
+    shell_exec($cmd);
+
+    // Solo sustituir si la compresión generó un archivo válido y más pequeño
+    if (
+        file_exists($rutaTmp) &&
+        filesize($rutaTmp) > 0 &&
+        filesize($rutaTmp) < filesize($rutaAbs)
+    ) {
+        rename($rutaTmp, $rutaAbs);
+    } else {
+        @unlink($rutaTmp);
+    }
+}
+
 function slugify(string $text): string
 {
     $text = trim($text);
@@ -94,7 +120,12 @@ function guardarPdf(array $file, string $rutaDestinoAbs): bool
     $extension = strtolower((string) pathinfo($file['name'] ?? '', PATHINFO_EXTENSION));
     if ($extension !== 'pdf') return false;
     if (!is_uploaded_file($file['tmp_name'])) return false;
-    return move_uploaded_file($file['tmp_name'], $rutaDestinoAbs);
+
+    if (!move_uploaded_file($file['tmp_name'], $rutaDestinoAbs)) return false;
+
+    comprimirPdf($rutaDestinoAbs);
+
+    return true;
 }
 
 // Cargar proyecto
