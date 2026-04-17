@@ -1,4 +1,4 @@
-<?php
+<?php  soloSuperadmin();
 
 
 // Consulta de profesores
