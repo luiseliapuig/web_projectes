@@ -1,13 +1,10 @@
 <?php
 declare(strict_types=1);
 
-ob_start();
-
 header('Content-Type: application/json');
 
 function jsonOut(bool $ok, array $extra = [], string $missatge = ''): never
 {
-    ob_end_clean();
     echo json_encode(array_merge(['ok' => $ok, 'missatge' => $missatge], $extra));
     exit;
 }
@@ -38,11 +35,24 @@ function comprimirPdf(string $rutaAbs): void
     }
 }
 
-if (!isset($_SESSION['professor_id']) && !esSuperadmin() && !isset($_SESSION['alumne_id'])) {
-    jsonOut(false, missatge: 'No autoritzat.');
+$accio      = trim($_POST['accio'] ?? '');
+$idProjecte = (int)($_POST['proyecto_id'] ?? 0);
+
+// Per eliminar, proyecto_id no ve al POST — l'obtenim de la BD
+if ($accio === 'eliminar' && $idProjecte === 0) {
+    $idAdj = (int)($_POST['id'] ?? 0);
+    if ($idAdj > 0) {
+        try {
+            $stmtP = $pdo->prepare("SELECT proyecto_id FROM app.proyecto_adjuntos WHERE id = ?");
+            $stmtP->execute([$idAdj]);
+            $idProjecte = (int)($stmtP->fetchColumn() ?: 0);
+        } catch (PDOException $e) {}
+    }
 }
 
-$accio = trim($_POST['accio'] ?? '');
+if (!esSuperadmin() && !esSuProyectoAlumno($idProjecte)) {
+    jsonOut(false, missatge: 'No autoritzat.');
+}
 
 // ── AFEGIR ────────────────────────────────────────────────────────
 if ($accio === 'afegir') {
@@ -51,7 +61,7 @@ if ($accio === 'afegir') {
     $tipo       = trim($_POST['tipo'] ?? '');
     $nom        = trim($_POST['nom'] ?? '');
 
-    if (!$proyectoId || !in_array($tipo, ['arxiu', 'enllac', 'planificacio'], true) || $nom === '') {
+    if (!$proyectoId || !in_array($tipo, ['arxiu', 'enllac', 'planificacio', 'gestio'], true) || $nom === '') {
         jsonOut(false, missatge: 'Dades incorrectes.');
     }
 
@@ -110,6 +120,72 @@ if ($accio === 'afegir') {
 
         jsonOut(true, ['id' => $id, 'nom' => $nom, 'ruta' => $rutaRel]);
 
+    } elseif ($tipo === 'gestio') {
+
+        // Guardar captura de gestió (imatge)
+        $file = $_FILES['fitxer'] ?? null;
+        if (!$file || $file['error'] !== UPLOAD_ERR_OK) {
+            jsonOut(false, missatge: 'Error en la pujada de la imatge.');
+        }
+        if (!is_uploaded_file($file['tmp_name'])) jsonOut(false, missatge: 'Fitxer no vàlid.');
+
+        $imageInfo = @getimagesize($file['tmp_name']);
+        if ($imageInfo === false) jsonOut(false, missatge: 'El fitxer no és una imatge vàlida.');
+
+        $ciclo          = preg_replace('/[^A-Za-z0-9\-_]/', '', (string)$proj['ciclo']);
+        $curs           = preg_replace('/[^A-Za-z0-9\-_]/', '', (string)$proj['curso_academico']);
+        $uploadsBaseAbs = dirname(__DIR__, 2) . '/uploads';
+        $dirAbs         = $uploadsBaseAbs . '/' . $curs . '/' . $ciclo . '/' . $proyectoId;
+        $dirRel         = '/uploads/' . $curs . '/' . $ciclo . '/' . $proyectoId;
+
+        if (!is_dir($dirAbs)) mkdir($dirAbs, 0775, true);
+
+        // Numeració seqüencial gestio1.jpg, gestio2.jpg...
+        $n = 1;
+        while (file_exists($dirAbs . '/gestio' . $n . '.jpg')) $n++;
+        $nomFitxer = 'gestio' . $n . '.jpg';
+        $rutaAbs   = $dirAbs . '/' . $nomFitxer;
+        $rutaRel   = $dirRel . '/' . $nomFitxer;
+
+        // Processar i guardar com a JPG (màx 1600x1200)
+        [$w, $h, $tipus] = $imageInfo;
+        $ratio      = min(1600 / $w, 1200 / $h, 1);
+        $nouW       = (int)round($w * $ratio);
+        $nouH       = (int)round($h * $ratio);
+
+        $origen = match ($tipus) {
+            IMAGETYPE_JPEG => @imagecreatefromjpeg($file['tmp_name']),
+            IMAGETYPE_PNG  => @imagecreatefrompng($file['tmp_name']),
+            IMAGETYPE_WEBP => function_exists('imagecreatefromwebp') ? @imagecreatefromwebp($file['tmp_name']) : false,
+            IMAGETYPE_GIF  => @imagecreatefromgif($file['tmp_name']),
+            default        => false,
+        };
+        if ($origen === false) jsonOut(false, missatge: 'No s\'ha pogut processar la imatge.');
+
+        $destino = imagecreatetruecolor($nouW, $nouH);
+        $blanc   = imagecolorallocate($destino, 255, 255, 255);
+        imagefilledrectangle($destino, 0, 0, $nouW, $nouH, $blanc);
+        imagecopyresampled($destino, $origen, 0, 0, 0, 0, $nouW, $nouH, $w, $h);
+        $ok = imagejpeg($destino, $rutaAbs, 85);
+        imagedestroy($origen);
+        imagedestroy($destino);
+
+        if (!$ok) jsonOut(false, missatge: 'No s\'ha pogut guardar la imatge.');
+
+        try {
+            $ins = $pdo->prepare("
+                INSERT INTO app.proyecto_adjuntos (proyecto_id, tipo, nom, ruta)
+                VALUES (?, 'gestio', ?, ?)
+                RETURNING id
+            ");
+            $ins->execute([$proyectoId, $nom, $rutaRel]);
+            $id = (int)$ins->fetchColumn();
+        } catch (PDOException $e) {
+            jsonOut(false, missatge: 'Error en guardar a la base de dades.');
+        }
+
+        jsonOut(true, ['id' => $id, 'nom' => $nom, 'ruta' => $rutaRel]);
+
     } else {
 
         // Enllaç
@@ -150,8 +226,8 @@ if ($accio === 'eliminar') {
 
     if (!$adj) jsonOut(false, missatge: 'Adjunt no trobat.');
 
-    // Eliminar fitxer físic si és arxiu
-    if ($adj['tipo'] === 'arxiu' && !empty($adj['ruta'])) {
+    // Eliminar fitxer físic si és arxiu o gestio
+    if (in_array($adj['tipo'], ['arxiu', 'gestio'], true) && !empty($adj['ruta'])) {
         $absPath = dirname(__DIR__, 2) . $adj['ruta'];
         if (is_file($absPath)) @unlink($absPath);
     }

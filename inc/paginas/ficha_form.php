@@ -265,7 +265,22 @@ window.PAGE_TITLE = 'Editar fitxa del projecte';
                                     <div id="llista-planificacio">
                                         <?php foreach ($adjuntsPlanificacio as $adj): ?>
                                         <div class="d-flex align-items-center justify-content-between gap-2 mb-2" id="adj-<?= (int)$adj['id'] ?>">
-                                            <a href="<?= h($adj['ruta']) ?>" target="_blank" class="doc-link-current flex-grow-1"><?= h($adj['nom']) ?></a>
+                                            <a href="<?= h($adj['ruta']) ?>" target="_blank" class="doc-link-current flex-grow-1">Enllaç: <?= h($adj['nom']) ?></a>
+                                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="eliminarAdjunt(<?= (int)$adj['id'] ?>)">✕</button>
+                                        </div>
+                                        <?php endforeach; ?>
+                                    </div>
+
+                                    <?php
+                                    $adjuntsGestio = array_filter($adjuntos, fn($a) => $a['tipo'] === 'gestio');
+                                    ?>
+                                    <!-- Captures de gestió existents -->
+                                    <div id="llista-gestio">
+                                        <?php foreach ($adjuntsGestio as $adj): ?>
+                                        <div class="d-flex align-items-center justify-content-between gap-2 mb-2" id="adj-<?= (int)$adj['id'] ?>">
+                                            <a href="<?= h($adj['ruta']) ?>" target="_blank" class="doc-link-current flex-grow-1">
+                                                Captura: <?= h($adj['nom']) ?>
+                                            </a>
                                             <button type="button" class="btn btn-sm btn-outline-danger" onclick="eliminarAdjunt(<?= (int)$adj['id'] ?>)">✕</button>
                                         </div>
                                         <?php endforeach; ?>
@@ -280,9 +295,23 @@ window.PAGE_TITLE = 'Editar fitxa del projecte';
                                         <button type="button" class="btn btn-sm btn-link text-muted" onclick="cancelarNou('planificacio')">Cancel·lar</button>
                                     </div>
 
-                                    <button type="button" id="btn-nou-planificacio" class="btn btn-sm btn-link text-muted ps-0 mt-1" onclick="mostrarNou('planificacio')">
-                                        + Afegir nou enllaç
-                                    </button>
+                                    <!-- Formulari nova captura gestió -->
+                                    <div id="form-nou-gestio" class="d-none">
+                                        <label class="edit-label-subtle">Nom de la captura</label>
+                                        <input type="text" class="form-control meta-input mb-2" id="nou-gestio-nom" placeholder="Tauler Trello, Sprint 1...">
+                                        <input type="file" class="form-control mb-2" id="nou-gestio-fitxer" accept="image/*">
+                                        <button type="button" class="btn btn-puig btn-sm px-3" onclick="afegirCaptura()">+ Afegir</button>
+                                        <button type="button" class="btn btn-sm btn-link text-muted" onclick="cancelarNou('gestio')">Cancel·lar</button>
+                                    </div>
+
+                                    <div class="d-flex gap-3">
+                                        <button type="button" id="btn-nou-planificacio" class="btn btn-sm btn-link text-muted ps-0 mt-1" onclick="mostrarNou('planificacio')">
+                                            + Afegir nou enllaç
+                                        </button>
+                                        <button type="button" id="btn-nou-gestio" class="btn btn-sm btn-link text-muted ps-0 mt-1" onclick="mostrarNou('gestio')">
+                                            + Afegir captura
+                                        </button>
+                                    </div>
 
                                 </div>
                             </div>
@@ -510,7 +539,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // ── Adjunts (globals per poder cridar-les des d'onclick inline) ───
 const _adjIdProyecto = <?= (int)$idProyecto ?>;
-const _adjuntUrl     = '/index.php?main=proyecto_adjunt_accio&raw=1';
+const _adjuntUrl     = '/index.php?main=ficha_adjunt_accio&raw=1';
 
 function mostrarNou(tipus) {
     if (tipus === 'arxiu') {
@@ -519,6 +548,9 @@ function mostrarNou(tipus) {
     } else if (tipus === 'planificacio') {
         document.getElementById('form-nou-planificacio').classList.remove('d-none');
         document.getElementById('btn-nou-planificacio').classList.add('d-none');
+    } else if (tipus === 'gestio') {
+        document.getElementById('form-nou-gestio').classList.remove('d-none');
+        document.getElementById('btn-nou-gestio').classList.add('d-none');
     } else {
         document.getElementById('form-nou-enllac').classList.remove('d-none');
         document.getElementById('btn-nou-enllac').classList.add('d-none');
@@ -536,6 +568,11 @@ function cancelarNou(tipus) {
         document.getElementById('btn-nou-planificacio').classList.remove('d-none');
         document.getElementById('nou-planificacio-nom').value = '';
         document.getElementById('nou-planificacio-url').value = '';
+    } else if (tipus === 'gestio') {
+        document.getElementById('form-nou-gestio').classList.add('d-none');
+        document.getElementById('btn-nou-gestio').classList.remove('d-none');
+        document.getElementById('nou-gestio-nom').value = '';
+        document.getElementById('nou-gestio-fitxer').value = '';
     } else {
         document.getElementById('form-nou-enllac').classList.add('d-none');
         document.getElementById('btn-nou-enllac').classList.remove('d-none');
@@ -617,6 +654,31 @@ async function afegirPlanificacio() {
         <button type="button" class="btn btn-sm btn-outline-danger" onclick="eliminarAdjunt(${data.id})">✕</button>`;
     document.getElementById('llista-planificacio').appendChild(div);
     cancelarNou('planificacio');
+}
+
+async function afegirCaptura() {
+    const nom    = document.getElementById('nou-gestio-nom').value.trim();
+    const fitxer = document.getElementById('nou-gestio-fitxer').files[0];
+    if (!nom || !fitxer) { alert('Cal indicar un nom i seleccionar una imatge.'); return; }
+
+    const fd = new FormData();
+    fd.append('accio',       'afegir');
+    fd.append('tipo',        'gestio');
+    fd.append('proyecto_id', _adjIdProyecto);
+    fd.append('nom',         nom);
+    fd.append('fitxer',      fitxer);
+
+    const res  = await fetch(_adjuntUrl, { method: 'POST', body: fd });
+    const data = await res.json();
+    if (!data.ok) { alert(data.missatge || 'Error en afegir.'); return; }
+
+    const div = document.createElement('div');
+    div.className = 'd-flex align-items-center justify-content-between gap-2 mb-2';
+    div.id = 'adj-' + data.id;
+    div.innerHTML = `<a href="${data.ruta}" target="_blank" class="doc-link-current flex-grow-1">🖼 ${data.nom}</a>
+        <button type="button" class="btn btn-sm btn-outline-danger" onclick="eliminarAdjunt(${data.id})">✕</button>`;
+    document.getElementById('llista-gestio').appendChild(div);
+    cancelarNou('gestio');
 }
 
 async function eliminarAdjunt(id) {

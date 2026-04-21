@@ -1578,3 +1578,93 @@ textarea {
 .t-col-1 { padding-right: 24px !important;}
 .t-col-2 { padding-left: 24px !important; padding-right: 24px !important;}
 .t-col-3 { padding-left: 24px !important;}
+
+.mega-buttons {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.mega-btn {
+    flex: 1;
+    min-width: 240px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 18px;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+/* ICONO */
+.mega-icon {
+    font-size: 21px;
+    line-height: 1;
+}
+.mega-icon svg {
+    width: 30px;
+    height: 30px;
+}
+
+/* TEXTO */
+.mega-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.mega-text strong {
+    font-size: 15px;
+    color: inherit;
+}
+
+.mega-text small {
+    font-size: 12px;
+    opacity: 0.7;
+}
+.icon-memoria {margin-right: -4px;}
+.rocket svg { height: 30px;}
+
+
+
+/* BOTÓN OUTLINE (MEMORIA) */
+
+
+.mega-btn-outline {
+    background-color: #f8e9ec; /* más sutil */
+    border: 1px solid #e3b8c1;
+    color: #970A2C;
+}
+
+.mega-btn-outline:hover {
+    
+    color: #970A2C;
+    transform: translateY(-2px);
+    background-color: #f3d6dc;
+    border-color: #970A2C;
+}
+
+/* BOTÓN SOLIDO (DEMO) */
+.mega-btn-solid {
+    background-color: #970A2C;
+    color: #fff;
+    border: 1px solid #970A2C;
+}
+
+.mega-btn-solid:hover {
+    background-color: #7a0823;
+    border-color: #7a0823;
+    transform: translateY(-2px);
+    color: #fff;
+}
+
+.mega-btn:hover {
+    box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+}
+
+.mega-arrow {
+    margin-left: auto;
+    font-size: 18px;
+    opacity: 0.7;
+}
