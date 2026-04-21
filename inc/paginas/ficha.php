@@ -177,41 +177,13 @@ window.PAGE_TITLE = '<?= h($proyecto['nombre'] ?? '') ?> | <?= h($proyecto['cicl
                             <?php endif; ?>
                         </div>
 
-                        <div class="mb-3">
-                            <h1 style="font-size: 2rem; line-height: 1.2; margin-bottom: 0.75rem;">
-                                <?= h($proyecto['nombre'] ?? '') ?>
-                            </h1>
-
-                            <?php if (!empty($proyecto['resumen'])): ?>
-                                <h3 style="font-size: 1.2rem; line-height: 1.45; font-weight: 400; color: #6b7280; margin-bottom: 1.25rem;">
-                                    <?= nl2br(h($proyecto['resumen'])) ?>
-                                </h3>
-                            <?php endif; ?>
-                        </div>
-
-                        <div class="mb-4">
-                            <h5 class="mb-3">Descripció</h5>
-
-                            <?php if (!empty($proyecto['descripcion'])): ?>
-                                <div style="font-size: 1rem; line-height: 1.75; color: #374151;">
-                                    <?= nl2br(h($proyecto['descripcion'])) ?>
-                                </div>
-                            <?php else: ?>
-                                <p class="text-muted mb-0">Aquest projecte encara no té descripció.</p>
-                            <?php endif; ?>
-                        </div>
-
-                
-
-
-
-                        <?php
+                         <?php
                         $hayDemo   = !empty($proyecto['url_proyecto']);
                         $hayGithub = !empty($proyecto['url_github']);
                         $hayMemoria = !empty($proyecto['ruta_memoria']);
                         ?>
 
-                        <div class="mega-buttons mt-4 pt-20">
+                        <div class="mega-buttons mt-4 pb-30">
 
                             <!-- MEMORIA (siempre secundaria) -->
                             <?php if ($hayMemoria): ?>
@@ -282,6 +254,36 @@ window.PAGE_TITLE = '<?= h($proyecto['nombre'] ?? '') ?> | <?= h($proyecto['cicl
                             <?php endif; ?>
 
                         </div>
+
+                        <div class="mb-3">
+                            <h1 style="font-size: 2rem; line-height: 1.2; margin-bottom: 0.75rem;">
+                                <?= h($proyecto['nombre'] ?? '') ?>
+                            </h1>
+
+                            <?php if (!empty($proyecto['resumen'])): ?>
+                                <h3 style="font-size: 1.2rem; line-height: 1.45; font-weight: 400; color: #6b7280; margin-bottom: 1.25rem;">
+                                    <?= nl2br(h($proyecto['resumen'])) ?>
+                                </h3>
+                            <?php endif; ?>
+                        </div>
+
+                        <div class="mb-4">
+                            <h5 class="mb-3">Descripció</h5>
+
+                            <?php if (!empty($proyecto['descripcion'])): ?>
+                                <div style="font-size: 1rem; line-height: 1.75; color: #374151;">
+                                    <?= nl2br(h($proyecto['descripcion'])) ?>
+                                </div>
+                            <?php else: ?>
+                                <p class="text-muted mb-0">Aquest projecte encara no té descripció.</p>
+                            <?php endif; ?>
+                        </div>
+
+                
+
+
+
+                       
 
                     </div>
 
