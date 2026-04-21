@@ -3,6 +3,11 @@ declare(strict_types=1);
 
 $idProyecto = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 
+
+if (!esSuperadmin() && !esSuProyectoAlumno($idProyecto)) {
+    die();
+}
+
 if ($idProyecto <= 0) {
     echo '<div class="alert alert-danger">No s\'ha indicat cap projecte vàlid.</div>';
     return;
