@@ -1,4 +1,4 @@
-<?php
+<?php die();
 declare(strict_types=1);
 ob_start();
 session_start();
