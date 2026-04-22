@@ -20,11 +20,9 @@ if ($ciclo !== '') {
     $params[':ciclo'] = $ciclo;
 }
 
-if ($grupo === 'A') {
-    $where[] = 'p.grupo = :grupo_a';
-    $params[':grupo_a'] = 'A';
-} elseif ($grupo === 'RESTO') {
-    $where[] = "COALESCE(p.grupo, '') <> 'A'";
+if ($grupo !== '') {
+    $where[] = 'p.grupo = :grupo';
+    $params[':grupo'] = $grupo;
 }
 
 $whereSql = '';
@@ -155,8 +153,10 @@ Una salutació.";
                     <label for="grupo" class="form-label fw-semibold">Grup</label>
                     <select name="grupo" id="grupo" class="form-select">
                         <option value="" <?= ($grupo === '' ? 'selected' : '') ?>>Tots</option>
-                        <option value="A" <?= ($grupo === 'A' ? 'selected' : '') ?>>Només A</option>
-                        <option value="RESTO" <?= ($grupo === 'RESTO' ? 'selected' : '') ?>>Resta de grups</option>
+                        <option value="A" <?= ($grupo === 'A' ? 'selected' : '') ?>>A</option>
+                        <option value="B" <?= ($grupo === 'B' ? 'selected' : '') ?>>B</option>
+                        <option value="C" <?= ($grupo === 'C' ? 'selected' : '') ?>>C</option>
+                        <option value="D" <?= ($grupo === 'D' ? 'selected' : '') ?>>D</option>
                     </select>
                 </div>
 
