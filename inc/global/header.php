@@ -101,7 +101,7 @@
               </a>
               <ul class="dropdown-menu" aria-labelledby="adminDropdown">
                 <li><a class="dropdown-item" href="/index.php?main=configuracion">Configuració</a></li>
-                <li><a class="dropdown-item" href="/index.php?main=planificacio">Planificación defensas</a></li>
+                <li><a class="dropdown-item" href="/index.php?main=calendari_drag">Planificació defenses</a></li>
                 <hr>
                 <li><a class="dropdown-item" href="/index.php?main=emails-profesores">Emails professorat</a></li>
                 <li><a class="dropdown-item" href="/index.php?main=emails-alumnos">Emails alumnes</a></li>

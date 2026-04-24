@@ -160,16 +160,17 @@
                                 Aplicar assignació automàtica
                             </button>
                         </div>
+                       
                     </div>
                 </div>
             </div>
-
+ 
         </div>
 
         <!-- COLUMNA DERECHA -->
         <div class="col-12 col-xl-4">
 
-            <!-- RESUM LÒGICA -->
+            <!-- RESUM LÒGICA
             <div class="card border-0 shadow-sm rounded-4 mb-4">
                 <div class="card-header bg-white border-0 px-4 pt-4 pb-2">
                     <div class="text-uppercase small fw-semibold text-primary mb-1">Funcionament</div>
@@ -185,16 +186,12 @@
                         <div class="fw-semibold mb-1">Distribució homogènia</div>
                         <div class="small text-muted">Les defenses de cada grup es reparteixen equitativament entre els dies indicats.</div>
                     </div>
-                    <div class="border rounded-4 p-3 mb-3 bg-light-subtle">
-                        <div class="fw-semibold mb-1">Torn per grup</div>
-                        <div class="small text-muted">El torn (matí o tarda) ve determinat per la configuració de cada grup, no per cicle.</div>
-                    </div>
                     <div class="border rounded-4 p-3 bg-light-subtle">
                         <div class="fw-semibold mb-1">Sense solapaments</div>
-                        <div class="small text-muted">Cap dos projectes del mateix grup coincideixen a la mateixa franja horària.</div>
+                        <div class="small text-muted">Dos projectes del mateix grup coincideixen a la mateixa franja horària.</div>
                     </div>
                 </div>
-            </div>
+            </div> -->
 
             <!-- RESUM DE SIMULACIÓ -->
             <div class="card border-0 shadow-sm rounded-4 mb-4" id="card-simulacio">
@@ -245,8 +242,11 @@ Encara no s'ha executat cap operació.
 Prem "Simular" per veure el resum de capacitat, o "Aplicar" per fer l'assignació real.
                     </div>
                 </div>
-            </div>
 
+            </div>
+<a href="/index.php?main=calendari_drag" class="btn btn-outline-secondary px-4 mt-20" id="btn-simular">
+                                Tornar al calendari
+                            </a>
         </div>
     </div>
 </section>
