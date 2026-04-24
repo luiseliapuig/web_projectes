@@ -56,6 +56,25 @@ try {
     $stats_dia = ['mati' => 0, 'tarda' => 0, 'aules' => 0, 'franges' => 0];
 }
 
+// ── Aula natural per cicle+grup (segons tabla grupos) ─────────────
+try {
+    $aulanatural_raw = $pdo->query("
+        SELECT c.abr AS cicle, g.grupo, a.codigo AS aula_codi, a.nombre AS aula_nom
+        FROM app.grupos g
+        JOIN app.ciclos c ON c.id_ciclo = g.id_ciclo
+        JOIN app.aulas  a ON a.id_aula  = g.id_aula
+    ")->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $aulanatural_raw = [];
+}
+// Índex: $aulaNatural['DAM']['B'] = 'INF01 · Aula informàtica 1'
+$aulaNatural = [];
+foreach ($aulanatural_raw as $r) {
+    $cicle = strtoupper($r['cicle']);
+    $grup  = $r['grupo'] !== null ? strtoupper($r['grupo']) : '';
+    $aulaNatural[$cicle][$grup] = $r['aula_codi'] . ' · ' . $r['aula_nom'];
+}
+
 // ── Aules ─────────────────────────────────────────────────────────
 try {
     $stmt = $pdo->prepare("
@@ -169,7 +188,6 @@ foreach ($projectes as $p) {
 }
 
 // Filtrar les aules que no tenen cap projecte en el torn actiu
-// (pot passar que una aula tingui defenses un dia però en un altre torn)
 $aules_amb_proj = [];
 foreach ($projectes as $p) {
     $aules_amb_proj[$p['defensa_aula_id']] = true;
@@ -226,6 +244,8 @@ ob_start();
                                     <?= h($cicle . ($grup ? ' ' . $grup : '')) ?>
                                 </span>
                             </div>
+
+                            <div class="detall-ficha">
 
                             <h3 class="h6 fw-bold mb-3 text-center lh-sm mt-10"><a href="/projecte/<?= (int)$proj['id_proyecto'] ?>" target="_blank"><?= h($proj['nombre']) ?></a></h3>
 
@@ -297,8 +317,13 @@ ob_start();
 
                             </div>
 
-                            <!-- Botó modificar data (superadmin) -->
-                            <?php if (esSuperadmin()): ?>
+                            </div><!-- /detall-ficha -->
+
+                            <?php if (esSuperadmin()):
+                                $cicle_proj = strtoupper($proj['ciclo'] ?? '');
+                                $grup_proj  = ($proj['grupo'] !== null && $proj['grupo'] !== '') ? strtoupper($proj['grupo']) : '';
+                                $aula_natural = $aulaNatural[$cicle_proj][$grup_proj] ?? '';
+                            ?>
                             <div class="mt-3 text-center">
                                 <button
                                     type="button"
@@ -307,6 +332,7 @@ ob_start();
                                     data-dia="<?= h($dia) ?>"
                                     data-hora="<?= h($hora) ?>"
                                     data-aula-id="<?= (int)$aula['id_aula'] ?>"
+                                    data-aula-natural="<?= h($aula_natural) ?>"
                                     onclick="obrirModalModificar(this)">
                                     ✏ Modificar data
                                 </button>
