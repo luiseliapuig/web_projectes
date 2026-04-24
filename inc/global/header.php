@@ -108,6 +108,7 @@
                 <hr>
                 <li><a class="dropdown-item" href="/index.php?main=profesor">Professorat</a></li>
                 <li><a class="dropdown-item" href="/index.php?main=aula">Aules</a></li>
+                <li><a class="dropdown-item" href="/index.php?main=grupos">Grups</a></li>
                 <hr>
                 <li><a class="dropdown-item" href="/index.php?main=proyecto">Projectes</a></li>
                 <li><a class="dropdown-item" href="/index.php?main=alumno">Alumnat</a></li>

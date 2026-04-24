@@ -65,7 +65,7 @@ window.PAGE_TITLE = '<?= $isEdit ? 'Editar aula' : 'Nova aula' ?>';
                             name="nombre"
                             class="form-control"
                             value="<?= htmlspecialchars((string)$data['nombre']) ?>"
-                            required
+                            
                         >
                     </div>
 

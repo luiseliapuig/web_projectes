@@ -168,6 +168,14 @@ foreach ($projectes as $p) {
     $matriu[$p['hora_inici']][$p['defensa_aula_id']] = $p;
 }
 
+// Filtrar les aules que no tenen cap projecte en el torn actiu
+// (pot passar que una aula tingui defenses un dia però en un altre torn)
+$aules_amb_proj = [];
+foreach ($projectes as $p) {
+    $aules_amb_proj[$p['defensa_aula_id']] = true;
+}
+$aules = array_values(array_filter($aules, fn($a) => isset($aules_amb_proj[$a['id_aula']])));
+
 $duracio_min = 45;
 if (count($hores) >= 2) {
     $duracio_min = (strtotime('2000-01-01 ' . $hores[1]) - strtotime('2000-01-01 ' . $hores[0])) / 60;

@@ -31,7 +31,7 @@ $codigo = trim($_POST['codigo'] ?? '');
 $nombre = trim($_POST['nombre'] ?? '');
 $piso = trim($_POST['piso'] ?? '');
 
-if ($codigo === '' || $nombre === '') {
+if ($codigo === '' ) {
     die('Falten camps obligatoris');
 }
 
