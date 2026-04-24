@@ -70,6 +70,7 @@ if (!is_file($filePagina)) {
      <link rel="stylesheet" href="/assets/css/estilos.css" />
      <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
   </head>
   <body>
 

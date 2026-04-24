@@ -151,6 +151,16 @@ if (isset($_SESSION['professor_id'])) {
 window.PAGE_TITLE = 'Calendari defenses';
 </script>
 <style>
+    .container , .main-wrapper {
+   
+    max-width: 1800px !important;
+ 
+}
+
+
+
+</style>
+<style>
 .pill-btn {
     cursor: pointer;
     transition: all 0.15s ease;
@@ -260,6 +270,9 @@ window.PAGE_TITLE = 'Calendari defenses';
     opacity: 0;
 }
 .link-apuntarme { height: 21px };
+/* Mode compacte */
+.mode-compacte .defense-table tbody tr { height: auto; }
+.mode-compacte .detall-ficha { display: none !important; }
 /* Modal modificar */
 .modal-modificar .modal-content { border-radius: 1rem; border: 0; }
 .modal-modificar .modal-header  { border-bottom: 1px solid #f1f3f5; padding: 1.25rem 1.5rem; }
@@ -481,6 +494,14 @@ window.PAGE_TITLE = 'Calendari defenses';
     ══════════════════════════════════════════════════════════ -->
     <div class="card border-0 shadow-sm rounded-4">
         <div class="card-body p-4">
+            <div class="d-flex justify-content-end mb-3">
+                <button type="button" class="btn btn-outline-secondary btn-sm px-3 d-flex align-items-center gap-2" id="btn-compacte" onclick="toggleCompacte()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5v-2z"/>
+                    </svg>
+                    <span id="btn-compacte-label">Vista compacta</span>
+                </button>
+            </div>
             <div id="quota-wrap" class="mb-3"></div>
             <div id="calendari-loading">
                 <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
@@ -749,15 +770,16 @@ function toggleResum() {
 
 // ── Modal modificar defensa ───────────────────────────────────
 function obrirModalModificar(btn) {
-    const projId    = btn.dataset.projId;
-    const dia       = btn.dataset.dia;
-    const hora      = btn.dataset.hora;
-    const aulaId    = btn.dataset.aulaId;
+    const projId      = btn.dataset.projId;
+    const dia         = btn.dataset.dia;
+    const hora        = btn.dataset.hora;
+    const aulaId      = btn.dataset.aulaId;
+    const aulaNatural = btn.dataset.aulaNatural ?? '';
 
-    document.getElementById('mod-proj-id').value             = projId;
-    document.getElementById('mod-dia-retorn').value           = diaActiu;
-    document.getElementById('mod-torn-retorn').value          = tornActiu;
-    document.getElementById('mod-data-actual').textContent   = dia + ' ' + hora;
+    document.getElementById('mod-proj-id').value           = projId;
+    document.getElementById('mod-dia-retorn').value         = diaActiu;
+    document.getElementById('mod-torn-retorn').value        = tornActiu;
+    document.getElementById('mod-data-actual').textContent = dia + ' ' + hora;
 
     // Preseleccionar valors actuals als selects
     const selData = document.getElementById('mod-data');
@@ -771,6 +793,10 @@ function obrirModalModificar(btn) {
     // Nom de l'aula seleccionada per mostrar a "Assignació actual"
     const nomAula = selAula.options[selAula.selectedIndex]?.text ?? '';
     document.getElementById('mod-aula-actual').textContent = nomAula;
+
+    // Aula natural del grup (segons configuració de grups)
+    document.getElementById('mod-grup-aula').textContent =
+        aulaNatural ? 'Aula del grup: ' + aulaNatural : '';
 
     new bootstrap.Modal(document.getElementById('modalModificar')).show();
 }
@@ -807,6 +833,17 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 });
+
+// ── Toggle mode compacte ─────────────────────────────────────
+function toggleCompacte() {
+    const wrap  = document.getElementById('calendari-wrap');
+    const btn   = document.getElementById('btn-compacte');
+    const label = document.getElementById('btn-compacte-label');
+    const actiu = wrap.classList.toggle('mode-compacte');
+    label.textContent = actiu ? 'Vista completa' : 'Vista compacta';
+    btn.classList.toggle('btn-outline-secondary', !actiu);
+    btn.classList.toggle('btn-secondary', actiu);
+}
 </script>
 
 <!-- ══════════════════════════════════════════════════════════
@@ -855,6 +892,7 @@ try {
                         <div class="text-muted mb-1">Assignació actual</div>
                         <div class="fw-semibold" id="mod-data-actual"></div>
                         <div class="text-muted" id="mod-aula-actual"></div>
+                        <div class="text-muted fst-italic mt-1" id="mod-grup-aula"></div>
                     </div>
 
                     <div class="mb-3">

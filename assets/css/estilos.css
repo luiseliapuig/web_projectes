@@ -1595,6 +1595,11 @@ textarea {
     border-radius: 12px;
     text-decoration: none;
     transition: all 0.2s ease;
+    
+}
+
+th.fw-semibold.text-center.py-3 {
+    min-width: 233px;
 }
 
 /* ICONO */

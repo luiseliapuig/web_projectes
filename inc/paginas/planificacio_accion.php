@@ -1,7 +1,10 @@
 <?php
 // planificacio_accion.php
-// Algoritme: cada cicle rep slots ordenats per hora→dia→aula.
-// Mai dos projectes del mateix cicle coincideixen en dia+hora.
+// Algoritme: assignació vertical per minimitzar solapaments d'hora.
+// - Cada cicle reinicia el cursor (dia 0, hora 0).
+// - Dins d'un cicle, els grups s'encadenen: el grup B continua
+//   des d'on ha deixat el grup A (mateix dia i hora).
+// - L'aula de cada grup ve determinada per la BD (grupos → ciclos).
 
 declare(strict_types=1);
 
@@ -33,115 +36,71 @@ function parseConfig(array $input): array
         'mati' => [
             'inici' => $input['hora_inici_mati']  ?? '08:30',
             'fi'    => $input['hora_fi_mati']      ?? '11:30',
-            'aules' => array_map('intval', $input['aules_mati'] ?? []),
         ],
         'tarda' => [
             'inici' => $input['hora_inici_tarda'] ?? '15:00',
             'fi'    => $input['hora_fi_tarda']    ?? '18:00',
-            'aules' => array_map('intval', $input['aules_tarda'] ?? []),
         ],
     ];
 }
 
-function esManyana(array $p): bool
+// Genera l'array de franges horàries per a un torn: ['09:00', '09:45', ...]
+function generarHores(array $cfg, string $torn): array
 {
-    return strtoupper($p['cicle']) === 'SMX'
-        && in_array(strtoupper($p['grup'] ?? ''), ['A', 'B'], true);
-}
-
-// Genera tots els slots d'un torn com a índex: $slots[$hora][$dia][] = aulaId
-// Estructura que permet recórrer hora a hora, rotant entre dies.
-function generarSlotsIndexats(array $cfg, string $torn): array
-{
-    $durSecs = $cfg['duracio'] * 60;
-
+    $durSecs   = $cfg['duracio'] * 60;
     $ref_inici = strtotime('2000-01-01 ' . $cfg[$torn]['inici']);
     $ref_fi    = strtotime('2000-01-01 ' . $cfg[$torn]['fi']);
 
-    // $index[$hora][$dia] = [ ['aula_id'=>X, 'ocupat'=>false], ... ]
-    $index = [];
+    $hores = [];
     for ($t = $ref_inici; $t + $durSecs <= $ref_fi; $t += $durSecs) {
-        $hora = date('H:i', $t);
-        foreach ($cfg['dies'] as $dia) {
-            foreach ($cfg[$torn]['aules'] as $aulaId) {
-                $index[$hora][$dia][] = ['aula_id' => $aulaId, 'ocupat' => false];
-            }
-        }
+        $hores[] = date('H:i', $t);
     }
-
-    return $index;
+    return $hores;
 }
 
-// Agrupa projectes per torn i cicle+grup
-function agrupPerCicle(array $projectes): array
-{
-    $grups = ['mati' => [], 'tarda' => []];
-    foreach ($projectes as $p) {
-        $torn = esManyana($p) ? 'mati' : 'tarda';
-        // Clau NOMÉS per cicle — DAM_A i DAM_B van junts sota 'DAM'
-        // perquè la restricció és que cap dos projectes del mateix cicle
-        // coincideixin en dia+hora, independentment del grup.
-        $clau = strtoupper($p['cicle']);
-        $grups[$torn][$clau][] = $p;
-    }
-    ksort($grups['mati']);
-    ksort($grups['tarda']);
-    return $grups;
-}
-
-// Assignació principal amb distribució homogènia entre dies.
-// Per cada cicle:
-//   - recorre les hores en ordre
-//   - dins de cada hora, rota entre dies (dia1→dia2→dia3→dia1...)
-//   - dins de cada dia+hora, agafa la primera aula lliure
-// Garantia: cap dos projectes del mateix cicle al mateix dia+hora.
-function assignarTorn(array $cicles, array &$slotsIndex, array $dies): array
+// Assignació vertical: omple el dia sencer abans de passar al següent.
+// El cursor és circular: quan arriba a l'últim dia torna al dia 0.
+// Això permet escalonar el punt d'inici sense perdre slots.
+// S'atura quan ha donat una volta completa sense poder assignar (tots els slots plens).
+// $cursor és passat per referència i queda apuntant a la següent franja lliure.
+function assignarVertical(array $projectes, int $aulaId, string $torn, array $cfg, array &$cursor): array
 {
     $assignats = [];
     $senseSlot = [];
-    $hores     = array_keys($slotsIndex);
 
-    foreach ($cicles as $clau => $projectes) {
-        $nProj    = count($projectes);
-        $projIdx  = 0;
+    $dies      = $cfg['dies'];
+    $hores     = generarHores($cfg, $torn);
+    $nDies     = count($dies);
+    $nHores    = count($hores);
+    $totalSlots = $nDies * $nHores;
 
-        // Recorrem hora a hora; dins de cada hora rotem dies
-        foreach ($hores as $hora) {
-            if ($projIdx >= $nProj) break;
+    // Comptador de slots usats per detectar quan s'han exhaurit tots
+    $slotsUsats = $cursor['slotsUsats'] ?? 0;
 
-            foreach ($dies as $dia) {
-                if ($projIdx >= $nProj) break;
-
-                // Buscar aula lliure per a aquest dia+hora
-                $aulaAssignada = null;
-                foreach ($slotsIndex[$hora][$dia] as &$slot) {
-                    if (!$slot['ocupat']) {
-                        $slot['ocupat'] = true;
-                        $aulaAssignada  = $slot['aula_id'];
-                        break;
-                    }
-                }
-                unset($slot);
-
-                if ($aulaAssignada === null) continue; // hora+dia ple, prova el següent dia
-
-                $p = $projectes[$projIdx];
-                $assignats[] = [
-                    'proj_id'    => $p['id'],
-                    'dia'        => $dia,
-                    'hora_inici' => $hora,
-                    'aula_id'    => $aulaAssignada,
-                ];
-                $projIdx++;
-            }
+    foreach ($projectes as $p) {
+        if ($slotsUsats >= $totalSlots) {
+            $senseSlot[] = $p['id'];
+            continue;
         }
 
-        // Si queden projectes sense slot (més projectes que franges disponibles)
-        while ($projIdx < $nProj) {
-            $senseSlot[] = $projectes[$projIdx]['id'];
-            $projIdx++;
+        $assignats[] = [
+            'proj_id'    => $p['id'],
+            'dia'        => $dies[$cursor['diaIdx']],
+            'hora_inici' => $hores[$cursor['horaIdx']],
+            'aula_id'    => $aulaId,
+        ];
+
+        $slotsUsats++;
+
+        // Avançar cursor circular: primer hora (vertical), després dia, i torna al principi
+        $cursor['horaIdx']++;
+        if ($cursor['horaIdx'] >= $nHores) {
+            $cursor['horaIdx'] = 0;
+            $cursor['diaIdx']  = ($cursor['diaIdx'] + 1) % $nDies;
         }
     }
+
+    $cursor['slotsUsats'] = $slotsUsats;
 
     return ['assignats' => $assignats, 'sense_slot' => $senseSlot];
 }
@@ -157,12 +116,36 @@ if (count($cfg['dies']) === 0) {
     echo json_encode(['ok' => false, 'missatge' => "No s'han indicat dies de defensa."]);
     exit;
 }
-if (count($cfg['mati']['aules']) === 0 || count($cfg['tarda']['aules']) === 0) {
-    echo json_encode(['ok' => false, 'missatge' => 'Has de seleccionar aules per als dos torns.']);
+
+// 1. Carregar configuració de grups des de BD
+try {
+    $stmtGrups = $pdo->query("
+        SELECT c.abr AS cicle,
+               g.grupo,
+               g.id_aula,
+               g.torn
+        FROM app.grupos g
+        JOIN app.ciclos c ON c.id_ciclo = g.id_ciclo
+        ORDER BY c.abr, g.grupo
+    ");
+    $configGrups = $stmtGrups->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    echo json_encode(['ok' => false, 'missatge' => 'Error en llegir la configuració de grups.']);
     exit;
 }
 
-// Carregar projectes
+// Índex: $grupConfig['DAM']['A'] = ['aula_id' => X, 'torn' => 'Tarda']
+$grupConfig = [];
+foreach ($configGrups as $g) {
+    $cicle = strtoupper($g['cicle']);
+    $grup  = ($g['grupo'] !== null && $g['grupo'] !== '') ? strtoupper($g['grupo']) : '';
+    $grupConfig[$cicle][$grup] = [
+        'aula_id' => (int)$g['id_aula'],
+        'torn'    => $g['torn'],
+    ];
+}
+
+// 2. Carregar projectes
 try {
     $stmt = $pdo->query("
         SELECT id_proyecto, ciclo, grupo, defensa_fecha, defensa_aula_id
@@ -176,8 +159,8 @@ try {
 
 $tots = array_map(fn($p) => [
     'id'              => (int)$p['id_proyecto'],
-    'cicle'           => $p['ciclo']           ?? '',
-    'grup'            => $p['grupo']           ?? '',
+    'cicle'           => strtoupper($p['ciclo'] ?? ''),
+    'grup'            => ($p['grupo'] !== null && $p['grupo'] !== '') ? strtoupper($p['grupo']) : '',
     'defensa_fecha'   => $p['defensa_fecha']   ?? null,
     'defensa_aula_id' => $p['defensa_aula_id'] ?? null,
 ], $tots);
@@ -186,26 +169,62 @@ if (!$sobreescriure) {
     $tots = array_values(array_filter($tots, fn($p) =>
         empty($p['defensa_fecha']) || empty($p['defensa_aula_id'])
     ));
-} else {
-    $tots = array_values($tots);
 }
 
-// Agrupar i assignar per torn
-$cicles     = agrupPerCicle($tots);
-$slotsMati  = generarSlotsIndexats($cfg, 'mati');
-$slotsTarda = generarSlotsIndexats($cfg, 'tarda');
+// 3. Agrupar per cicle → grup, ambdós en ordre alfabètic
+$perCicle = [];
+foreach ($tots as $p) {
+    $perCicle[$p['cicle']][$p['grup']][] = $p;
+}
+ksort($perCicle);
+foreach ($perCicle as $cicle => &$grups) {
+    ksort($grups);
+}
+unset($grups);
 
-$resMati  = assignarTorn($cicles['mati'],  $slotsMati,  $cfg['dies']);
-$resTarda = assignarTorn($cicles['tarda'], $slotsTarda, $cfg['dies']);
+// 4. Assignar verticalment
+$assignats   = [];
+$senseSlot   = [];
+$senseConfig = [];
 
-$assignats = array_merge($resMati['assignats'], $resTarda['assignats']);
-$senseSlot = array_merge($resMati['sense_slot'], $resTarda['sense_slot']);
+$nDies    = count($cfg['dies']);
+$cicleIdx = 0;
 
-// Guardar a la BD
+foreach ($perCicle as $cicle => $grups) {
+    // Cada cicle comença en un dia diferent (rotació) per distribuir homogèniament
+    $diaInici    = $nDies > 0 ? $cicleIdx % $nDies : 0;
+    $cursorMati  = ['diaIdx' => $diaInici, 'horaIdx' => 0, 'slotsUsats' => 0];
+    $cursorTarda = ['diaIdx' => $diaInici, 'horaIdx' => 0, 'slotsUsats' => 0];
+    $cicleIdx++;
+
+    foreach ($grups as $grup => $projectes) {
+        if (!isset($grupConfig[$cicle][$grup])) {
+            foreach ($projectes as $p) {
+                $senseConfig[] = $p['id'];
+            }
+            continue;
+        }
+
+        $gc   = $grupConfig[$cicle][$grup];
+        $torn = (stripos($gc['torn'], 'mat') !== false) ? 'mati' : 'tarda';
+
+        // El cursor es passa per referència i queda on ha deixat el grup anterior
+        // PHP no permet fer referència a una expressió ternària directament
+        if ($torn === 'mati') {
+            $res = assignarVertical($projectes, $gc['aula_id'], $torn, $cfg, $cursorMati);
+        } else {
+            $res = assignarVertical($projectes, $gc['aula_id'], $torn, $cfg, $cursorTarda);
+        }
+
+        $assignats = array_merge($assignats, $res['assignats']);
+        $senseSlot = array_merge($senseSlot, $res['sense_slot']);
+    }
+}
+
+// 5. Guardar a la BD
 try {
     $pdo->beginTransaction();
 
-    // Pas 1: netejar assignacions anteriors per evitar col·lisió UNIQUE
     $ids = array_column($assignats, 'proj_id');
     if (!empty($ids)) {
         $ph = implode(',', array_fill(0, count($ids), '?'));
@@ -216,7 +235,6 @@ try {
         ")->execute($ids);
     }
 
-    // Pas 2: assignar nous valors
     $stmtUpdate = $pdo->prepare("
         UPDATE app.proyectos
         SET defensa_fecha   = :defensa_fecha,
@@ -241,9 +259,11 @@ try {
 }
 
 echo json_encode([
-    'ok'             => true,
-    'assignats'      => count($assignats),
-    'sense_slot'     => count($senseSlot),
-    'ids_sense_slot' => $senseSlot,
+    'ok'               => true,
+    'assignats'        => count($assignats),
+    'sense_slot'       => count($senseSlot),
+    'ids_sense_slot'   => $senseSlot,
+    'sense_config'     => count($senseConfig),
+    'ids_sense_config' => $senseConfig,
 ]);
 exit;

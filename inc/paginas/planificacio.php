@@ -1,8 +1,7 @@
 <?php
 // planificacio.php
-// Carrega les aules des de BD per als checkboxes
-$stmt = $pdo->query("SELECT id_aula, codigo, nombre FROM app.aulas ORDER BY codigo");
-$aules = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// Les aules venen determinades per la taula grupos (cicle+grup → aula+torn).
+// No cal seleccionar aules manualment.
 ?>
 
 <section class="container py-4">
@@ -17,14 +16,14 @@ $aules = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </div>
                     <h1 class="h3 fw-bold mb-1">Assignació automàtica d'aules i horaris</h1>
                     <p class="text-muted mb-0">
-                        Configura els dies, els torns i la duració de les franges. El sistema repartirà automàticament els projectes per cicle,
-                        recorrent els dies i ocupant sempre la primera aula lliure disponible.
+                        Configura els dies, els torns i la duració de les franges. El sistema repartirà automàticament
+                        els projectes a l'aula del seu grup, distribuint les defenses homogèniament entre els dies.
                     </p>
                 </div>
                 <div class="d-flex flex-wrap gap-2">
                     <span class="badge rounded-pill text-bg-light border px-3 py-2">3 dies</span>
                     <span class="badge rounded-pill text-bg-light border px-3 py-2">Franges configurables</span>
-                    <span class="badge rounded-pill text-bg-light border px-3 py-2">Assignació automàtica</span>
+                    <span class="badge rounded-pill text-bg-light border px-3 py-2">Aula per grup</span>
                 </div>
             </div>
         </div>
@@ -81,8 +80,7 @@ $aules = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             </div>
                             <div class="col-12 col-lg-6">
                                 <div class="small text-muted">
-                                    Aquesta duració s'aplicarà tant al torn de matí com al de tarda i et permetrà ajustar millor el temps
-                                    de defensa i deliberació del tribunal.
+                                    Aquesta duració s'aplicarà tant al torn de matí com al de tarda.
                                 </div>
                             </div>
                         </div>
@@ -93,7 +91,7 @@ $aules = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <div class="border rounded-4 p-4 h-100 bg-light-subtle">
                                 <div class="d-flex justify-content-between align-items-center mb-3">
                                     <h3 class="h6 fw-bold mb-0">Torn de matí</h3>
-                                    <span class="badge rounded-pill bg-warning-subtle text-dark border px-3 py-2">Només SMX A i B</span>
+                                    <span class="badge rounded-pill bg-warning-subtle text-dark border px-3 py-2">Grups torn Matí</span>
                                 </div>
                                 <div class="row g-3">
                                     <div class="col-12 col-md-6">
@@ -105,7 +103,7 @@ $aules = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                         <input type="time" class="form-control rounded-3" id="hora_fi_mati" name="hora_fi_mati" value="14:00">
                                     </div>
                                 </div>
-                                <div class="small text-muted mt-3 mb-0">La duració de cada franja es defineix a la configuració general.</div>
+                                <div class="small text-muted mt-3 mb-0">L'aula de cada grup ve determinada per la configuració de grups.</div>
                             </div>
                         </div>
 
@@ -113,7 +111,7 @@ $aules = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <div class="border rounded-4 p-4 h-100 bg-light-subtle">
                                 <div class="d-flex justify-content-between align-items-center mb-3">
                                     <h3 class="h6 fw-bold mb-0">Torn de tarda</h3>
-                                    <span class="badge rounded-pill bg-info-subtle text-dark border px-3 py-2">Resta de cicles</span>
+                                    <span class="badge rounded-pill bg-info-subtle text-dark border px-3 py-2">Grups torn Tarda</span>
                                 </div>
                                 <div class="row g-3">
                                     <div class="col-12 col-md-6">
@@ -125,70 +123,9 @@ $aules = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                         <input type="time" class="form-control rounded-3" id="hora_fi_tarda" name="hora_fi_tarda" value="21:00">
                                     </div>
                                 </div>
-                                <div class="small text-muted mt-3 mb-0">Repartiment per cicle, recorrent els dies i ocupant la primera aula lliure.</div>
+                                <div class="small text-muted mt-3 mb-0">Cada grup defensa a la seva aula assignada.</div>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- AULES -->
-            <div class="card border-0 shadow-sm rounded-4 mb-4">
-                <div class="card-header bg-white border-0 px-4 pt-4 pb-2">
-                    <div class="text-uppercase small fw-semibold text-primary mb-1">Espais</div>
-                    <h2 class="h5 fw-bold mb-0">Aules disponibles per torn</h2>
-                </div>
-                <div class="card-body px-4 pb-4 pt-3">
-                    <div class="row g-4">
-
-                        <div class="col-12 col-lg-6">
-                            <div class="border rounded-4 p-4 h-100">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <h3 class="h6 fw-bold mb-0">Aules de matí</h3>
-                                    <span class="badge rounded-pill text-bg-light border px-3 py-2">SMX A/B</span>
-                                </div>
-                                <div class="row g-2">
-                                    <?php foreach ($aules as $aula): ?>
-                                    <div class="col-12">
-                                        <div class="form-check border rounded-3 px-3 py-2">
-                                            <input class="form-check-input" type="checkbox"
-                                                value="<?= (int)$aula['id_aula'] ?>"
-                                                id="aula_mati_<?= (int)$aula['id_aula'] ?>"
-                                                name="aules_mati[]" checked>
-                                            <label class="form-check-label fw-medium" for="aula_mati_<?= (int)$aula['id_aula'] ?>">
-                                                <?= htmlspecialchars($aula['codigo'] . ' · ' . $aula['nombre'], ENT_QUOTES, 'UTF-8') ?>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <?php endforeach; ?>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-12 col-lg-6">
-                            <div class="border rounded-4 p-4 h-100">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <h3 class="h6 fw-bold mb-0">Aules de tarda</h3>
-                                    <span class="badge rounded-pill text-bg-light border px-3 py-2">Resta de cicles</span>
-                                </div>
-                                <div class="row g-2">
-                                    <?php foreach ($aules as $aula): ?>
-                                    <div class="col-12">
-                                        <div class="form-check border rounded-3 px-3 py-2">
-                                            <input class="form-check-input" type="checkbox"
-                                                value="<?= (int)$aula['id_aula'] ?>"
-                                                id="aula_tarda_<?= (int)$aula['id_aula'] ?>"
-                                                name="aules_tarda[]" checked>
-                                            <label class="form-check-label fw-medium" for="aula_tarda_<?= (int)$aula['id_aula'] ?>">
-                                                <?= htmlspecialchars($aula['codigo'] . ' · ' . $aula['nombre'], ENT_QUOTES, 'UTF-8') ?>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <?php endforeach; ?>
-                                </div>
-                            </div>
-                        </div>
-
                     </div>
                 </div>
             </div>
@@ -241,20 +178,20 @@ $aules = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <div class="card-body px-4 pb-4 pt-3">
                     <div class="small text-muted mb-3">El sistema utilitzarà aquestes regles per generar les defenses.</div>
                     <div class="border rounded-4 p-3 mb-3 bg-light-subtle">
-                        <div class="fw-semibold mb-1">Matí</div>
-                        <div class="small text-muted">Només projectes de <strong>SMX A</strong> i <strong>SMX B</strong>.</div>
+                        <div class="fw-semibold mb-1">Aula fixa per grup</div>
+                        <div class="small text-muted">Cada grup defensa sempre a l'aula que té assignada a la configuració de grups.</div>
                     </div>
                     <div class="border rounded-4 p-3 mb-3 bg-light-subtle">
-                        <div class="fw-semibold mb-1">Tarda</div>
-                        <div class="small text-muted">La resta de projectes: DAM, DAW, ASIX, DEV, SMX C, SMX D...</div>
+                        <div class="fw-semibold mb-1">Distribució homogènia</div>
+                        <div class="small text-muted">Les defenses de cada grup es reparteixen equitativament entre els dies indicats.</div>
                     </div>
                     <div class="border rounded-4 p-3 mb-3 bg-light-subtle">
-                        <div class="fw-semibold mb-1">Ordre</div>
-                        <div class="small text-muted">Assignació per <strong>cicle</strong>, recorrent els tres dies.</div>
+                        <div class="fw-semibold mb-1">Torn per grup</div>
+                        <div class="small text-muted">El torn (matí o tarda) ve determinat per la configuració de cada grup, no per cicle.</div>
                     </div>
                     <div class="border rounded-4 p-3 bg-light-subtle">
-                        <div class="fw-semibold mb-1">Ocupació</div>
-                        <div class="small text-muted">Cada projecte entra a la <strong>primera aula lliure</strong> de la franja disponible.</div>
+                        <div class="fw-semibold mb-1">Sense solapaments</div>
+                        <div class="small text-muted">Cap dos projectes del mateix grup coincideixen a la mateixa franja horària.</div>
                     </div>
                 </div>
             </div>
@@ -275,7 +212,7 @@ $aules = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         </div>
                         <div class="col-6">
                             <div class="border rounded-4 p-3 h-100">
-                                <div class="small text-muted mb-1">Slots matí</div>
+                                <div class="small text-muted mb-1">Franges/grup matí</div>
                                 <div class="h4 fw-bold mb-0" id="sim-slots-mati">—</div>
                             </div>
                         </div>
@@ -287,7 +224,7 @@ $aules = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         </div>
                         <div class="col-6">
                             <div class="border rounded-4 p-3 h-100">
-                                <div class="small text-muted mb-1">Slots tarda</div>
+                                <div class="small text-muted mb-1">Franges/grup tarda</div>
                                 <div class="h4 fw-bold mb-0" id="sim-slots-tarda">—</div>
                             </div>
                         </div>
@@ -318,9 +255,6 @@ Prem "Simular" per veure el resum de capacitat, o "Aplicar" per fer l'assignaci�
 (function () {
 
     function recollirDades() {
-        const aulesMati  = [...document.querySelectorAll('input[name="aules_mati[]"]:checked')].map(el => el.value);
-        const aulesTarda = [...document.querySelectorAll('input[name="aules_tarda[]"]:checked')].map(el => el.value);
-
         return {
             dia1:             document.getElementById('dia1').value,
             dia2:             document.getElementById('dia2').value,
@@ -331,8 +265,6 @@ Prem "Simular" per veure el resum de capacitat, o "Aplicar" per fer l'assignaci�
             hora_fi_tarda:    document.getElementById('hora_fi_tarda').value,
             duracio_franja:   document.getElementById('duracio_franja').value,
             sobreescriure:    document.getElementById('sobreescriure').checked ? '1' : '0',
-            aules_mati:       aulesMati,
-            aules_tarda:      aulesTarda,
         };
     }
 
@@ -340,8 +272,6 @@ Prem "Simular" per veure el resum de capacitat, o "Aplicar" per fer l'assignaci�
         if (!dades.dia1 || !dades.dia2 || !dades.dia3) return 'Has d\'indicar els tres dies de defensa.';
         if (!dades.hora_inici_mati || !dades.hora_fi_mati) return 'Has d\'indicar l\'horari del torn de matí.';
         if (!dades.hora_inici_tarda || !dades.hora_fi_tarda) return 'Has d\'indicar l\'horari del torn de tarda.';
-        if (dades.aules_mati.length === 0) return 'Has de seleccionar almenys una aula per al torn de matí.';
-        if (dades.aules_tarda.length === 0) return 'Has de seleccionar almenys una aula per al torn de tarda.';
         return null;
     }
 
@@ -399,7 +329,6 @@ Prem "Simular" per veure el resum de capacitat, o "Aplicar" per fer l'assignaci�
             const data = await resp.json();
             if (data.ok) {
                 setLog(`✓ Dates eliminades. ${data.projectes} projectes actualitzats.`);
-                // Resetear xifres de simulació
                 document.getElementById('sim-proj-mati').textContent   = '—';
                 document.getElementById('sim-slots-mati').textContent  = '—';
                 document.getElementById('sim-proj-tarda').textContent  = '—';
@@ -434,30 +363,40 @@ Prem "Simular" per veure el resum de capacitat, o "Aplicar" per fer l'assignaci�
             mostrarSimulacio(data);
 
             let log = '';
-            log += `── MATÍ ──────────────────────────\n`;
-            log += `Cicles:    ${data.cicles_mati}  |  Aules: ${data.aules_mati}\n`;
-            log += `Projectes: ${data.proj_mati}  |  Slots disponibles: ${data.slots_mati}\n`;
-            log += `Slots per aula: ${data.slots_per_aula_mati}\n`;
-            if (data.resum_cicles_mati) {
-                Object.entries(data.resum_cicles_mati).forEach(([c, n]) => {
-                    log += `  · ${c}: ${n} projectes\n`;
+
+            // Resum per torn
+            const grupsMati  = (data.resum_grups || []).filter(g => g.torn === 'Matí');
+            const grupsTarda = (data.resum_grups || []).filter(g => g.torn === 'Tarda');
+
+            if (grupsMati.length > 0) {
+                log += `── MATÍ ──────────────────────────\n`;
+                log += `Projectes totals: ${data.proj_mati}  |  Franges/grup: ${data.slots_mati}\n`;
+                grupsMati.forEach(g => {
+                    const estat = g.ok ? '✓' : '✗';
+                    log += `  ${estat} ${g.grup.padEnd(8)} Aula: ${g.aula.padEnd(6)}  ${g.projectes} proj / ${g.slots} franges\n`;
                 });
             }
-            log += `\n── TARDA ─────────────────────────\n`;
-            log += `Cicles:    ${data.cicles_tarda}  |  Aules: ${data.aules_tarda}\n`;
-            log += `Projectes: ${data.proj_tarda}  |  Slots disponibles: ${data.slots_tarda}\n`;
-            log += `Slots per aula: ${data.slots_per_aula_tarda}\n`;
-            if (data.resum_cicles_tarda) {
-                Object.entries(data.resum_cicles_tarda).forEach(([c, n]) => {
-                    log += `  · ${c}: ${n} projectes\n`;
+
+            if (grupsTarda.length > 0) {
+                log += `\n── TARDA ─────────────────────────\n`;
+                log += `Projectes totals: ${data.proj_tarda}  |  Franges/grup: ${data.slots_tarda}\n`;
+                grupsTarda.forEach(g => {
+                    const estat = g.ok ? '✓' : '✗';
+                    log += `  ${estat} ${g.grup.padEnd(8)} Aula: ${g.aula.padEnd(6)}  ${g.projectes} proj / ${g.slots} franges\n`;
                 });
             }
+
+            if (data.sense_config > 0) {
+                log += `\n⚠ ${data.sense_config} projectes sense configuració de grup a la BD.\n`;
+            }
+
             if (!data.ok) {
                 log += `\n── PROBLEMES ─────────────────────\n`;
                 data.problemes.forEach(p => log += '⚠ ' + p + '\n');
             } else {
                 log += `\n✓ Cap problema detectat. Pots aplicar l'assignació.`;
             }
+
             setLog(log);
         } catch (e) {
             setLog('Error de connexió amb el servidor.');
@@ -495,9 +434,14 @@ Prem "Simular" per veure el resum de capacitat, o "Aplicar" per fer l'assignaci�
                 log += `✓ Assignació completada.\n\n`;
                 log += `Projectes assignats: ${data.assignats}\n`;
                 if (data.sense_slot > 0) {
-                    log += `Sense slot disponible: ${data.sense_slot}\n`;
-                    log += '\nIDs sense assignar:\n';
-                    data.ids_sense_slot.forEach(id => log += '· Projecte #' + id + '\n');
+                    log += `Sense franja disponible: ${data.sense_slot}\n`;
+                    log += 'IDs sense assignar:\n';
+                    data.ids_sense_slot.forEach(id => log += '  · Projecte #' + id + '\n');
+                }
+                if (data.sense_config > 0) {
+                    log += `Sense configuració de grup: ${data.sense_config}\n`;
+                    log += 'IDs sense configuració:\n';
+                    data.ids_sense_config.forEach(id => log += '  · Projecte #' + id + '\n');
                 }
             } else {
                 log += `Error: ${data.missatge}`;

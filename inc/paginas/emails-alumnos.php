@@ -153,7 +153,11 @@ Una salutació.";
                     <label for="grupo" class="form-label fw-semibold">Grup</label>
                     <select name="grupo" id="grupo" class="form-select">
                         <option value="" <?= ($grupo === '' ? 'selected' : '') ?>>Tots</option>
+<<<<<<< HEAD
                         <option value="A" <?= ($grupo === 'A' ? 'selected' : '') ?>>A</option>
+=======
+                         <option value="A" <?= ($grupo === 'A' ? 'selected' : '') ?>>A</option>
+>>>>>>> eae9549be0c73192a84a0640de5b722c75970220
                         <option value="B" <?= ($grupo === 'B' ? 'selected' : '') ?>>B</option>
                         <option value="C" <?= ($grupo === 'C' ? 'selected' : '') ?>>C</option>
                         <option value="D" <?= ($grupo === 'D' ? 'selected' : '') ?>>D</option>
