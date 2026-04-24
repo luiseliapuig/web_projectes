@@ -151,6 +151,16 @@ if (isset($_SESSION['professor_id'])) {
 window.PAGE_TITLE = 'Calendari defenses';
 </script>
 <style>
+    .container , .main-wrapper {
+   
+    max-width: 1800px !important;
+ 
+}
+
+
+
+</style>
+<style>
 .pill-btn {
     cursor: pointer;
     transition: all 0.15s ease;
