@@ -1,5 +1,30 @@
 <?php  soloSuperadmin();
 
+
+function formatearNombres(string $nombres): string
+{
+    $array = array_filter(array_map('trim', explode(',', $nombres)));
+
+    $total = count($array);
+
+    if ($total === 0) {
+        return 'Bon dia,';
+    }
+
+    if ($total === 1) {
+        return 'Bon dia ' . $array[0] . ',';
+    }
+
+    if ($total === 2) {
+        return 'Bon dia ' . $array[0] . ' i ' . $array[1] . ',';
+    }
+
+    $ultimo = array_pop($array);
+
+    return 'Bon dia ' . implode(', ', $array) . ' i ' . $ultimo . ',';
+}
+
+
 // --------------------------------------------------
 // FILTROS
 // --------------------------------------------------
@@ -102,14 +127,29 @@ function generarMailProyecto(array $proyecto): string
     // Cada proyecto tiene su UUID único
     $enlace_acceso = 'https://projectes.elpuig.xeill.net/login/alumnes/' . $proyecto['uuid'];
 
-    $cuerpo = "Bon dia,
+    $saludo = formatearNombres($proyecto['nombres_alumnos']);
 
-Us fem arribar l'enllaç d'accés al vostre projecte a la web de Projectes Puig Castellar.
+$cuerpo = $saludo . "
 
-Accés directe:
+Us fem arribar l'enllaç d'accés al vostre projecte a la web de Projectes Puig Castellar:
+
 " . $enlace_acceso . "
 
-Des d'aquest enllaç podreu completar i actualitzar la fitxa del vostre projecte, afegir informació i pujar la documentació corresponent.
+Aquesta web serà l'ÚNIC punt d'entrega del projecte. No s'haurà de lliurar res per Moodle.
+
+Dins la fitxa del projecte trobareu tota la informació necessària per completar-la correctament, així com els espais per pujar la documentació corresponent.
+
+IMPORTANT:
+- Heu d'omplir també l'autoavaluació del projecte.
+- Heu d'anar completant la fitxa amb tota la informació del vostre projecte.
+
+DATA LÍMIT:
+- Diumenge 17 de maig a les 24:00.
+A partir d’aquest moment, l’edició quedarà desactivada.
+
+Encara que no tingueu la memòria o el projecte finalitzat, ja hi ha moltes parts de la fitxa que podeu començar a omplir des d'ara.
+
+No ho deixeu per a l'últim moment.
 
 Una salutació.";
 
