@@ -81,9 +81,14 @@
               <a class="nav-link" href="/calendari-defenses">Calendari defenses</a>
             </li>
               <?php } ?>
-            <li class="nav-item">
-              <a class="nav-link" href="/les-meves-defenses">Les meves defenses</a>
-            </li>
+
+
+           <?php if (tieneDefensas()): ?>
+              <li class="nav-item">
+                  <a class="nav-link" href="/les-meves-defenses">Les meves defenses</a>
+              </li>
+          <?php endif; ?>
+            
             <?php } ?>
 
 

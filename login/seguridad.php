@@ -188,6 +188,41 @@ function esTutor(): bool
 }
 
 
+
+function tieneDefensas(): bool
+{
+    if (!isset($_SESSION['professor_id'])) {
+        return false;
+    }
+
+    global $pdo;
+
+    static $cache = null;
+
+    if ($cache !== null) {
+        return $cache;
+    }
+
+    $idProfesor = (int)$_SESSION['professor_id'];
+
+    $sql = "
+        SELECT 1
+        FROM app.rel_profesores_tribunal
+        WHERE profesor_id = :id_profesor
+        LIMIT 1
+    ";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([
+        ':id_profesor' => $idProfesor
+    ]);
+
+    $cache = (bool)$stmt->fetchColumn();
+
+    return $cache;
+}
+
+
 // para permitir trozos segun configuración
 
 function db(): PDO
