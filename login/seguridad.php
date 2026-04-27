@@ -38,19 +38,31 @@ if ($isAlumne && $id > 0) {
 /// Bloque alumnos, restricciones:
 // Solo puede guardar su propio proyecto
 if ($main === 'ficha_accion' && $method === 'POST') {
-    if (!$isAlumne && !esSuperadmin()) {
+
+    $idProyectoPost = isset($_POST['id_proyecto']) ? (int)$_POST['id_proyecto'] : 0;
+
+    if (
+        !esSuperadmin() &&
+        !$isAlumne &&
+        !esTutorDelProyecto($idProyectoPost)
+    ) {
         exit;
     }
-    // Además, la edición debe estar permitida globalmente
-    if (!configuracion('permitir_editar') && !esSuperadmin()) {
+
+    // La edición global afecta solo a alumnos, no a superadmin ni tutor
+    if (
+        $isAlumne &&
+        !configuracion('permitir_editar')
+    ) {
         exit;
     }
-    // El superadmin no necesita validar proyecto propio
-    if (!esSuperadmin()) {
+
+    // Validación estricta para alumnos
+    if ($isAlumne && !esSuperadmin()) {
         $idSesion       = (int)$_SESSION['projecte_id'];
         $uuidSesion     = (string)$_SESSION['projecte_uuid'];
-        $idProyectoPost = isset($_POST['id_proyecto']) ? (int)$_POST['id_proyecto'] : 0;
         $uuidPost       = trim((string)($_POST['uuid'] ?? ''));
+
         if ($idProyectoPost !== $idSesion || $uuidPost !== $uuidSesion) {
             exit;
         }
@@ -140,6 +152,41 @@ function esTutorDelProyecto(int $idProjecte): bool
 
     return (bool) $stmt->fetchColumn();
 }
+
+
+// Comprueba si la persona que ha accedido es tutor de algún proyecto
+function esTutor(): bool
+{
+    if (!isset($_SESSION['professor_id'])) {
+        return false;
+    }
+
+    global $pdo;
+
+    static $cache = null;
+
+    // Cache para no consultar mil veces
+    if ($cache !== null) {
+        return $cache;
+    }
+
+    $idProfessor = (int)$_SESSION['professor_id'];
+
+    $sql = "
+        SELECT 1
+        FROM app.proyectos
+        WHERE tutor_id = :id
+        LIMIT 1
+    ";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([':id' => $idProfessor]);
+
+    $cache = (bool)$stmt->fetchColumn();
+
+    return $cache;
+}
+
 
 // para permitir trozos segun configuración
 

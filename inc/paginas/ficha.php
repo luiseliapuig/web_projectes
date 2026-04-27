@@ -122,8 +122,15 @@ window.PAGE_TITLE = '<?= h($proyecto['nombre'] ?? '') ?> | <?= h($proyecto['cicl
                 </a>
 
                 <?php 
-                // solo pueden editar los alumnos propietarios y si está permitido
-                if (esSuProyectoAlumno((int)$proyecto['id_proyecto']) && configuracion('permitir_editar')): ?>
+                // solo pueden editar los alumnos propietarios y los tutores y si está permitido
+                
+                if (
+                    configuracion('permitir_editar') &&
+                    (
+                        esSuProyectoAlumno((int)$proyecto['id_proyecto']) ||
+                        esTutorDelProyecto((int)$proyecto['id_proyecto'])
+                    )
+                ): ?>
                     <a href="/projecte/<?= (int)$proyecto['id_proyecto'] ?>/editar"
                        class="btn btn-puig px-3">
                         Editar fitxa
@@ -152,6 +159,9 @@ window.PAGE_TITLE = '<?= h($proyecto['nombre'] ?? '') ?> | <?= h($proyecto['cicl
     
 
 ?>
+
+
+
 
             <div class="card-style mb-30 ">
 

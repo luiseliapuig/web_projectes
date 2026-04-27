@@ -3,8 +3,12 @@ declare(strict_types=1);
 
 $idProyecto = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 
-
-if (!esSuperadmin() && !esSuProyectoAlumno($idProyecto)) {
+// acceso solo a alumno y tutores
+if (
+    !esSuperadmin() &&
+    !esSuProyectoAlumno($idProyecto) &&
+    !esTutorDelProyecto($idProyecto)
+) {
     die();
 }
 
@@ -123,6 +127,142 @@ window.PAGE_TITLE = 'Editar fitxa del projecte';
                 </button>
             </div>
 
+
+
+
+<!-- caja de ayuda -->
+
+
+<div class="help-main-box">
+
+    <div class="help-main-header" id="toggle-ajudes">
+        <div class="help-main-title-wrap">
+            <div class="help-icon">i</div>
+            <span class="help-main-title">Informació per omplir la fitxa</span>
+        </div>
+
+        <span class="help-toggle-btn">Ocultar ajudes</span>
+    </div>
+
+    <div id="help-main-body" class="help-main-content">
+        <!-- contenido -->
+
+        
+<div id="help-main-body" class="help-main-content">
+
+    <div class="help-deadline-box">
+        <div class="help-deadline-label">Data límit d’edició</div>
+        <div class="help-deadline-date">Diumenge 17 de maig a les 24:00</div>
+        <div class="help-deadline-note">
+            A partir d’aquest moment, l’edició quedarà desactivada.
+        </div>
+    </div>
+
+    <p class="help-intro">
+        Aquest és l’espai on es recull tot el treball que heu fet durant el curs. <br>
+És també l’únic punt d’entrega del projecte.
+    </p>
+
+    <div class="help-grid">
+
+        <div class="help-section">
+            <strong>Recordeu:</strong>
+            <ul class="help-main-list">
+                <li>La fitxa serà pública i permanent.</li>
+                <li>La veuran els vostres companys.</li>
+                <li>La veurà el tribunal durant la defensa.</li>
+                <li>Representa el vostre treball.</li>
+            </ul>
+        </div>
+
+        <div class="help-section">
+            <strong>Tingueu cura del contingut:</strong>
+            <ul class="help-main-list">
+                <li>No escriviu per omplir.</li>
+                <li>Sigueu clars, concrets i professionals.</li>
+                <li>Reviseu l’ortografia i la redacció.</li>
+                <li>Reviseu com es veu tot a la fitxa pública.</li>
+            </ul>
+        </div>
+
+        <div class="help-section">
+            <strong>Funcionament:</strong>
+            <ul class="help-main-list">
+                <li>Podeu editar la fitxa fins a la data límit.</li>
+                <li>No cal tenir-ho tot perfecte el primer dia.</li>
+                <li>Milloreu-la amb el pas de les setmanes.</li>
+                <li>No ho deixeu tot per al final.</li>
+            </ul>
+        </div>
+
+    </div>
+
+</div>
+
+
+
+
+
+
+
+    </div>
+
+</div>
+
+
+
+
+
+
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const btn = document.getElementById('toggle-ajudes');
+    const mainBody = document.getElementById('help-main-body');
+    const ayudas = document.querySelectorAll('.info-ajuda');
+
+    let visible = localStorage.getItem('ajudes_visible');
+
+    if (visible === null) {
+        visible = true;
+    } else {
+        visible = visible === 'true';
+    }
+
+    function aplicarEstado() {
+        if (mainBody) {
+            mainBody.classList.toggle('hidden', !visible);
+        }
+
+        ayudas.forEach(el => {
+            el.classList.toggle('hidden', !visible);
+        });
+
+        if (btn) {
+            const btnText = btn.querySelector('.help-toggle-btn');
+            if (btnText) {
+                btnText.textContent = visible ? 'Ocultar ajudes' : 'Mostrar ajudes';
+            }
+        }
+    }
+
+    if (btn) {
+        btn.addEventListener('click', () => {
+            visible = !visible;
+            localStorage.setItem('ajudes_visible', visible ? 'true' : 'false');
+            aplicarEstado();
+        });
+    }
+
+    aplicarEstado();
+});
+
+</script>
+<!-- fin caja de ayuda -->
+
+
+
+
             <form id="form-ficha-proyecto" action="/index.php?main=ficha_accion" method="post" enctype="multipart/form-data">
                 <input type="hidden" name="id_proyecto" value="<?= (int)$proyecto['id_proyecto'] ?>">
                 <input type="hidden" name="uuid" value="<?= h($proyecto['uuid']) ?>">
@@ -131,6 +271,9 @@ window.PAGE_TITLE = 'Editar fitxa del projecte';
                     <div class="row g-4">
 
                         <div class="col-lg-7">
+
+
+                            
 
                             <div class="mb-4">
                                 <?php if ($rutaImagen !== ''): ?>
@@ -147,6 +290,34 @@ window.PAGE_TITLE = 'Editar fitxa del projecte';
                                 <?php endif; ?>
                             </div>
 
+                            <!-- BLOC D'AJUDA -->
+                                <div class="info-ajuda">
+                                    <div class="info-ajuda-icon">i</div>
+
+                                    <div class="info-ajuda-content">
+                                        <div class="info-ajuda-title">
+                                            Quin tipus d’imatge cal pujar?
+                                        </div>
+
+                                        <ul class="info-ajuda-list">
+                                            <li>Una captura de pantalla del projecte, una composició (si és una app) o una fotografia si és hardware...</li>
+                                            <li>En qualsevol cas, trieu una imatge clara que expliqui bé el projecte.</li>
+
+                                        </ul>
+                                        <details class="info-ajuda-example">
+                                            <summary>Veure exemples</summary>
+
+                                           <div class="info-ajuda-example-content images">
+                                                <img src="/assets/images/ej4.png">
+                                                <img src="/assets/images/ej2.jpg">
+                                                <img src="/assets/images/ej1.jpg">
+                                                <img src="/assets/images/ej3.jpg">
+                                            </div>
+                                        </details>
+                                    </div>
+                                </div>
+
+
                             <div class="mb-4">
                                 <div class="image-upload-box">
                                     <span class="edit-label-subtle">Imatge del projecte</span>
@@ -157,6 +328,30 @@ window.PAGE_TITLE = 'Editar fitxa del projecte';
 
                             <div class="mb-3">
                                 <span class="edit-label-subtle">Nom del projecte</span>
+
+                                <!-- BLOC D'AJUDA -->
+                                <div class="info-ajuda">
+                                    <div class="info-ajuda-icon">i</div>
+
+                                    <div class="info-ajuda-content">
+                                        <div class="info-ajuda-title">
+                                            Quin tipus de nom de projecte cal posar?
+                                        </div>
+
+                                        <ul class="info-ajuda-list">
+                                            <li>El nom propi del projecte o, si no en té, un nom breu i clar.</li>
+                                            <li>Eviteu descripcions llargues, com ara “Aplicació Android per a la gestió de reserves”.</li>
+                                        </ul>
+                                        <details class="info-ajuda-example">
+                                            <summary>Veure exemple</summary>
+
+                                            <div class="info-ajuda-example-content">
+                                                AutoAI Market
+                                            </div>
+                                        </details>
+                                    </div>
+                                </div>
+
                                 <input
                                     type="text"
                                     class="form-control input-title-like form-prin"
@@ -164,30 +359,95 @@ window.PAGE_TITLE = 'Editar fitxa del projecte';
                                     name="nombre"
                                     value="<?= h($proyecto['nombre'] ?? '') ?>"
                                     placeholder="Nom del projecte"
-                                    required
+                                    
                                 >
                             </div>
 
                             <div class="mb-4">
                                 <span class="edit-label-subtle">Resum</span>
+
+                                <!-- BLOC D'AJUDA -->
+                                <div class="info-ajuda">
+                                    <div class="info-ajuda-icon">i</div>
+
+                                    <div class="info-ajuda-content">
+                                        <div class="info-ajuda-title">
+                                            Com ha de ser el resum del projecte?
+                                        </div>
+
+                                        <ul class="info-ajuda-list">
+                                            <li>Una sola frase clara que expliqui què és el projecte i què fa.</li>
+                                            <li>Podeu indicar breument alguna característica destacada (tecnologia, funcionalitat...).</li>
+                                            <li>Eviteu textos llargs o massa genèrics.</li>
+                                        </ul>
+                                        <details class="info-ajuda-example">
+                                            <summary>Veure exemple</summary>
+
+                                            <div class="info-ajuda-example-content">
+                                                AutoAI Market és una aplicació dissenyada per facilitar la compravenda de vehicles mitjançant l’ús d’intel·ligència artificial.
+                                            </div>
+                                        </details>
+                                    </div>
+                                </div>
+
                                 <textarea
                                     class="form-control input-summary-like js-autogrow form-prin"
                                     id="resumen"
                                     name="resumen"
                                     rows="2"
+                                    maxlength="220" 
                                     placeholder="Afegeix un resum breu i clar del projecte"
                                 ><?= h($proyecto['resumen'] ?? '') ?></textarea>
+                                <div class="char-counter" id="resum-counter">0 / 220</div>
                             </div>
 
                             <div class="mb-4">
                                 <h5 class="mb-3">Descripció</h5>
+
+                                <!-- BLOC D'AJUDA -->
+                                <div class="info-ajuda">
+                                    <div class="info-ajuda-icon">i</div>
+
+                                    <div class="info-ajuda-content">
+                                        <div class="info-ajuda-title">
+                                            Com ha de ser la descripció del projecte?
+                                        </div>
+
+                                        <ul class="info-ajuda-list">
+                                            <li>Expliqueu el projecte en 2 o 3 paràgrafs clars i ben estructurats.</li>
+                                            <li>Descriviu què fa, com funciona i què aporta.</li>
+                                            <li>Podeu comentar aspectes destacats (tecnologia, funcionalitats, ús per part de l’usuari...).</li>
+                                            <li>Eviteu textos massa breus o llistes sense explicació.</li>
+                                        </ul>
+                                        <details class="info-ajuda-example">
+                                            <summary>Veure exemple</summary>
+
+                                            <div class="info-ajuda-example-content">
+                                                <p>
+                                                    AutoAI Market és una aplicació dissenyada per facilitar la compravenda de vehicles mitjançant l’ús d’intel·ligència artificial. El sistema permet a l’usuari crear un anunci de forma ràpida a partir de fotografies del cotxe, a partir de les quals la aplicació identifica característiques com la marca, el model, el color, el tipus de carrosseria i altres detalls rellevants.
+                                                </p>
+
+                                                <p>
+                                                    L’aplicació genera automàticament una fitxa completa del vehicle, reduint el temps necessari per publicar anuncis i minimitzant errors en la introducció manual de dades. A més, l’usuari pot revisar i editar la informació abans de publicar-la, així com gestionar els seus anuncis i consultar vehicles disponibles.
+                                                </p>
+
+                                                <p>
+                                                    El projecte combina processament d’imatges, integració amb serveis d’intel·ligència artificial i una interfície intuïtiva orientada a millorar l’experiència d’usuari en plataformes de compravenda.
+                                                </p>
+                                            </div>
+                                        </details>
+                                    </div>
+                                </div>
+
                                 <textarea
                                     class="form-control textarea-description-like js-autogrow"
                                     id="descripcion"
                                     name="descripcion"
                                     rows="8"
+                                    minlength="800"
                                     placeholder="Explica el projecte amb més detall: objectiu, funcionalitats, enfocament, valor, estat actual..."
                                 ><?= h($proyecto['descripcion'] ?? '') ?></textarea>
+                                <div class="char-counter" id="descripcio-counter">0 caràcters (mínim 800)</div>
                             </div>
 
                         </div>
@@ -247,6 +507,24 @@ window.PAGE_TITLE = 'Editar fitxa del projecte';
 
                             <div class="section-block">
                                 <h3 class="h3fichas">Tecnologies</h3>
+
+                                <!-- BLOC D'AJUDA -->
+                                <div class="info-ajuda">
+                                    <div class="info-ajuda-icon">i</div>
+
+                                    <div class="info-ajuda-content">
+                                        <div class="info-ajuda-title">
+                                            Quines tecnologies cal indicar?
+                                        </div>
+
+                                        <ul class="info-ajuda-list">
+                                            <li>Tecnologies del projecte (Python, Java, Kotlin, HTML, CSS, JavaScript...).</li>
+                                            <li>Frameworks o llibreries si escau (Spring, React, Bootstrap...).</li>
+                                            <li>No eines de treball (GitHub, Visual Studio, Figma...).</li>
+                                        </ul>
+                                    </div>
+                                </div>
+
                                 <div class="inner-ficha">
                                     <div class="mb-0">
                                         <div class="link-muted-title">Separades per comes</div>
@@ -264,6 +542,25 @@ window.PAGE_TITLE = 'Editar fitxa del projecte';
 
                             <div class="section-block">
                                 <h3 class="h3fichas">Planificació i gestió</h3>
+
+                                <!-- BLOC D'AJUDA -->
+                                <div class="info-ajuda">
+                                    <div class="info-ajuda-icon">i</div>
+
+                                    <div class="info-ajuda-content">
+                                        <div class="info-ajuda-title">
+                                            Què cal incloure en planificació i gestió?
+                                        </div>
+
+                                        <ul class="info-ajuda-list">
+                                            <li>Si heu utilitzat una eina de gestió (Trello, Jira, Notion...), podeu afegir un enllaç públic.</li>
+                                            <li>Si no es pot compartir, pugeu una o diverses captures del vostre sistema de treball.</li>
+                                            <li>Si heu utilitzat l’Excel de seguiment setmanal, també el podeu adjuntar.</li>
+                                            <li>Els enllaços han de ser públics i només de lectura (no edició).</li>
+                                        </ul>
+                                    </div>
+                                </div>
+
                                 <div class="inner-ficha">
 
                                     <!-- Adjunts planificació existents -->
@@ -323,6 +620,30 @@ window.PAGE_TITLE = 'Editar fitxa del projecte';
 
                             <div class="section-block">
                                 <h3 class="h3fichas">Documentació</h3>
+
+                                <!-- BLOC D'AJUDA -->
+                                <div class="info-ajuda">
+                                    <div class="info-ajuda-icon">i</div>
+
+                                    <div class="info-ajuda-content">
+                                        <div class="info-ajuda-title">
+                                            Quina documentació cal pujar?
+                                        </div>
+
+                                        <ul class="info-ajuda-list">
+                                            <li>La memòria del projecte és obligatòria.</li>
+                                            <li>El document funcional és opcional, però recomanable.</li>
+                                            <li>Podeu afegir altres documents que aportin valor (documentació tècnica, guia d’usuari, full d’estil...).</li>
+                                            <li>Els documents han de ser en PDF i amb una mida optimitzada.</li>
+                                            <li>Pugeu només documents rellevants: el que no aporta, resta.</li>
+                                        </ul>
+                                        <div class="info-ajuda-note">
+                                            Reduiu la mida dels PDF amb eines com 
+                                            <a href="https://www.ilovepdf.com/es/comprimir_pdf" target="_blank">iLovePDF</a>.
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div class="inner-ficha">
 
                                     <div class="form-section-card  doc-block-primary">
@@ -371,6 +692,28 @@ window.PAGE_TITLE = 'Editar fitxa del projecte';
 
                             <div class="section-block mb-4">
                                 <h3 class="h3fichas">Enllaços</h3>
+
+                                <!-- BLOC D'AJUDA -->
+                                <div class="info-ajuda">
+                                    <div class="info-ajuda-icon">i</div>
+
+                                    <div class="info-ajuda-content">
+                                        <div class="info-ajuda-title">
+                                            Quins enllaços cal afegir?
+                                        </div>
+
+                                        <ul class="info-ajuda-list">
+                                            <li>L’enllaç al repositori (GitHub) és obligatori.</li>
+                                            <li>Si el projecte és de software (web, app, videojoc...), afegiu un enllaç per poder-lo provar o visualitzar.</li>
+                                            <li>Podeu afegir altres enllaços si aporten valor.</li>
+                                            <li>Els enllaços han de ser públics i accesibles.</li>
+                                        </ul>
+                                        <div class="info-ajuda-note">
+                                            Si el projecte és una descàrrega o un hardware, podeu crear una petita landing o web estàtica per presentar-lo i pujar-la com a demo del projecte.
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div class="inner-ficha">
 
                                     <div class="mb-3">
@@ -437,6 +780,26 @@ window.PAGE_TITLE = 'Editar fitxa del projecte';
                 <!-- ══════════════════════════════════════════════
                      BLOC AUTOEVALUACIÓ
                 ══════════════════════════════════════════════ -->
+
+
+                <!-- BLOC D'AJUDA -->
+                <div class="info-ajuda info-ajuda-wide">
+                    <div class="info-ajuda-icon">i</div>
+
+                    <div class="info-ajuda-content">
+                        <div class="info-ajuda-title">
+                            Com heu d’omplir la reflexió final?
+                        </div>
+
+                        <ul class="info-ajuda-list">
+                            <li>Aquesta part no és pública: només la veureu vosaltres i l’equip docent.</li>
+                            <li>Responeu amb sinceritat i amb exemples concrets del vostre projecte.</li>
+                            <li>No cal escriure molt, però sí explicar idees reals i ben pensades.</li>
+                            <li>Aquesta part ajudarà a entendre al tribunal el vostre procés de treball, no només el resultat final.</li>
+                        </ul>
+                    </div>
+                </div>
+
                 <div class="mb-20 autoevaluacion">
                     <div class="border rounded-4 overflow-hidden">
 
@@ -528,6 +891,49 @@ window.PAGE_TITLE = 'Editar fitxa del projecte';
 </div>
 
 <script>
+
+document.addEventListener('DOMContentLoaded', () => {
+    const textarea = document.getElementById('resumen');
+    const counter = document.getElementById('resum-counter');
+    const max = textarea.getAttribute('maxlength');
+
+    function updateCounter() {
+        const length = textarea.value.length;
+        counter.textContent = length + ' / ' + max;
+
+        if (length > max * 0.9) {
+            counter.classList.add('limit');
+        } else {
+            counter.classList.remove('limit');
+        }
+    }
+
+    textarea.addEventListener('input', updateCounter);
+    updateCounter();
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    const textarea = document.getElementById('descripcion');
+    const counter = document.getElementById('descripcio-counter');
+    const min = 800;
+
+    function updateCounter() {
+        const length = textarea.value.length;
+        counter.textContent = length + ' caràcters (mínim ' + min + ')';
+
+        if (length < min) {
+            counter.classList.add('limit');
+            counter.classList.remove('ok');
+        } else {
+            counter.classList.remove('limit');
+            counter.classList.add('ok');
+        }
+    }
+
+    textarea.addEventListener('input', updateCounter);
+    updateCounter();
+});
+
 document.addEventListener('DOMContentLoaded', function () {
     const autoGrow = (textarea) => {
         textarea.style.height = 'auto';

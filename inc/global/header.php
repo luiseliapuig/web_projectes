@@ -87,6 +87,12 @@
             <?php } ?>
 
 
+            <?php if (esTutor()) { ?>
+            <li class="nav-item">
+              <a class="nav-link" href="/projectes-tutoritzats">Projectes tutoritzats</a>
+            </li>
+            <?php } ?>
+
             <?php if (esSuperadmin()): ?>
             <li class="nav-item dropdown">
               <a
@@ -104,6 +110,7 @@
                 <li><a class="dropdown-item" href="/index.php?main=calendari_drag">Planificació defenses</a></li>
                 <hr>
                 <li><a class="dropdown-item" href="/index.php?main=emails-profesores">Emails professorat</a></li>
+                <li><a class="dropdown-item" href="/index.php?main=emails-tutores">Emails tutors</a></li>
                 <li><a class="dropdown-item" href="/index.php?main=emails-alumnos">Emails alumnes</a></li>
                 <hr>
                 <li><a class="dropdown-item" href="/index.php?main=profesor">Professorat</a></li>

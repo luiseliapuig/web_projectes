@@ -19,6 +19,7 @@ RewriteRule ^projecte/([0-9]+)$ /index.php?main=ficha&id=$1 [L,QSA]
 RewriteRule ^calendari-defenses$ /index.php?main=calendari [L,QSA]
 RewriteRule ^les-meves-defenses$ /index.php?main=les-meves-defenses [L,QSA]
 
+RewriteRule ^projectes-tutoritzats$ /index.php?main=proyectos-tutorizados [L,QSA]
 
 # LOGIN 
 RewriteRule ^login/alumnes/([0-9a-fA-F\-]+)$ /login/alumnes.php?token=$1 [L,QSA]

@@ -171,8 +171,8 @@ $autoev3 = trim($_POST['autoev3'] ?? '');
 $autoev4 = trim($_POST['autoev4'] ?? '');
 
 if ($nombre === '') {
-    echo '<div class="alert alert-danger">El nom del projecte és obligatori.</div>';
-    return;
+   // echo '<div class="alert alert-danger">El nom del projecte és obligatori.</div>';
+   // return;
 }
 if ($urlGithub !== '' && filter_var($urlGithub, FILTER_VALIDATE_URL) === false) {
     echo '<div class="alert alert-danger">La URL del repositori no és vàlida.</div>';
