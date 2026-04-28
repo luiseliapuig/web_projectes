@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nombre del Producto</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header class="hero" id="inicio">
+    <nav class="navbar">
+        <div class="logo">NombreProducto</div>
+
+        <div class="nav-links">
+            <a href="#inicio">Inicio</a>
+            <a href="#producto">Producto</a>
+            <a href="#capturas">Capturas</a>
+            <a href="#descarga">Descarga</a>
+        </div>
+    </nav>
+
+    <section class="hero-content">
+        <div class="hero-text">
+            <span class="badge">Demo disponible</span>
+
+            <h1>Una frase potente para presentar vuestro producto</h1>
+
+            <p>
+                Explicad en una o dos frases qué hace vuestra aplicación, juego o herramienta.
+                Pensad en un usuario real, no en el profesor.
+            </p>
+
+            <div class="hero-buttons">
+                <a href="demo-plantilla.zip" class="btn btn-primary">Descargar demo</a>
+                <a href="#capturas" class="btn btn-secondary">Ver capturas</a>
+            </div>
+        </div>
+
+        <div class="hero-preview">
+            <div class="product-window">
+                <div class="window-bar">
+                    <span></span><span></span><span></span>
+                </div>
+
+                <div class="window-content">
+                    <h3>NombreProducto</h3>
+                    <p>App, videojuego o herramienta digital</p>
+
+                    <div class="mockup-card"></div>
+                    <div class="mockup-row">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</header>
+
+<main>
+
+    <section class="section" id="producto">
+        <div class="section-title">
+            <span>Producto</span>
+            <h2>Diseñado para resolver una necesidad real</h2>
+        </div>
+
+        <div class="split">
+            <div>
+                <p>
+                    Aquí no expliquéis “hemos hecho un proyecto final”. Explicad qué ofrece
+                    vuestro producto al público: qué permite hacer, qué problema resuelve
+                    o qué experiencia propone.
+                </p>
+
+                <p>
+                    Si es una app, hablad del beneficio para el usuario. Si es un videojuego,
+                    presentad el mundo, la mecánica principal o el reto.
+                </p>
+            </div>
+
+            <div class="highlight-card">
+                <h3>Propuesta de valor</h3>
+                <p>
+                    Una frase clara: “Con esta app puedes…” o “En este juego tendrás que…”.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section section-alt" id="beneficios">
+        <div class="section-title">
+            <span>Qué ofrece</span>
+            <h2>Funciones destacadas</h2>
+        </div>
+
+        <div class="features-grid">
+            <article class="feature-card">
+                <h3>Rápido de usar</h3>
+                <p>Explicad una ventaja clara para el usuario final.</p>
+            </article>
+
+            <article class="feature-card">
+                <h3>Interfaz clara</h3>
+                <p>Mostrad que el producto está pensado para ser cómodo y visual.</p>
+            </article>
+
+            <article class="feature-card">
+                <h3>Función principal</h3>
+                <p>Destacad la mecánica o funcionalidad más importante.</p>
+            </article>
+
+            <article class="feature-card">
+                <h3>Experiencia completa</h3>
+                <p>Explicad qué puede hacer el usuario desde que entra hasta que termina.</p>
+            </article>
+        </div>
+    </section>
+
+    <section class="section" id="capturas">
+        <div class="section-title">
+            <span>Galería</span>
+            <h2>El producto en acción</h2>
+        </div>
+
+        <div class="gallery">
+            <a href="#img1">
+                <img src="img/captura-1.jpg" alt="Captura 1 del producto">
+            </a>
+            <a href="#img2">
+                <img src="img/captura-2.jpg" alt="Captura 2 del producto">
+            </a>
+            <a href="#img3">
+                <img src="img/captura-3.jpg" alt="Captura 3 del producto">
+            </a>
+        </div>
+
+        <div id="img1" class="modal">
+            <a href="#capturas" class="modal-close">×</a>
+            <a href="#img3" class="modal-nav prev">‹</a>
+            <img src="img/captura-1.jpg" alt="Captura ampliada 1">
+            <a href="#img2" class="modal-nav next">›</a>
+        </div>
+
+        <div id="img2" class="modal">
+            <a href="#capturas" class="modal-close">×</a>
+            <a href="#img1" class="modal-nav prev">‹</a>
+            <img src="img/captura-2.jpg" alt="Captura ampliada 2">
+            <a href="#img3" class="modal-nav next">›</a>
+        </div>
+
+        <div id="img3" class="modal">
+            <a href="#capturas" class="modal-close">×</a>
+            <a href="#img2" class="modal-nav prev">‹</a>
+            <img src="img/captura-3.jpg" alt="Captura ampliada 3">
+            <a href="#img1" class="modal-nav next">›</a>
+        </div>
+    </section>
+
+    <section class="section section-alt" id="descarga">
+        <div class="download-box">
+            <div>
+                <span class="badge badge-dark">Descarga</span>
+                <h2>Prueba la demo del producto</h2>
+                <p>
+                    Incluid aquí el enlace al instalador, APK, ZIP, ejecutable, página de itch.io,
+                    demo web o repositorio con instrucciones.
+                </p>
+
+                <a href="demo-plantilla.zip" class="btn btn-primary">Descargar demo</a>
+            </div>
+
+            <div class="requirements">
+                <h3>Requisitos</h3>
+                <ul>
+                    <li>Windows / Linux / Android / Navegador moderno</li>
+                    <li>Conexión a internet si es necesaria</li>
+                    <li>Resolución recomendada: 1366 × 768</li>
+                    <li>Versión demo no comercial</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="section credits">
+        <p>
+            Creado por <strong>Nombre del equipo</strong>.  
+            Proyecto desarrollado como demostración de producto digital.
+        </p>
+    </section>
+
+</main>
+
+<footer class="footer">
+    <p>NombreProducto · Demo pública</p>
+</footer>
+
+</body>
+</html>

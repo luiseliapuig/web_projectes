@@ -1721,6 +1721,7 @@ th.fw-semibold.text-center.py-3 {
 .info-ajuda-note a:hover {text-decoration: underline;}
 .info-ajuda-example-content.images {display: flex; gap: 8px; flex-wrap: wrap;}
 .info-ajuda-example-content.images img {width: calc(25% - 6px); border-radius: 6px; object-fit: cover;}
+.info-ajuda-example a {color: #92400e;}
 
 .info-ajuda-wide {margin-bottom: 14px; padding: 14px 16px;}
 .info-ajuda-wide .info-ajuda-title {font-size: 0.95rem;}
