@@ -1,104 +1,175 @@
 <?php
 // calendari_tribunal_accio.php
-// Gestiona apuntar-se i desapuntar-se d'un tribunal.
-// Rep JSON via POST. Retorna JSON.
+// Endpoint raw — gestiona apuntar i desapuntar professors al tribunal.
+// Rep JSON via php://input (com el fitxer anterior). Retorna JSON.
+// Crida: POST /index.php?main=calendari_tribunal_accio&raw=1
+//
+// Accions:
+//   accio=apuntar        → apunta el professor actual
+//   accio=desapuntar     → desapunta (target_profesor_id opcional per superadmin)
+//   accio=apuntar_admin  → superadmin apunta un professor concret (requereix target_profesor_id)
 
 declare(strict_types=1);
 
-if (!function_exists('h')) {
-    function h(?string $v): string {
-        return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8');
-    }
-}
+header('Content-Type: application/json; charset=utf-8');
 
-// Netejar qualsevol output previ (warnings, etc.) per garantir JSON net
-ob_start();
-
-$input = json_decode(file_get_contents('php://input'), true);
-
-$professor_id = isset($_SESSION['professor_id']) ? (int)$_SESSION['professor_id'] : null;
-
-if (!$professor_id) {
-    ob_end_clean();
-    echo json_encode(['ok' => false, 'missatge' => 'No identificat com a professor.']);
+if (empty($_SESSION['professor_id'])) {
+    echo json_encode(['ok' => false, 'missatge' => 'Sessió no vàlida']);
     exit;
 }
 
-$proj_id = (int)($input['proj_id'] ?? 0);
-$accio   = trim($input['accio'] ?? '');
+$profId      = (int)$_SESSION['professor_id'];
+$esSuperadm  = esSuperadmin();
 
-// El superadmin pot desapuntar qualsevol professor passant profesor_id
-$target_professor_id = $professor_id;
-if ($accio === 'desapuntar' && isset($input['profesor_id']) && esSuperadmin()) {
-    $target_professor_id = (int)$input['profesor_id'];
+// Rep JSON (manté compatibilitat amb el patró anterior)
+$input     = json_decode(file_get_contents('php://input'), true) ?? [];
+$accio     = trim($input['accio']      ?? '');
+$projecteId = (int)($input['proj_id'] ?? $input['proyecto_id'] ?? 0);
+
+if (!$projecteId) {
+    echo json_encode(['ok' => false, 'missatge' => 'Projecte no especificat']);
+    exit;
 }
 
-if (!$proj_id || !in_array($accio, ['apuntar', 'desapuntar'], true)) {
-    ob_end_clean();
-
-    echo json_encode(['ok' => false, 'missatge' => 'Paràmetres incorrectes.']);
+// Verificar que el projecte existeix i té defensa planificada
+$stmtProj = $pdo->prepare("
+    SELECT id_proyecto FROM app.proyectos
+    WHERE id_proyecto = ? AND defensa_fecha IS NOT NULL AND defensa_aula_id IS NOT NULL
+");
+$stmtProj->execute([$projecteId]);
+if (!$stmtProj->fetch()) {
+    echo json_encode(['ok' => false, 'missatge' => 'Projecte no trobat o sense defensa planificada']);
     exit;
 }
 
 try {
-    if ($accio === 'apuntar') {
+    switch ($accio) {
 
-        // Comprovar que el projecte existeix i té defensa assignada
-        $proj = $pdo->prepare("SELECT id_proyecto FROM app.proyectos WHERE id_proyecto = ? AND defensa_fecha IS NOT NULL");
-        $proj->execute([$proj_id]);
-        if (!$proj->fetch()) {
-            ob_end_clean();
+        // ── Apuntar professor actual ───────────────────────────────────
+        case 'apuntar': {
+            $stmtC = $pdo->prepare("SELECT COUNT(*) FROM app.rel_profesores_tribunal WHERE id_proyecto = ?");
+            $stmtC->execute([$projecteId]);
+            if ((int)$stmtC->fetchColumn() >= 3) {
+                echo json_encode(['ok' => false, 'tribunal_ple' => true, 'missatge' => 'El tribunal ja té 3 membres']);
+                exit;
+            }
 
-            echo json_encode(['ok' => false, 'missatge' => 'Projecte no trobat o sense data assignada.']);
-            exit;
+            $stmtEx = $pdo->prepare("SELECT 1 FROM app.rel_profesores_tribunal WHERE id_proyecto = ? AND profesor_id = ?");
+            $stmtEx->execute([$projecteId, $profId]);
+            if ($stmtEx->fetch()) {
+                echo json_encode(['ok' => false, 'missatge' => 'Ja estàs apuntat a aquest tribunal']);
+                exit;
+            }
+
+            // Comprovar solapament horari: el professor no pot estar a dos tribunals
+            // el mateix dia a la mateixa hora
+            $stmtSolap = $pdo->prepare("
+                SELECT p2.nombre
+                FROM app.rel_profesores_tribunal rpt
+                JOIN app.proyectos p2 ON p2.id_proyecto = rpt.id_proyecto
+                JOIN app.proyectos p1 ON p1.id_proyecto = ?
+                WHERE rpt.profesor_id = ?
+                  AND p2.defensa_fecha = p1.defensa_fecha
+            ");
+            $stmtSolap->execute([$projecteId, $profId]);
+            $solapament = $stmtSolap->fetch(PDO::FETCH_ASSOC);
+            if ($solapament) {
+                $nomProj = $solapament['nombre'] ?? 'un altre projecte';
+                echo json_encode(['ok' => false, 'missatge' => "Ja estàs apuntat a «{$nomProj}» a la mateixa hora"]);
+                exit;
+            }
+
+            $pdo->prepare("INSERT INTO app.rel_profesores_tribunal (id_proyecto, profesor_id) VALUES (?, ?)")
+                ->execute([$projecteId, $profId]);
+
+            echo json_encode(['ok' => true, 'accio' => 'apuntat']);
+            break;
         }
 
-        // Comprovar que el tribunal no està ple (màxim 3)
-        $count = $pdo->prepare("SELECT COUNT(*) FROM app.rel_profesores_tribunal WHERE id_proyecto = ?");
-        $count->execute([$proj_id]);
-        $n = (int)$count->fetchColumn();
+        // ── Desapuntar ────────────────────────────────────────────────
+        case 'desapuntar': {
+            // target_profesor_id: el prof actual per defecte; superadmin pot indicar un altre
+            $targetId = isset($input['target_profesor_id']) ? (int)$input['target_profesor_id'] : $profId;
+            // compatibilitat amb clau antiga
+            if (isset($input['profesor_id']) && $esSuperadm) {
+                $targetId = (int)$input['profesor_id'];
+            }
 
-        if ($n >= 3) {
-            ob_end_clean();
+            if ($targetId !== $profId && !$esSuperadm) {
+                echo json_encode(['ok' => false, 'missatge' => 'Sense permís']);
+                exit;
+            }
 
-            echo json_encode(['ok' => false, 'tribunal_ple' => true, 'missatge' => 'Ho sento, aquest tribunal ja està complet.']);
-            exit;
+            $pdo->prepare("DELETE FROM app.rel_profesores_tribunal WHERE id_proyecto = ? AND profesor_id = ?")
+                ->execute([$projecteId, $targetId]);
+
+            echo json_encode(['ok' => true, 'accio' => 'desapuntat']);
+            break;
         }
 
-        // Comprovar que el professor no hi és ja
-        $exists = $pdo->prepare("SELECT 1 FROM app.rel_profesores_tribunal WHERE id_proyecto = ? AND profesor_id = ?");
-        $exists->execute([$proj_id, $professor_id]);
-        if ($exists->fetch()) {
-            ob_end_clean();
+        // ── Apuntar qualsevol professor (superadmin) ──────────────────
+        case 'apuntar_admin': {
+            if (!$esSuperadm) {
+                echo json_encode(['ok' => false, 'missatge' => 'Sense permís de superadmin']);
+                exit;
+            }
 
-            echo json_encode(['ok' => false, 'missatge' => 'Ja estàs apuntat a aquest tribunal.']);
-            exit;
+            $targetId = (int)($input['target_profesor_id'] ?? 0);
+            if (!$targetId) {
+                echo json_encode(['ok' => false, 'missatge' => 'Professor no especificat']);
+                exit;
+            }
+
+            $stmtP = $pdo->prepare("SELECT 1 FROM app.profesores WHERE id_profesor = ? AND activo = true");
+            $stmtP->execute([$targetId]);
+            if (!$stmtP->fetch()) {
+                echo json_encode(['ok' => false, 'missatge' => 'Professor no trobat']);
+                exit;
+            }
+
+            $stmtC = $pdo->prepare("SELECT COUNT(*) FROM app.rel_profesores_tribunal WHERE id_proyecto = ?");
+            $stmtC->execute([$projecteId]);
+            if ((int)$stmtC->fetchColumn() >= 3) {
+                echo json_encode(['ok' => false, 'tribunal_ple' => true, 'missatge' => 'El tribunal ja té 3 membres']);
+                exit;
+            }
+
+            $stmtEx = $pdo->prepare("SELECT 1 FROM app.rel_profesores_tribunal WHERE id_proyecto = ? AND profesor_id = ?");
+            $stmtEx->execute([$projecteId, $targetId]);
+            if ($stmtEx->fetch()) {
+                echo json_encode(['ok' => false, 'missatge' => 'El professor ja és al tribunal']);
+                exit;
+            }
+
+            // Comprovar solapament horari
+            $stmtSolap = $pdo->prepare("
+                SELECT p2.nombre
+                FROM app.rel_profesores_tribunal rpt
+                JOIN app.proyectos p2 ON p2.id_proyecto = rpt.id_proyecto
+                JOIN app.proyectos p1 ON p1.id_proyecto = ?
+                WHERE rpt.profesor_id = ?
+                  AND p2.defensa_fecha = p1.defensa_fecha
+            ");
+            $stmtSolap->execute([$projecteId, $targetId]);
+            $solapament = $stmtSolap->fetch(PDO::FETCH_ASSOC);
+            if ($solapament) {
+                $nomProj = $solapament['nombre'] ?? 'un altre projecte';
+                echo json_encode(['ok' => false, 'missatge' => "El professor ja està apuntat a «{$nomProj}» a la mateixa hora"]);
+                exit;
+            }
+
+            $pdo->prepare("INSERT INTO app.rel_profesores_tribunal (id_proyecto, profesor_id) VALUES (?, ?)")
+                ->execute([$projecteId, $targetId]);
+
+            echo json_encode(['ok' => true, 'accio' => 'apuntat_admin']);
+            break;
         }
 
-        // Inserir
-        $pdo->prepare("INSERT INTO app.rel_profesores_tribunal (id_proyecto, profesor_id) VALUES (?, ?)")
-            ->execute([$proj_id, $professor_id]);
-
-        ob_end_clean();
-
-
-        echo json_encode(['ok' => true, 'accio' => 'apuntat']);
-
-    } else {
-
-        // Desapuntar
-        $pdo->prepare("DELETE FROM app.rel_profesores_tribunal WHERE id_proyecto = ? AND profesor_id = ?")
-            ->execute([$proj_id, $target_professor_id]);
-
-        ob_end_clean();
-
-
-        echo json_encode(['ok' => true, 'accio' => 'desapuntat']);
+        default:
+            echo json_encode(['ok' => false, 'missatge' => 'Acció desconeguda']);
     }
 
-} catch (PDOException $e) {
-    ob_end_clean();
-
-    echo json_encode(['ok' => false, 'missatge' => 'Error de base de dades: ' . $e->getMessage()]);
+} catch (Throwable $e) {
+    echo json_encode(['ok' => false, 'missatge' => 'Error intern: ' . $e->getMessage()]);
 }
 exit;

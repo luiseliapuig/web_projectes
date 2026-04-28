@@ -16,7 +16,7 @@ RewriteRule ^projecte/([0-9]+)/editar$ /index.php?main=ficha_form&id=$1 [L,QSA]
 RewriteRule ^projecte/([0-9]+)$ /index.php?main=ficha&id=$1 [L,QSA]
 
 # DEFENSAS
-RewriteRule ^calendari-defenses$ /index.php?main=calendari [L,QSA]
+RewriteRule ^calendari-defenses$ /index.php?main=calendari_tribunal [L,QSA]
 RewriteRule ^les-meves-defenses$ /index.php?main=les-meves-defenses [L,QSA]
 
 RewriteRule ^projectes-tutoritzats$ /index.php?main=proyectos-tutorizados [L,QSA]

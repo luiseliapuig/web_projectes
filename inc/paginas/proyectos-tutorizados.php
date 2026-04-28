@@ -50,6 +50,12 @@ $stmt->execute([
 
 $projectes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+$numProjectesTutor = count($projectes);
+
+$textProjectesTutor = $numProjectesTutor === 1
+    ? "Ets tutor d’1 projecte."
+    : "Ets tutor de {$numProjectesTutor} projectes.";
+
 foreach ($projectes as &$projecte) {
     $projecte['alumnos_array'] = [];
 
@@ -103,7 +109,7 @@ window.PAGE_TITLE = 'Els meus projectes tutoritzats';
     <div class="projectes-header mb-4 mt-30">
         <h1 class="projectes-title mb-2">Projectes tutoritzats</h1>
         <p class="projectes-subtitle mb-0">
-            Projectes en què constes com a tutor/a.
+            <?= htmlspecialchars($textProjectesTutor) ?>
         </p>
     </div>
 
