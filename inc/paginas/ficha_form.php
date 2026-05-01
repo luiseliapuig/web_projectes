@@ -718,8 +718,12 @@ document.addEventListener('DOMContentLoaded', () => {
                                             <li>Els enllaços han de ser públics i accesibles.</li>
                                         </ul>
                                         <div class="info-ajuda-note">
-                                            Si el projecte és una descàrrega o un hardware, podeu crear una petita landing o web estàtica per presentar-lo i pujar-la com a demo del projecte.
+                                            Si el projecte és una descàrrega o un hardware, podeu crear una petita landing o web estàtica per presentar-lo i pujar-la com a demo del projecte. 
+                                            <details class="info-ajuda-example">
+                                                <summary><a  href="/demo" target="_blank">Veure exemple</a></summary>
+                                            </details>
                                         </div>
+                                        
                                     </div>
                                 </div>
 
