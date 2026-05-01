@@ -197,6 +197,15 @@ window.PAGE_TITLE = 'Editar fitxa del projecte';
 
     </div>
 
+<div class="alerta-llenguatge">
+    <span class="icon">⚠️</span>
+    <div class="text">
+        <strong>Ús del llenguatge:</strong><br>
+        Sigueu curosos amb el llenguatge que utilitzeu.<br>
+        No s’admetran expressions o paraules que puguin ser interpretades com a despectives envers cap persona o col·lectiu.
+    </div>
+</div>
+
 </div>
 
 

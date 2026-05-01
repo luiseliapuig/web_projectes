@@ -1728,6 +1728,9 @@ th.fw-semibold.text-center.py-3 {
 .char-counter.limit {color: #dc2626; font-weight: 600;}
 .char-counter.ok {color: #16a34a; font-weight: 600;}
 
+.alerta-llenguatge {  margin-top: 20px ; padding: 12px 16px; background: #fef3c7; border-left: 4px solid #f59e0b;  border-radius: 10px; display: flex; gap: 10px; font-size: 0.9rem; color: #7a4e00;}
+.alerta-llenguatge .icon { font-size: 1.2rem; line-height: 1.2; }
+.alerta-llenguatge strong { color: #b45309;}
 
 /* ======== RESPONSIVE ======== */
 
