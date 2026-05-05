@@ -115,9 +115,24 @@ $adjuntsPlanificacio = array_filter($adjuntos, fn($a) => $a['tipo'] === 'planifi
 window.PAGE_TITLE = 'Editar fitxa del projecte';
 </script>
 
+
+
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
+
+
+
+  <?php // mostrar fecha de defensas a los alumnos interesados y a cualquier profesor si se deciden mostrar
+        if (
+            configuracion('mostrar_defensas') &&
+            (esSuProyectoAlumno((int)$proyecto['id_proyecto']) || esProfesor())
+        ) { 
+            include('bloque-defensa.php'); 
+            
+        }
+?>
+
 
             <div class="d-flex justify-content-between align-items-center breadcrum">
                 <a href="/projecte/<?= (int)$proyecto['id_proyecto'] ?>"
@@ -201,14 +216,14 @@ window.PAGE_TITLE = 'Editar fitxa del projecte';
 
     </div>
 
-<div class="alerta-llenguatge">
+<!--<div class="alerta-llenguatge">
     <span class="icon">⚠️</span>
     <div class="text">
         <strong>Ús del llenguatge:</strong><br>
         Sigueu curosos amb el llenguatge que utilitzeu.<br>
         No s’admetran expressions o paraules que puguin ser interpretades com a despectives envers cap persona o col·lectiu.
     </div>
-</div>
+</div>-->
 
 </div>
 

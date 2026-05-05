@@ -118,6 +118,19 @@ window.PAGE_TITLE = '<?= h($proyecto['nombre'] ?? '') ?> | <?= h($proyecto['cicl
     <div class="row">
         <div class="col-12">
 
+                        <?php 
+
+        // mostrar fecha de defensas a los alumnos interesados y a cualquier profesor si se deciden mostrar
+        if (
+            configuracion('mostrar_defensas') &&
+            (esSuProyectoAlumno((int)$proyecto['id_proyecto']) || esProfesor())
+        ) {
+            include('bloque-defensa.php'); 
+        }
+    
+
+?>
+
             <div class="d-flex justify-content-between align-items-center breadcrum ">
 
                 <a href="/projectes/<?= h($proyecto['ciclo'] ?? '-') ?>"
@@ -137,7 +150,7 @@ window.PAGE_TITLE = '<?= h($proyecto['nombre'] ?? '') ?> | <?= h($proyecto['cicl
                     )
                 ): ?>
                     <a href="/projecte/<?= (int)$proyecto['id_proyecto'] ?>/editar"
-                       class="btn btn-puig px-3">
+                       class="btn btn-puig-solid px-4">
                         Editar fitxa
                     </a>
                 <?php endif; ?>
@@ -148,22 +161,7 @@ window.PAGE_TITLE = '<?= h($proyecto['nombre'] ?? '') ?> | <?= h($proyecto['cicl
 
 
 
-            <?php 
 
-
-        
-
-
-        // mostrar fecha de defensas a los alumnos interesados y a cualquier profesor si se deciden mostrar
-        if (
-            configuracion('mostrar_defensas') &&
-            (esSuProyectoAlumno((int)$proyecto['id_proyecto']) || esProfesor())
-        ) {
-            include('bloque-defensa.php'); 
-        }
-    
-
-?>
 
 
 

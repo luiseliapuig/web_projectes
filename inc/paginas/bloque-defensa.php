@@ -162,7 +162,7 @@ if ($defensa):
     $any         = date('Y', $ts);
     $aula        = trim(($defensa['aula_codigo'] ?? '') . ($defensa['aula_nombre'] ? ' · ' . $defensa['aula_nombre'] : ''));
 ?>
-<div class="defensa-banner-v3">
+<div class="defensa-banner-v3 mt-30">
     <div class="defensa-banner-v3-date">
         <div class="defensa-banner-v3-kicker">Defensa</div>
         <div class="defensa-banner-v3-date-value">
