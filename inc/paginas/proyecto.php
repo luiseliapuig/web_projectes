@@ -24,6 +24,8 @@ $sql = "
         a.codigo AS aula_codigo,
         pr.nombre AS tutor_nombre,
         pr.apellidos AS tutor_apellidos,
+        co.nombre AS cotutor_nombre,
+        co.apellidos AS cotutor_apellidos,
         COALESCE(
             string_agg(
                 al.nombre || ' ' || al.apellidos,
@@ -36,6 +38,8 @@ $sql = "
         ON a.id_aula = p.defensa_aula_id
     LEFT JOIN app.profesores pr
         ON pr.id_profesor = p.tutor_id
+    LEFT JOIN app.profesores co
+        ON co.id_profesor = p.cotutor_id
     LEFT JOIN app.rel_proyectos_alumnos rpa
         ON rpa.proyecto_id = p.id_proyecto
     LEFT JOIN app.alumnos al
@@ -73,7 +77,9 @@ $sql .= "
         a.nombre,
         a.codigo,
         pr.nombre,
-        pr.apellidos
+        pr.apellidos,
+        co.nombre,
+        co.apellidos
     ORDER BY p.curso_academico DESC, p.ciclo ASC, p.grupo ASC, p.nombre ASC
 ";
 
@@ -148,6 +154,7 @@ window.PAGE_TITLE = 'Projectes';
                                 <th>Grup</th>
                                 <th>Curs</th>
                                 <th>Tutor</th>
+                                <th>Cotutor</th>
                                 <th>Alumnes</th>
                                 <th>Defensa</th>
                                 <th>Estat</th>
@@ -158,7 +165,7 @@ window.PAGE_TITLE = 'Projectes';
                         <tbody>
                             <?php if (!$rows): ?>
                                 <tr>
-                                    <td colspan="10">No hi ha projectes.</td>
+                                    <td colspan="11">No hi ha projectes.</td>
                                 </tr>
                             <?php else: ?>
                                 <?php foreach ($rows as $r): ?>
@@ -169,28 +176,29 @@ window.PAGE_TITLE = 'Projectes';
                                             <br>
 
                                             <a
-                                                href="index.php?main=ficha_form&uuid=<?= urlencode((string)$r['uuid']) ?>"
-                                                style="font-size: .85rem;"
-                                            >
-                                                Editar ficha
-                                            </a>
-
-<br>
-
-                                            <a
                                                 href="/login/alumnes/<?= urlencode((string)$r['uuid']) ?>"
                                                 target="_blank"
                                                 style="font-size: .85rem;"
                                             >
                                                 Enlace de entrada
                                             </a>
-
                                         </td>
                                         <td><?= htmlspecialchars((string)$r['ciclo']) ?></td>
                                         <td><?= htmlspecialchars((string)$r['grupo']) ?></td>
                                         <td><?= htmlspecialchars((string)$r['curso_academico']) ?></td>
                                         <td>
-                                            <?= htmlspecialchars(trim(((string)$r['tutor_apellidos']) . ', ' . ((string)$r['tutor_nombre']))) ?>
+                                            <?php
+                                            $tutor = trim(((string)($r['tutor_apellidos'] ?? '')) . ', ' . ((string)($r['tutor_nombre'] ?? '')));
+                                            $tutor = trim($tutor, ' ,');
+                                            ?>
+                                            <?= $tutor !== '' ? htmlspecialchars($tutor) : '-' ?>
+                                        </td>
+                                        <td>
+                                            <?php
+                                            $cotutor = trim(((string)($r['cotutor_apellidos'] ?? '')) . ', ' . ((string)($r['cotutor_nombre'] ?? '')));
+                                            $cotutor = trim($cotutor, ' ,');
+                                            ?>
+                                            <?= $cotutor !== '' ? htmlspecialchars($cotutor) : '-' ?>
                                         </td>
                                         <td>
                                             <?php

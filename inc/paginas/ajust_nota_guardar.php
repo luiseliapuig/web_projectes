@@ -9,7 +9,7 @@ function jsonOut(bool $ok, array $extra = [], string $missatge = ''): never {
 }
 
 // ── Permisos (han de coincidir amb bloque-nota-final.php) ─────────
-$permiso_tutor    = false;
+// Tutor, cotutor, tribunal i superadmin poden ajustar notes individuals
 $permiso_tribunal = true;
 
 $professorId = isset($_SESSION['professor_id']) ? (int)$_SESSION['professor_id'] : null;
@@ -27,30 +27,37 @@ if (!$proyectoId || !$alumnoId) {
 // ── Verificar permisos ────────────────────────────────────────────
 $potAjustar = false;
 
+// Superadmin siempre puede
 if (esSuperadmin()) {
     $potAjustar = true;
-} else {
-    if ($permiso_tutor) {
-        try {
-            $stmt = $pdo->prepare("SELECT tutor_id FROM app.proyectos WHERE id_proyecto = ?");
-            $stmt->execute([$proyectoId]);
-            $proj = $stmt->fetch(PDO::FETCH_ASSOC);
-            if ($proj && (int)$proj['tutor_id'] === $professorId) $potAjustar = true;
-        } catch (PDOException $e) {}
-    }
-    if ($permiso_tribunal && !$potAjustar) {
-        try {
-            $stmt = $pdo->prepare("
-                SELECT 1 FROM app.rel_profesores_tribunal
-                WHERE id_proyecto = ? AND profesor_id = ?
-            ");
-            $stmt->execute([$proyectoId, $professorId]);
-            if ($stmt->fetch()) $potAjustar = true;
-        } catch (PDOException $e) {}
+}
+
+// Tutor o cotutor
+if (!$potAjustar && esTutorDelProyecto($proyectoId)) {
+    $potAjustar = true;
+}
+
+// Tribunal
+if (!$potAjustar && $permiso_tribunal) {
+    try {
+        $stmt = $pdo->prepare("
+            SELECT 1
+            FROM app.rel_profesores_tribunal
+            WHERE id_proyecto = ? AND profesor_id = ?
+        ");
+        $stmt->execute([$proyectoId, $professorId]);
+
+        if ($stmt->fetch()) {
+            $potAjustar = true;
+        }
+    } catch (PDOException $e) {
+        // Si falla, no damos permiso
     }
 }
 
-if (!$potAjustar) jsonOut(false, missatge: 'No tens permís per ajustar aquesta nota.');
+if (!$potAjustar) {
+    jsonOut(false, missatge: 'No tens permís per ajustar aquesta nota.');
+}
 
 // ── Verificar que l'alumne pertany al projecte ────────────────────
 try {

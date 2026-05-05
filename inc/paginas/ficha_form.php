@@ -36,32 +36,35 @@ function absolutizePath(?string $ruta): string
 
 try {
     $stmt = $pdo->prepare("
-        SELECT
-            p.id_proyecto,
-            p.uuid,
-            p.nombre,
-            p.resumen,
-            p.descripcion,
-            p.stack,
-            p.url_github,
-            p.url_proyecto,
-            p.ruta_imagen,
-            p.ruta_memoria,
-            p.ruta_funcional,
-            p.ciclo,
-            p.grupo,
-            p.curso_academico,
-            p.autoev1,
-            p.autoev2,
-            p.autoev3,
-            p.autoev4,
-            pr.nombre AS tutor_nombre,
-            pr.apellidos AS tutor_apellidos
-        FROM proyectos p
-        LEFT JOIN profesores pr ON pr.id_profesor = p.tutor_id
-        WHERE p.id_proyecto = :id_proyecto
-        LIMIT 1
-    ");
+    SELECT
+        p.id_proyecto,
+        p.uuid,
+        p.nombre,
+        p.resumen,
+        p.descripcion,
+        p.stack,
+        p.url_github,
+        p.url_proyecto,
+        p.ruta_imagen,
+        p.ruta_memoria,
+        p.ruta_funcional,
+        p.ciclo,
+        p.grupo,
+        p.curso_academico,
+        p.autoev1,
+        p.autoev2,
+        p.autoev3,
+        p.autoev4,
+        pr.nombre AS tutor_nombre,
+        pr.apellidos AS tutor_apellidos,
+        co.nombre AS cotutor_nombre,
+        co.apellidos AS cotutor_apellidos
+    FROM proyectos p
+    LEFT JOIN profesores pr ON pr.id_profesor = p.tutor_id
+    LEFT JOIN profesores co ON co.id_profesor = p.cotutor_id
+    WHERE p.id_proyecto = :id_proyecto
+    LIMIT 1
+");
     $stmt->execute(['id_proyecto' => $idProyecto]);
     $proyecto = $stmt->fetch(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
@@ -84,6 +87,7 @@ $stmt->execute(['id' => $proyecto['id_proyecto']]);
 $alumnos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $nombreTutor = trim(((string)($proyecto['tutor_nombre'] ?? '')) . ' ' . ((string)($proyecto['tutor_apellidos'] ?? '')));
+$nombreCotutor = trim( (($proyecto['cotutor_nombre'] ?? '') . ' ' . ($proyecto['cotutor_apellidos'] ?? '')));
 
 $rutaImagen      = absolutizePath($proyecto['ruta_imagen'] ?? '');
 $rutaFuncional   = absolutizePath($proyecto['ruta_funcional'] ?? '');
@@ -483,32 +487,45 @@ document.addEventListener('DOMContentLoaded', () => {
                                         </div>
 
                                         <div class="container-fluid px-4 ml-0 mr-0">
-                                            <div class="row g-4">
-                                                <div class="col-auto">
-                                                    <div class="mb-2">
-                                                        <strong class="info-label">Cicle:</strong><br>
-                                                        <?= h($proyecto['ciclo'] ?? '-') ?>
-                                                    </div>
-                                                </div>
-                                                <div class="col-auto">
-                                                    <div class="mb-2">
-                                                        <strong class="info-label">Grup:</strong><br>
-                                                        <?= h($proyecto['grupo'] ?? '-') ?>
-                                                    </div>
-                                                </div>
-                                                <div class="col-auto">
-                                                    <div class="mb-2">
-                                                        <strong class="info-label">Curs:</strong><br>
-                                                        <?= h($proyecto['curso_academico'] ?? '-') ?>
-                                                    </div>
-                                                </div>
-                                                <div class="col-auto">
-                                                    <div class="mb-0">
-                                                        <strong class="info-label">Tutor:</strong><br>
-                                                        <?= $nombreTutor !== '' ? h($nombreTutor) : '-' ?>
-                                                    </div>
+                                            <div class="row g-2 align-items-start">
+                                            
+                                            <div class="col col-f1">
+                                                <div class="mb-0">
+                                                    <strong class="info-label">Cicle:</strong><br>
+                                                    <?= h($proyecto['ciclo']) ?>
                                                 </div>
                                             </div>
+
+                                            <div class="col col-f2">
+                                                <div class="mb-0">
+                                                    <strong class="info-label">Grup:</strong><br>
+                                                    <?= h($proyecto['grupo']) ?>
+                                                </div>
+                                            </div>
+
+                                            <div class="col col-f3">
+                                                <div class="mb-0">
+                                                    <strong class="info-label">Curs:</strong><br>
+                                                    <?= h($proyecto['curso_academico']) ?>
+                                                </div>
+                                            </div>
+
+                                            <div class="col">
+                                                <div class="mb-0">
+                                                    <strong class="info-label">Tutor:</strong><br>
+                                                    <?= $nombreTutor !== '' ? h($nombreTutor) : '-' ?>
+                                                </div>
+                                            </div>
+
+                                            <?php if ($nombreCotutor !== ''): ?>
+                                                <div class="col">
+                                                    <div class="mb-0">
+                                                        <strong class="info-label">Cotutor:</strong><br>
+                                                        <?= h($nombreCotutor) ?>
+                                                    </div>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
                                         </div>
                                     </div>
                                 </div>

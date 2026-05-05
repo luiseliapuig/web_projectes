@@ -1,8 +1,6 @@
 <?php
 // ── Dades del tutor ───────────────────────────────────────────────
-$esTutor    = isset($_SESSION['professor_id'])
-              && (int)($_SESSION['professor_id']) === (int)($proyecto['tutor_id'] ?? -1);
-$puedeEditar = $esTutor || esSuperadmin();
+$puedeEditar = esTutorDelProyecto((int)$idProyecto) || esSuperadmin();
 
 $notasTutor = [
     'planificacion' => (int)($proyecto['nota_tutor_planificacion'] ?? 0),

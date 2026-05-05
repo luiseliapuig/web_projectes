@@ -1,28 +1,46 @@
 <?php
 // ── Permisos ajust nota individual ───────────────────────────────
-$permiso_tutor    = false;
+// Tutor y cotutor pueden ajustar desde el inicio
+// Tribunal también puede ajustar (como hasta ahora)
 $permiso_tribunal = true;
-$salto            = 0.5;
+$salto            = 0.1;
 
 // ── Determinar si el professor actual pot ajustar ─────────────────
-$professorActualId = isset($_SESSION['professor_id']) ? (int)$_SESSION['professor_id'] : null;
+$professorActualId = isset($_SESSION['professor_id'])
+    ? (int)$_SESSION['professor_id']
+    : null;
 
 $potAjustar = false;
+
 if ($professorActualId) {
-    if ($permiso_tutor && (int)($proyecto['tutor_id'] ?? -1) === $professorActualId) {
+
+    // ── Tutor o cotutor (misma lógica centralizada) ───────────────
+    if (esTutorDelProyecto((int)$idProyecto)) {
         $potAjustar = true;
     }
+
+    // ── Tribunal (solo si aún no es tutor/cotutor) ────────────────
     if ($permiso_tribunal && !$potAjustar) {
         try {
             $stmtPerm = $pdo->prepare("
-                SELECT 1 FROM app.rel_profesores_tribunal
+                SELECT 1
+                FROM app.rel_profesores_tribunal
                 WHERE id_proyecto = ? AND profesor_id = ?
             ");
             $stmtPerm->execute([$idProyecto, $professorActualId]);
-            if ($stmtPerm->fetch()) $potAjustar = true;
-        } catch (PDOException $e) {}
+
+            if ($stmtPerm->fetch()) {
+                $potAjustar = true;
+            }
+        } catch (PDOException $e) {
+            // Silencioso: si falla, no damos permiso
+        }
     }
-    if (esSuperadmin()) $potAjustar = true;
+
+    // ── Superadmin siempre puede ──────────────────────────────────
+    if (esSuperadmin()) {
+        $potAjustar = true;
+    }
 }
 
 // ── Càlcul de la nota final ───────────────────────────────────────

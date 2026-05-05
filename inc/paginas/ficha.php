@@ -33,14 +33,18 @@ function absolutizePath(?string $ruta): string
 }
 
 try {
-    $stmt = $pdo->prepare("
+       $stmt = $pdo->prepare("
         SELECT
             p.*,
             pr.nombre AS tutor_nombre,
-            pr.apellidos AS tutor_apellidos
+            pr.apellidos AS tutor_apellidos,
+            co.nombre AS cotutor_nombre,
+            co.apellidos AS cotutor_apellidos
         FROM app.proyectos p
         LEFT JOIN app.profesores pr
             ON pr.id_profesor = p.tutor_id
+        LEFT JOIN app.profesores co
+            ON co.id_profesor = p.cotutor_id
         WHERE p.id_proyecto = :id_proyecto
         LIMIT 1
     ");
@@ -74,6 +78,7 @@ try {
 }
 
 $nombreTutor = trim(((string)($proyecto['tutor_nombre'] ?? '')) . ' ' . ((string)($proyecto['tutor_apellidos'] ?? '')));
+$nombreCotutor = trim( (($proyecto['cotutor_nombre'] ?? '') . ' ' . ($proyecto['cotutor_apellidos'] ?? '')));
 
 $tags = [];
 if (!empty($proyecto['stack'])) {
@@ -329,36 +334,44 @@ window.PAGE_TITLE = '<?= h($proyecto['nombre'] ?? '') ?> | <?= h($proyecto['cicl
 
                                     <div class="container-fluid px-4 ml-0 mr-0">
 
-                                        <div class="row g-4">
-
-                                            <div class="col-auto">
-                                                <div class="mb-2">
+                                        <div class="row g-2 align-items-start">
+                                            
+                                            <div class="col col-f1">
+                                                <div class="mb-0">
                                                     <strong class="info-label">Cicle:</strong><br>
-                                                    <?= h($proyecto['ciclo'] ?? '-') ?>
+                                                    <?= h($proyecto['ciclo']) ?>
                                                 </div>
                                             </div>
 
-                                            <div class="col-auto">
-                                                <div class="mb-2">
+                                            <div class="col col-f2">
+                                                <div class="mb-0">
                                                     <strong class="info-label">Grup:</strong><br>
-                                                    <?= h($proyecto['grupo'] ?? '-') ?>
+                                                    <?= h($proyecto['grupo']) ?>
                                                 </div>
                                             </div>
 
-                                            <div class="col-auto">
-                                                <div class="mb-2">
+                                            <div class="col col-f3">
+                                                <div class="mb-0">
                                                     <strong class="info-label">Curs:</strong><br>
-                                                    <?= h($proyecto['curso_academico'] ?? '-') ?>
+                                                    <?= h($proyecto['curso_academico']) ?>
                                                 </div>
                                             </div>
 
-                                            <div class="col-auto">
+                                            <div class="col">
                                                 <div class="mb-0">
                                                     <strong class="info-label">Tutor:</strong><br>
                                                     <?= $nombreTutor !== '' ? h($nombreTutor) : '-' ?>
                                                 </div>
                                             </div>
 
+                                            <?php if ($nombreCotutor !== ''): ?>
+                                                <div class="col">
+                                                    <div class="mb-0">
+                                                        <strong class="info-label">Cotutor:</strong><br>
+                                                        <?= h($nombreCotutor) ?>
+                                                    </div>
+                                                </div>
+                                            <?php endif; ?>
                                         </div>
 
                                     </div>

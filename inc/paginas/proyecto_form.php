@@ -1,6 +1,5 @@
 <?php soloSuperadmin();
 
-
 $ciclos = ['SMX', 'DAM', 'DAW', 'ASIX', 'DEV'];
 
 function gruposPorCiclo(string $ciclo): array
@@ -62,6 +61,7 @@ $data = [
     'grupo' => 'A',
     'estado' => 'activo',
     'tutor_id' => '',
+    'cotutor_id' => '',
     'defensa_aula_id' => '',
     'defensa_fecha' => '',
     'publicado' => false,
@@ -79,6 +79,7 @@ if ($id > 0) {
             grupo,
             estado,
             tutor_id,
+            cotutor_id,
             defensa_aula_id,
             defensa_fecha,
             publicado
@@ -104,11 +105,6 @@ if ($id > 0) {
     $alumnosSeleccionados = array_map('intval', $stmtRel->fetchAll(PDO::FETCH_COLUMN));
 }
 
-/*
-|--------------------------------------------------------------------------
-| Si llegan ciclo/grupo por GET, actualizan el contexto del formulario
-|--------------------------------------------------------------------------
-*/
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if (isset($_GET['ciclo']) && $_GET['ciclo'] !== '') {
         $cicloGet = trim((string)$_GET['ciclo']);
@@ -351,6 +347,21 @@ window.PAGE_TITLE = '<?= $isEdit ? 'Editar projecte' : 'Nou projecte' ?>';
                         </div>
 
                         <div class="col-md-4 mb-3">
+                            <label class="form-label">Cotutor</label>
+                            <select name="cotutor_id" class="form-select">
+                                <option value="">-- Sense cotutor --</option>
+                                <?php foreach ($profesores as $prof): ?>
+                                    <option
+                                        value="<?= (int)$prof['id_profesor'] ?>"
+                                        <?= (string)$data['cotutor_id'] === (string)$prof['id_profesor'] ? 'selected' : '' ?>
+                                    >
+                                        <?= htmlspecialchars($prof['apellidos'] . ', ' . $prof['nombre']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
                             <label class="form-label">Aula defensa</label>
                             <select name="defensa_aula_id" class="form-select">
                                 <option value="">-- Sense aula --</option>
@@ -364,7 +375,9 @@ window.PAGE_TITLE = '<?= $isEdit ? 'Editar projecte' : 'Nou projecte' ?>';
                                 <?php endforeach; ?>
                             </select>
                         </div>
+                    </div>
 
+                    <div class="row">
                         <div class="col-md-4 mb-3">
                             <label class="form-label">Data i hora de defensa</label>
                             <input

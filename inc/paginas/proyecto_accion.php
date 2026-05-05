@@ -1,6 +1,6 @@
-<?php soloSuperadmin();
+<?php
 
-declare(strict_types=1);
+soloSuperadmin();
 
 $accion = $_POST['accion'] ?? '';
 
@@ -69,6 +69,7 @@ $ciclo = trim($_POST['ciclo'] ?? '');
 $grupo = trim($_POST['grupo'] ?? '');
 $estado = trim($_POST['estado'] ?? 'activo');
 $tutorId = trim((string)($_POST['tutor_id'] ?? ''));
+$cotutorId = trim((string)($_POST['cotutor_id'] ?? ''));
 $defensaAulaId = trim((string)($_POST['defensa_aula_id'] ?? ''));
 $defensaFecha = trim($_POST['defensa_fecha'] ?? '');
 $publicado = !empty($_POST['publicado']);
@@ -113,6 +114,7 @@ if (count($alumnos) === 0) {
 }
 
 $tutorId = $tutorId !== '' ? (int)$tutorId : null;
+$cotutorId = $cotutorId !== '' ? (int)$cotutorId : null;
 $defensaAulaId = $defensaAulaId !== '' ? (int)$defensaAulaId : null;
 $defensaFechaSql = $defensaFecha !== '' ? str_replace('T', ' ', $defensaFecha) . ':00' : null;
 
@@ -179,6 +181,7 @@ try {
                 grupo = :grupo,
                 estado = :estado,
                 tutor_id = :tutor_id,
+                cotutor_id = :cotutor_id,
                 defensa_aula_id = :defensa_aula_id,
                 defensa_fecha = :defensa_fecha,
                 publicado = :publicado,
@@ -201,6 +204,12 @@ try {
             $stmt->bindValue(':tutor_id', null, PDO::PARAM_NULL);
         } else {
             $stmt->bindValue(':tutor_id', $tutorId, PDO::PARAM_INT);
+        }
+
+        if ($cotutorId === null) {
+            $stmt->bindValue(':cotutor_id', null, PDO::PARAM_NULL);
+        } else {
+            $stmt->bindValue(':cotutor_id', $cotutorId, PDO::PARAM_INT);
         }
 
         if ($defensaAulaId === null) {
@@ -237,6 +246,7 @@ try {
                 grupo,
                 estado,
                 tutor_id,
+                cotutor_id,
                 defensa_aula_id,
                 defensa_fecha,
                 publicado,
@@ -248,6 +258,7 @@ try {
                 :grupo,
                 :estado,
                 :tutor_id,
+                :cotutor_id,
                 :defensa_aula_id,
                 :defensa_fecha,
                 :publicado,
@@ -272,6 +283,12 @@ try {
             $stmt->bindValue(':tutor_id', null, PDO::PARAM_NULL);
         } else {
             $stmt->bindValue(':tutor_id', $tutorId, PDO::PARAM_INT);
+        }
+
+        if ($cotutorId === null) {
+            $stmt->bindValue(':cotutor_id', null, PDO::PARAM_NULL);
+        } else {
+            $stmt->bindValue(':cotutor_id', $cotutorId, PDO::PARAM_INT);
         }
 
         if ($defensaAulaId === null) {

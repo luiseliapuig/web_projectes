@@ -1155,7 +1155,7 @@ a.text-muted span:first-child {
 
 .puig-panel-content {
     padding: 1rem;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     color: #444;
 }
 
@@ -1749,3 +1749,15 @@ th.fw-semibold.text-center.py-3 {
 /* ============================= */
 
 /* fin ayuda */
+
+.col-f1 {
+    flex: 0 0 50px;
+}
+
+.col-f2 {
+    flex: 0 0 40px;
+}
+
+.col-f3 {
+    flex: 0 0 80px;
+}

@@ -140,14 +140,17 @@ function esTutorDelProyecto(int $idProjecte): bool
         SELECT 1
         FROM proyectos
         WHERE id_proyecto = :id_proyecto
-          AND tutor_id = :tutor_id
+          AND (
+                tutor_id = :id_professor
+                OR cotutor_id = :id_professor
+          )
         LIMIT 1
     ";
 
     $stmt = $pdo->prepare($sql);
     $stmt->execute([
-        ':id_proyecto' => $idProjecte,
-        ':tutor_id'    => $idProfessor
+        ':id_proyecto'  => $idProjecte,
+        ':id_professor' => $idProfessor
     ]);
 
     return (bool) $stmt->fetchColumn();

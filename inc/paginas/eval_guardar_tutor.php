@@ -17,18 +17,9 @@ $proyectoId = (int)($_POST['proyecto_id'] ?? 0);
 if (!$proyectoId) jsonOut(false, missatge: 'Projecte no vàlid.');
 
 // Verificar que és el tutor o superadmin
-try {
-    $stmt = $pdo->prepare("SELECT tutor_id FROM app.proyectos WHERE id_proyecto = ?");
-    $stmt->execute([$proyectoId]);
-    $proj = $stmt->fetch(PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    jsonOut(false, missatge: 'Error en carregar el projecte.');
+if (!esTutorDelProyecto($proyectoId) && !esSuperadmin()) {
+    jsonOut(false, missatge: 'No tens permís per editar aquesta valoració.');
 }
-
-if (!$proj) jsonOut(false, missatge: 'Projecte no trobat.');
-
-$esTutor = (int)$proj['tutor_id'] === $professorId;
-if (!$esTutor && !esSuperadmin()) jsonOut(false, missatge: 'No tens permís per editar aquesta valoració.');
 
 $accio = trim($_POST['accio'] ?? '');
 
