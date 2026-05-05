@@ -1,6 +1,5 @@
 <?php soloSuperadmin();
 
-declare(strict_types=1);
 
 $accion = $_POST['accion'] ?? '';
 

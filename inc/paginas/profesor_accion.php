@@ -1,6 +1,6 @@
 <?php soloSuperadmin();
 
-declare(strict_types=1);
+
 
 $id = isset($_POST['id_profesor']) ? (int)$_POST['id_profesor'] : 0;
 
