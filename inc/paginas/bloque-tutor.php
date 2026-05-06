@@ -29,9 +29,28 @@ $labelsTutor = [
         <h3 class="fw-semibold mb-1">Valoració del tutor</h3>
         <p class="text-muted small mb-0">Avaluació global del projecte per part del tutor</p>
       </div>
-      <div class="text-end border-start ps-3 ms-3">
-        <h5 class="fw-semibold"><?= h(trim($proyecto['tutor_nombre'] . ' ' . $proyecto['tutor_apellidos'])) ?></h5>
-        <div class="text-muted small">Tutor</div>
+      <div class="text-end border-start ps-3 ms-3 lh12">
+
+          <h5 class="fw-semibold mb-1">
+              <?= h(trim($proyecto['tutor_nombre'] . ' ' . $proyecto['tutor_apellidos'])) ?>
+          </h5>
+
+          <?php
+          $nombreCotutor = trim(
+              ($proyecto['cotutor_nombre'] ?? '') . ' ' .
+              ($proyecto['cotutor_apellidos'] ?? '')
+          );
+          ?>
+
+          <?php if ($nombreCotutor !== ''): ?>
+              <div class="fw-semibold cotutortx ">
+                  <?= h($nombreCotutor) ?>
+              </div>
+              <div class="text-muted small">Tutor i cotutor</div>
+          <?php else: ?>
+              <div class="text-muted small">Tutor</div>
+          <?php endif; ?>
+
       </div>
     </div>
 
