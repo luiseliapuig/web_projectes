@@ -27,7 +27,9 @@ $sql = "
         ON rpa.proyecto_id = p.id_proyecto
     LEFT JOIN app.alumnos a
         ON a.id_alumno = rpa.alumno_id
-    WHERE p.tutor_id = :id_professor
+    WHERE
+        p.tutor_id = :id_professor
+        OR p.cotutor_id = :id_professor
     GROUP BY
         p.id_proyecto,
         p.uuid,
@@ -53,8 +55,8 @@ $projectes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $numProjectesTutor = count($projectes);
 
 $textProjectesTutor = $numProjectesTutor === 1
-    ? "Ets tutor d’1 projecte."
-    : "Ets tutor de {$numProjectesTutor} projectes.";
+    ? "Ets tutor o cotutor d’1 projecte."
+    : "Ets tutor o cotutor de {$numProjectesTutor} projectes.";
 
 foreach ($projectes as &$projecte) {
     $projecte['alumnos_array'] = [];

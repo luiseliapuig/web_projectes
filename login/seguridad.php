@@ -179,6 +179,7 @@ function esTutor(): bool
         SELECT 1
         FROM app.proyectos
         WHERE tutor_id = :id
+           OR cotutor_id = :id
         LIMIT 1
     ";
 
