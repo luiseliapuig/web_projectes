@@ -1,3 +1,5 @@
+Options -Indexes
+
 RewriteEngine On
 
 # Evitar reescribir archivos y carpetas reales
