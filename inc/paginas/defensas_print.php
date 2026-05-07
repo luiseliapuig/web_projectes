@@ -4,6 +4,9 @@
  * Sense funcionalitat interactiva. Només visualització.
  */
 
+require_once __DIR__ . '/includes/db.php';
+require_once __DIR__ . '/includes/auth.php';
+require_once __DIR__ . '/includes/seguridad.php';
 
 $curs = $_GET['curs'] ?? null;
 
@@ -91,10 +94,16 @@ $badgeClass = [
     'DEV'  => 'badge-DEV',
 ];
 
-$DUR = 44; // minuts per defensa (podria venir de config)
+$DUR = 45; // minuts per defensa (podria venir de config)
 ?>
-
-
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<title>Llistat Defenses<?= $curs ? ' ' . h($curs) : '' ?> · Puig Castellar</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="/assets/css/bootstrap.min.css">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 <style>
 /* ── Base ───────────────────────────────────────────────────────── */
 body {
@@ -313,9 +322,10 @@ body {
       $perHora = [];
       foreach ($diaRows as $r) $perHora[$r['hora']][] = $r;
       foreach ($perHora as &$projs) {
-          usort($projs, fn($a, $b) =>
-              ($ordreCicle[$a['ciclo']] ?? 99) <=> ($ordreCicle[$b['ciclo']] ?? 99)
-          );
+          usort($projs, function($a, $b) use ($ordreCicle) {
+              $cmp = ($ordreCicle[$a['ciclo']] ?? 99) <=> ($ordreCicle[$b['ciclo']] ?? 99);
+              return $cmp !== 0 ? $cmp : strcmp($a['grupo'] ?? '', $b['grupo'] ?? '');
+          });
       }
       unset($projs);
     ?>
@@ -382,6 +392,5 @@ body {
   <?php endif ?>
 
 </div>
-<script>
-window.PAGE_TITLE = 'Calendari defenses';
-</script>
+</body>
+</html>
