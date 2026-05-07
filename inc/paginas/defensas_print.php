@@ -328,7 +328,7 @@ body {
             <tr>
               <th class="th-hora">Hora</th>
               <?php for ($c = 1; $c <= $maxCols; $c++): ?>
-              <th>Defensa <?= $c ?></th>
+              <th>Tribunal <?= $c ?></th>
               <?php endfor ?>
             </tr>
           </thead>
