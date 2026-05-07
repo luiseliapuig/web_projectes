@@ -91,16 +91,10 @@ $badgeClass = [
     'DEV'  => 'badge-DEV',
 ];
 
-$DUR = 45; // minuts per defensa (podria venir de config)
+$DUR = 44; // minuts per defensa (podria venir de config)
 ?>
-<!DOCTYPE html>
-<html lang="ca">
-<head>
-<meta charset="UTF-8">
-<title>Llistat Defenses<?= $curs ? ' ' . h($curs) : '' ?> · Puig Castellar</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="/assets/css/bootstrap.min.css">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+
 <style>
 /* ── Base ───────────────────────────────────────────────────────── */
 body {
@@ -230,6 +224,7 @@ body {
 @media print {
     body { background:#fff; font-size:.82rem; }
     .toolbar { display:none !important; }
+    .site-header, .site-footer { display:none !important; }
     .page-wrap { padding:.3cm .4cm; max-width:100%; }
 
     .doc-header { border-bottom-color:#1e3a8a; margin-bottom:1rem; }
@@ -313,9 +308,16 @@ body {
     <?php foreach ($torn[$tornKey] as $dia => $diaRows):
       $hores   = horesUniques($diaRows);
       $maxCols = maxCols($diaRows);
-      // Indexa per hora
+      // Indexa per hora i ordena per cicle
+      $ordreCicle = ['SMX' => 0, 'DAM' => 1, 'DAW' => 2, 'ASIX' => 3, 'DEV' => 4];
       $perHora = [];
       foreach ($diaRows as $r) $perHora[$r['hora']][] = $r;
+      foreach ($perHora as &$projs) {
+          usort($projs, fn($a, $b) =>
+              ($ordreCicle[$a['ciclo']] ?? 99) <=> ($ordreCicle[$b['ciclo']] ?? 99)
+          );
+      }
+      unset($projs);
     ?>
     <div class="dia-bloc">
       <div class="dia-cap"><?= h(nomDiaLlarg($dia)) ?></div>
@@ -380,5 +382,6 @@ body {
   <?php endif ?>
 
 </div>
-</body>
-</html>
+<script>
+window.PAGE_TITLE = 'Calendari defenses';
+</script>
