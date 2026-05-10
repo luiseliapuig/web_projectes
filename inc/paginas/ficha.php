@@ -178,7 +178,8 @@ window.PAGE_TITLE = '<?= h($proyecto['nombre'] ?? '') ?> | <?= h($proyecto['cicl
                                     src="<?= h($rutaImagen) ?>"
                                     alt="<?= h($proyecto['nombre'] ?? 'Proyecto') ?>"
                                     class="img-fluid rounded"
-                                    style="width: 100%; max-height: 460px; object-fit: cover;"
+                                    style="width: 100%; max-height: 460px; object-fit: cover; cursor: pointer;"
+                                    onclick="obrirModalImatgePrincipal()"
                                 >
                             <?php else: ?>
                                 <div
@@ -429,10 +430,39 @@ window.PAGE_TITLE = '<?= h($proyecto['nombre'] ?? '') ?> | <?= h($proyecto['cicl
                         </div>
                         <?php endif; ?>
 
+                        <!-- Modal imatge principal -->
+                        <?php if ($rutaImagen !== ''): ?>
+                        <div class="modal fade" id="modalImatgePrincipal" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-xl modal-dialog-centered">
+                                <div class="modal-content bg-dark border-0">
+                                    <div class="modal-header border-0 pb-0">
+                                        <span class="text-white small"><?= h($proyecto['nombre'] ?? '') ?></span>
+                                        <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body text-center p-3">
+                                        <img src="<?= h($rutaImagen) ?>"
+                                             alt="<?= h($proyecto['nombre'] ?? 'Proyecto') ?>"
+                                             class="img-fluid rounded"
+                                             style="max-height: 80vh;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <script>
+                        var _modalImatgePrincipal = null;
+                        function obrirModalImatgePrincipal() {
+                            if (!_modalImatgePrincipal) {
+                                _modalImatgePrincipal = new bootstrap.Modal(document.getElementById('modalImatgePrincipal'));
+                            }
+                            _modalImatgePrincipal.show();
+                        }
+                        </script>
+                        <?php endif; ?>
+
                         <!-- Modal captures gestió -->
                         <?php if (!empty($adjuntsGestio)): ?>
                         <div class="modal fade" id="modalGestio" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog modal-lg modal-dialog-centered">
+                            <div class="modal-dialog modal-xl modal-dialog-centered">
                                 <div class="modal-content bg-dark border-0">
                                     <div class="modal-header border-0 pb-0">
                                         <span class="text-white small" id="modalGestioTitol"></span>

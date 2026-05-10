@@ -196,7 +196,7 @@ if (!is_dir($rutaProyectoAbs)) {
 }
 
 $slugProyecto     = slugify($nombre);
-$nombreImagen     = 'imagen.jpg';
+$nombreImagen     = 'imagen-' . time() . '.jpg';
 $nombreMemoria    = $slugProyecto . '-' . $ciclo . '-memoria.pdf';
 $nombreFuncional  = $slugProyecto . '-' . $ciclo . '-documento-funcional.pdf';
 $nombreFichaEntrega = $slugProyecto . '-' . $ciclo . '-ficha-de-entrega.pdf';

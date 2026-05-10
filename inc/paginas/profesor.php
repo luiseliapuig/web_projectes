@@ -21,6 +21,18 @@ $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 window.PAGE_TITLE = 'Professorat';
 </script>
 
+<?php if (!empty($_GET['error'])): ?>
+    <div class="alert alert-danger mb-3" role="alert">
+        <?= $_GET['error'] ?>
+    </div>
+<?php endif; ?>
+
+<?php if (isset($_GET['msg']) && $_GET['msg'] === 'eliminat'): ?>
+    <div class="alert alert-success mb-3" role="alert">
+        Professor eliminat correctament.
+    </div>
+<?php endif; ?>
+
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
@@ -53,24 +65,37 @@ window.PAGE_TITLE = 'Professorat';
                                 <?php foreach ($rows as $r): ?>
                                     <tr>
                                         <td>
-                                            <?= htmlspecialchars($r['nombre'] . ' ' . $r['apellidos']) ?>
+                                            <?= h($r['nombre'] . ' ' . $r['apellidos']) ?>
                                             <br>
-                                             <a
-                href="/login/<?= htmlspecialchars($r['uuid_acceso']) ?>"
-                target="_blank"
-                class="small text-muted mt-1"
-            >
-                🔑 Acceso
-            </a>
+                                            <a
+                                                href="/login/<?= h($r['uuid_acceso']) ?>"
+                                                target="_blank"
+                                                class="small text-muted mt-1"
+                                            >
+                                                🔑 Acceso
+                                            </a>
                                         </td>
-                                        <td><?= htmlspecialchars($r['email']) ?></td>
-                                        <td><?= htmlspecialchars((string)$r['departamento']) ?></td>
+                                        <td><?= h($r['email']) ?></td>
+                                        <td><?= h((string)$r['departamento']) ?></td>
                                         <td><?= (int)$r['activo'] === 1 ? 'Sí' : 'No' ?></td>
                                         <td><?= $r['rol'] === 'superadmin' ? 'Sí' : 'No' ?></td>
-                                        <td>
+                                        <td class="text-nowrap">
                                             <a href="index.php?main=profesor_form&id=<?= (int)$r['id_profesor'] ?>">
                                                 Editar
                                             </a>
+                                            &nbsp;·&nbsp;
+                                            <form
+                                                method="POST"
+                                                action="index.php?main=profesor_accion"
+                                                style="display:inline"
+                                                onsubmit="return confirm('Segur que vols eliminar <?= h(addslashes($r['nombre'] . ' ' . $r['apellidos'])) ?>?\nAquesta acció no es pot desfer.')"
+                                            >
+                                                <input type="hidden" name="id_profesor" value="<?= (int)$r['id_profesor'] ?>">
+                                                <input type="hidden" name="accio" value="eliminar">
+                                                <button type="submit" class="btn btn-link p-0 text-danger" style="vertical-align:baseline">
+                                                    Eliminar
+                                                </button>
+                                            </form>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
