@@ -171,7 +171,7 @@ window.PAGE_TITLE = 'Editar fitxa del projecte';
 
     <div class="help-deadline-box">
         <div class="help-deadline-label">Data límit d’edició</div>
-        <div class="help-deadline-date">Diumenge 17 de maig a les 24:00</div>
+        <div class="help-deadline-date">Diumenge 17 de maig a les 23:59</div>
         <div class="help-deadline-note">
             A partir d’aquest moment, l’edició quedarà desactivada.
         </div>
