@@ -1748,6 +1748,107 @@ th.fw-semibold.text-center.py-3 {
 /* FIN BLOQUE AJUDES_FITXA       */
 /* ============================= */
 
+
+
+/* ============================= */
+/* PANEL ENTREGAS                */
+/* ============================= */
+.panel-entregues { max-width:1700px; margin:0 auto; padding:24px; }
+.panel-entregues h2 { font-weight:700; margin-bottom:6px; color:#2f3b52; }
+.panel-entregues .subtitol { color:#6c757d; margin-bottom:24px; }
+.card-entrega { background:#fff; border:1px solid #d9dee5; border-radius:18px; overflow:hidden; margin-bottom:24px; box-shadow:0 2px 8px rgba(20,30,50,0.04); }
+.card-header-projecte { background:linear-gradient(135deg,#2f3b52,#465979); color:#fff; padding:16px 20px; display:flex; justify-content:space-between; align-items:flex-start; gap:20px; }
+.card-header-main { min-width:0; }
+.card-titol { font-size:1.15rem; font-weight:800; line-height:1.25; margin-bottom:5px; }
+.card-meta { font-size:0.88rem; color:rgba(255,255,255,0.78); }
+.card-alumnes { text-align:right; font-size:0.92rem; line-height:1.35; color:rgba(255,255,255,0.92); min-width:190px; }
+.card-alumnes-label { display:block; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.04em; color:rgba(255,255,255,0.58); margin-bottom:4px; }
+.card-cos { padding:20px; display:grid; grid-template-columns:1fr 1fr 0.9fr 1.15fr 0.95fr 1.1fr; gap:18px; align-items:start; }
+.bloc-control { min-width:0; }
+.bloc-titol { font-size:0.78rem; font-weight:800; text-transform:uppercase; color:#465979; letter-spacing:0.04em; margin-bottom:10px; padding-bottom:6px; border-bottom:1px solid #edf0f3; }
+.bloc-pills { display:flex; flex-direction:column; align-items:flex-start; gap:8px; }
+.pill-check,
+.pill-x,
+.pill-neutral { display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:999px; font-size:0.82rem; font-weight:650; white-space:nowrap; }
+.pill-check { background:#e8f5e9; color:#08751c; border:1px solid #c8e6c9; }
+.pill-x { background:#fdecea; color:#c62828; border:1px solid #f5c6cb; }
+.pill-neutral { background:#f1f3f5; color:#7a838d; border:1px solid #dee2e6; }
+.estat-box { border-radius:14px; padding:14px 15px; font-weight:800; font-size:1rem; line-height:1.2; border:1px solid; }
+.estat-box small { display:block; margin-top:6px; font-size:0.78rem; font-weight:500; line-height:1.25; }
+.estat-complet { background:#e8f5e9; color:#08751c; border-color:#b7dfbd; }
+.estat-valid { background:#fff4e5; color:#a65f00; border-color:#ffd08a; }
+.estat-invalid { background:#fdecea; color:#c62828; border-color:#f3b5b5; }
+.notas-box { min-width:150px; }
+.nota-global { font-size:1.9rem; font-weight:850; line-height:1; color:#3f4a68; margin-bottom:4px; }
+.nota-label { font-size:0.78rem; color:#6c757d; margin-bottom:16px; }
+.nota-alumne { display:flex; align-items:center; gap:8px; font-size:0.88rem; margin-top:8px; color:#4b5875; line-height:1.35; }
+.nota-nom { white-space:nowrap; }
+.nota-separador { flex:1; border-bottom:1px dotted #c7ced6; transform:translateY(2px); height:6px; }
+.nota-valor { font-weight:850; color:#2f3b52; white-space:nowrap; }
+.card-footer-projecte { background:#f3f5f7; border-top:1px solid #e0e4e9; padding:12px 20px; display:flex; justify-content:space-between; align-items:center; gap:16px; }
+.footer-responsables { display:flex; flex-wrap:wrap; gap:18px; font-size:0.83rem; color:#5f6b7a; }
+.footer-responsables strong { color:#2f3b52; }
+.boto-fitxa { display:inline-flex; align-items:center; justify-content:center; padding:9px 16px; border-radius:999px; background:#465979; color:#fff; text-decoration:none; font-size:0.85rem; font-weight:700; transition:0.2s; }
+.boto-fitxa:hover { background:#2f3b52; color:#fff; }
+
+.resum-global {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.75rem;
+    padding: 0.75rem 1.25rem;
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    width: fit-content;
+}
+
+.resum-item {
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+}
+
+.resum-num {
+    font-size: 1.35rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.resum-label {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #6c757d;
+}
+
+.resum-valids .resum-num   { color: #2d6a4f; }
+.resum-incomplets .resum-num { color: #c0392b; }
+
+.resum-sep {
+    color: #ced4da;
+    font-size: 1.1rem;
+    padding: 0 0.1rem;
+}
+
+.resum-total {
+    font-size: 0.8rem;
+    color: #adb5bd;
+    padding-left: 0.5rem;
+    border-left: 1px solid #dee2e6;
+}
+
+
+@media (max-width:1100px) {
+    .panel-entregues { overflow-x:auto; }
+    .card-entrega { min-width:1250px; }
+}
+/* ============================= */
+/* FIN PANEL ENTREGAS            */
+/* ============================= */
+
+
+
 /* fin ayuda */
 
 .col-f1 {

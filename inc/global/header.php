@@ -111,6 +111,8 @@
                 Administració
               </a>
               <ul class="dropdown-menu" aria-labelledby="adminDropdown">
+                <li><a class="dropdown-item" href="/entregues/SMX">Entregues</a></li>
+                <hr>
                 <li><a class="dropdown-item" href="/index.php?main=configuracion">Configuració</a></li>
                 <li><a class="dropdown-item" href="/index.php?main=calendari_drag">Planificació defenses</a></li>
                 <li><a class="dropdown-item" href="/index.php?main=defensas_print">Imprimir defenses</a></li>

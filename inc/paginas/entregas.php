@@ -1,12 +1,14 @@
 <?php
-// proyectos-tutorizados.php — vista
+// entregas.php — vista
 
-if (!isset($_SESSION['professor_id'])) {
-    header('Location: /login');
-    exit;
+$cicleActiu = $_GET['cicle'] ?? null;
+
+// Cicles disponibles (els que tenen projectes)
+$ciclesDisponibles = ['SMX', 'DAM', 'DAW', 'ASIX', 'DEV'];
+
+if (!$cicleActiu && !empty($ciclesDisponibles)) {
+    $cicleActiu = $ciclesDisponibles[0];
 }
-
-$idProfessor = (int)$_SESSION['professor_id'];
 
 $sql = "
 SELECT
@@ -85,7 +87,7 @@ LEFT JOIN app.proyecto_adjuntos       adj ON adj.proyecto_id = p.id_proyecto
 LEFT JOIN app.evaluacion_tribunal     et  ON et.proyecto_id  = p.id_proyecto
 LEFT JOIN app.ajustes_nota_individual ani ON ani.proyecto_id = p.id_proyecto
 
-WHERE p.tutor_id = :id OR p.cotutor_id = :id
+WHERE p.ciclo = :cicle
 
 GROUP BY
     p.id_proyecto, p.uuid, p.nombre, p.resumen, p.descripcion, p.stack,
@@ -98,11 +100,11 @@ GROUP BY
     pct.nombre, pct.apellidos,
     au.nombre, au.codigo
 
-ORDER BY p.ciclo, p.grupo, p.nombre
+ORDER BY p.grupo, p.nombre
 ";
 
 $stmt = $pdo->prepare($sql);
-$stmt->execute([':id' => $idProfessor]);
+$stmt->execute([':cicle' => $cicleActiu]);
 $projectes = [];
 
 while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -123,20 +125,21 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
     $projectes[] = $row;
 }
 
-$total = count($projectes);
+$total_valids     = count(array_filter($projectes, fn($r) => in_array($r['estat_entrega'], ['complet', 'valid'])));
+$total_incomplets = count(array_filter($projectes, fn($r) => $r['estat_entrega'] === 'incomplet'));
+$total            = count($projectes);
 
-// Agrupar per cicle + grup
+// Agrupar per grup
 $projectes_per_grup = [];
 foreach ($projectes as $p) {
-    $clau = trim((string)($p['ciclo'] ?? ''));
-    $clau .= !empty($p['grupo']) ? ' · Grup ' . trim((string)$p['grupo']) : ' · Sense grup';
+    $clau = $p['grupo'] ?? '—';
     $projectes_per_grup[$clau][] = $p;
 }
-if (!empty($projectes_per_grup)) {
-    uksort($projectes_per_grup, 'strnatcasecmp');
-}
 
-// Helpers (guards)
+// ---------------------------------------------------------------------------
+// Helpers (guards per si es carreguen múltiples vistes en el mateix request)
+// ---------------------------------------------------------------------------
+
 if (!function_exists('renderPill')) {
     function renderPill(bool $ok, string $label, bool $obligatori = false): string {
         if ($ok)         return '<span class="pill-check">✓ ' . h($label) . '</span>';
@@ -368,25 +371,43 @@ if (!function_exists('renderCardEntrega')) {
 }
 ?>
 
-<script>
-window.PAGE_TITLE = 'Els meus projectes tutoritzats';
-</script>
-
 <div class="panel-entregues">
 
-    <div class="projectes-header mb-4">
-        <h2>Projectes tutoritzats</h2>
-        <div class="subtitol">
-            <?= $total === 1 ? "Ets tutor o cotutor d'1 projecte." : "Ets tutor o cotutor de {$total} projectes." ?>
+    <h2>Panell de control de lliuraments</h2>
+    <div class="subtitol">Revisió ràpida de l'estat de les fitxes de projecte després del tancament de lliuraments.</div>
+
+    <!-- FILTRE CICLES -->
+    <div class="projectes-filter mb-4">
+        <div class="d-flex flex-wrap gap-2">
+            <?php foreach ($ciclesDisponibles as $cicle): ?>
+                <a
+                    href="/entregues/<?= urlencode($cicle) ?>"
+                    class="projectes-filter-pill <?= $cicle === $cicleActiu ? 'active' : '' ?>"
+                ><?= h($cicle) ?></a>
+            <?php endforeach ?>
         </div>
     </div>
 
+    <!-- RESUM GLOBAL -->
+    <div class="resum-global">
+        <div class="resum-item resum-valids">
+            <span class="resum-num"><?= $total_valids ?></span>
+            <span class="resum-label">Vàlids</span>
+        </div>
+        <div class="resum-sep">/</div>
+        <div class="resum-item resum-incomplets">
+            <span class="resum-num"><?= $total_incomplets ?></span>
+            <span class="resum-label">Incomplets</span>
+        </div>
+        <div class="resum-total"><?= $total ?> projectes</div>
+    </div>
+
     <?php if (empty($projectes)): ?>
-        <div class="text-muted mt-4">Actualment no constes com a tutor/a de cap projecte.</div>
+        <div class="text-muted mt-4">No hi ha projectes per al cicle seleccionat.</div>
     <?php else: ?>
         <?php foreach ($projectes_per_grup as $grupNom => $grupProjectes): ?>
             <div class="projectes-grup-header mb-3 mt-4">
-                <h3 class="projectes-grup-title mb-0"><?= h($grupNom) ?></h3>
+                <h3 class="projectes-grup-title mb-0">Grup <?= h($grupNom) ?></h3>
             </div>
             <?php foreach ($grupProjectes as $p): ?>
                 <?php renderCardEntrega($p) ?>

@@ -143,11 +143,14 @@ window.PAGE_TITLE = '<?= h($proyecto['nombre'] ?? '') ?> | <?= h($proyecto['cicl
                 // solo pueden editar los alumnos propietarios y los tutores y si está permitido
                 
                 if (
-                    configuracion('permitir_editar') &&
                     (
-                        esSuProyectoAlumno((int)$proyecto['id_proyecto']) ||
-                        esTutorDelProyecto((int)$proyecto['id_proyecto'])
+                        configuracion('permitir_editar') &&
+                        esSuProyectoAlumno((int)$proyecto['id_proyecto'])
                     )
+                    ||
+                    esTutorDelProyecto((int)$proyecto['id_proyecto'])
+                    ||
+                    esSuperadmin()
                 ): ?>
                     <a href="/projecte/<?= (int)$proyecto['id_proyecto'] ?>/editar"
                        class="btn btn-puig-solid px-4">
