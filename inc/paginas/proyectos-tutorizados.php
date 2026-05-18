@@ -117,7 +117,14 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                         && !empty($row['resumen'])
                         && !empty($row['descripcion']);
 
-    $row['estat_entrega'] = !$obligatoris ? 'incomplet' : ($presentacioCompleta ? 'complet' : 'valid');
+    $autoavCompleta = !empty($row['autoev1'])
+                   && !empty($row['autoev2'])
+                   && !empty($row['autoev3'])
+                   && !empty($row['autoev4']);
+
+    $opcionalsComplets = $presentacioCompleta && $autoavCompleta;
+
+    $row['estat_entrega'] = !$obligatoris ? 'incomplet' : ($opcionalsComplets ? 'complet' : 'valid');
 
     $projectes[] = $row;
 }

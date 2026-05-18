@@ -112,14 +112,21 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
     $row['tribunal'] = json_decode($row['tribunal'], true);
     $row['ajustos']  = json_decode($row['ajustos'], true);
 
-    $obligatoris = !empty($row['nombre'])
-                && !empty($row['ruta_memoria']);
+   $obligatoris = !empty($row['nombre'])
+            && !empty($row['ruta_memoria']);
 
     $presentacioCompleta = !empty($row['ruta_imagen'])
                         && !empty($row['resumen'])
                         && !empty($row['descripcion']);
 
-    $row['estat_entrega'] = !$obligatoris ? 'incomplet' : ($presentacioCompleta ? 'complet' : 'valid');
+    $autoavCompleta = !empty($row['autoev1'])
+                   && !empty($row['autoev2'])
+                   && !empty($row['autoev3'])
+                   && !empty($row['autoev4']);
+
+    $opcionalsComplets = $presentacioCompleta && $autoavCompleta;
+
+    $row['estat_entrega'] = !$obligatoris ? 'incomplet' : ($opcionalsComplets ? 'complet' : 'valid');
 
     $projectes[] = $row;
 }
