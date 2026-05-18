@@ -35,6 +35,28 @@ if ($isAlumne && $id > 0) {
     }
 }
 
+
+   // Si la edición está cerrada, los alumnos no pueden entrar al formulario.
+    // Superadmin y tutor sí pueden.
+if ($main === 'ficha_form') {
+
+    $idProyecto = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+
+    $esSuperadmin = esSuperadmin();
+    $esTutor      = esTutorDelProyecto($idProyecto);
+
+ 
+    if (
+        !configuracion('permitir_editar') &&
+        !$esSuperadmin &&
+        !$esTutor
+    ) {
+        header('Location: /projecte/' . $idProyecto);
+        exit;
+    }
+}
+
+
 /// Bloque alumnos, restricciones:
 // Solo puede guardar su propio proyecto
 if ($main === 'ficha_accion' && $method === 'POST') {

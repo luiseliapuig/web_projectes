@@ -121,6 +121,7 @@
                 <li><a class="dropdown-item" href="/index.php?main=emails-tutores">Emails tutors</a></li>
                 <li><a class="dropdown-item" href="/index.php?main=emails-alumnos">Emails alumnes</a></li>
                 <li><a class="dropdown-item" href="/index.php?main=lista-emails-profesores">Llista emails professors</a></li>
+                <li><a class="dropdown-item" href="/index.php?main=lista-emails-tutores">Llista emails tutors</a></li>
                 <li><a class="dropdown-item" href="/index.php?main=lista-emails-alumnos">Llista emails alumnes</a></li>
                 <hr>
                 <li><a class="dropdown-item" href="/index.php?main=profesor">Professorat</a></li>

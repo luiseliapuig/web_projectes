@@ -111,8 +111,7 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
     $row['ajustos']  = json_decode($row['ajustos'], true);
 
     $obligatoris = !empty($row['nombre'])
-                && !empty($row['ruta_memoria'])
-                && !empty($row['url_github']);
+                && !empty($row['ruta_memoria']);
 
     $presentacioCompleta = !empty($row['ruta_imagen'])
                         && !empty($row['resumen'])
@@ -297,7 +296,7 @@ if (!function_exists('renderCardEntrega')) {
                 <section class="bloc-control">
                     <div class="bloc-titol">Enllaços</div>
                     <div class="bloc-pills">
-                        <?= renderPill($ckGithub, 'GitHub', true) ?>
+                        <?= renderPill($ckGithub, 'GitHub', false) ?>
                         <?= renderPill($ckDemo,   'Demo',   false) ?>
                         <?php if ($numEnllacos > 0): ?>
                             <span class="pill-check">✓ <?= $numEnllacos ?> enllaç<?= $numEnllacos > 1 ? 'os' : '' ?> extra</span>
