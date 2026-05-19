@@ -3,7 +3,14 @@
 // Calendari de tribunals.
 // Files=hora, Cols=Tribunal 1/2/...N. Selector torn → dia.
 
-declare(strict_types=1);
+if (
+    !configuracion('seleccionar_defensas') &&
+    !esSuperadmin()
+) {
+    die();
+}
+
+
 
 if (!function_exists('h')) {
     function h(?string $v): string {

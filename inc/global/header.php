@@ -74,21 +74,24 @@
             </ul>
             </li>
 
-             <?php if (esProfesor()) { 
-
-               if ( configuracion('seleccionar_defensas')) { ?>
-            <li class="nav-item">
-              <a class="nav-link" href="/calendari-defenses">Calendari defenses</a>
-            </li>
-              <?php } ?>
+             <?php if (esProfesor()) { ?>
 
 
-           <?php if (tieneDefensas()): ?>
-              <li class="nav-item">
-                  <a class="nav-link" href="/les-meves-defenses">Les meves defenses</a>
-              </li>
-          <?php endif; ?>
-            
+                    <?php  if ( configuracion('seleccionar_defensas')  || esSuperadmin()) { ?>
+                      <li class="nav-item">
+                        <a class="nav-link" href="/calendari-defenses">Calendari defenses</a>
+                      </li>
+                    <?php } ?>
+
+
+
+
+                   <?php if (tieneDefensas()): ?>
+                      <li class="nav-item">
+                          <a class="nav-link" href="/les-meves-defenses">Les meves defenses</a>
+                      </li>
+                  <?php endif; ?>
+                    
             <?php } ?>
 
 
