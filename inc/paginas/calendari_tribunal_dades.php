@@ -131,6 +131,19 @@ try {
     $rangMax = max(0, (int)ceil($mitjanaTotalPerProf)  - $apuntatsJo);
     if ($rangMin === $rangMax && $rangMin > 0) $rangMax++;
 
+    // ── 6. Professors per modal admin ─────────────────────────────────
+    $profsList = $pdo->query("
+        SELECT p.id_profesor, p.nombre || ' ' || p.apellidos AS nom_complet,
+               COUNT(rpt.id_proyecto) AS total_tribunals
+        FROM app.profesores p
+        LEFT JOIN app.rel_profesores_tribunal rpt ON rpt.profesor_id = p.id_profesor
+        WHERE p.activo = true
+        GROUP BY p.id_profesor, p.nombre, p.apellidos
+        ORDER BY total_tribunals ASC, p.apellidos, p.nombre
+    ")->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($profsList as &$pr) { $pr['id_profesor'] = (int)$pr['id_profesor']; }
+    unset($pr);
+
     // ── 7. Blocs ──────────────────────────────────────────────────────
     $blocs       = ['tarda' => null, 'mati' => null];
     $projPerTorn = ['mati' => [], 'tarda' => []];
