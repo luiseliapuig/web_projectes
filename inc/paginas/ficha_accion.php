@@ -232,7 +232,7 @@ if (!empty($_FILES['funcional']['name'] ?? '')) {
         echo '<div class="alert alert-danger">El document funcional ha de ser un PDF vàlid.</div>';
         return;
     }
-    $data['ruta_funcional'] = $rutaProyectoRel . '/' . $nombreFuncional;
+    $data['ruta_funcional'] = $rutaProyectoRel . '/' . $nombreFuncional . '?v=' . time();
 }
 
 // Memoria
@@ -242,7 +242,7 @@ if (!empty($_FILES['memoria']['name'] ?? '')) {
         echo '<div class="alert alert-danger">La memòria ha de ser un PDF vàlid.</div>';
         return;
     }
-    $data['ruta_memoria'] = $rutaProyectoRel . '/' . $nombreMemoria;
+    $data['ruta_memoria'] = $rutaProyectoRel . '/' . $nombreMemoria . '?v=' . time();
 }
 
 // Ficha de entrega
@@ -252,7 +252,7 @@ if (!empty($_FILES['ficha_entrega']['name'] ?? '')) {
         echo '<div class="alert alert-danger">La fitxa d\'entrega ha de ser un PDF vàlid.</div>';
         return;
     }
-    $data['ruta_ficha_entrega'] = $rutaProyectoRel . '/' . $nombreFichaEntrega;
+    $data['ruta_ficha_entrega'] = $rutaProyectoRel . '/' . $nombreFichaEntrega . '?v=' . time();
 }
 
 // Update

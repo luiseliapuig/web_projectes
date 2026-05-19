@@ -122,24 +122,14 @@ try {
     }
     $profsActius   = (int)$pdo->query("SELECT COUNT(*) FROM app.profesores WHERE activo = true")->fetchColumn();
     $placesLliures = max(0, $totalProjectes * 3 - $totalOcupades);
-    $mitjanaToca   = $profsActius > 0 ? $placesLliures / $profsActius : 0;
-    // Rang personal: quantes en li queden a ell específicament
-    $rangMin       = max(0, (int)floor($mitjanaToca) - $apuntatsJo);
-    $rangMax       = max(0, (int)ceil($mitjanaToca)  - $apuntatsJo);
-    if ($rangMin === $rangMax && $rangMin > 0) $rangMax++;
 
-    // ── 6. Professors per modal admin ─────────────────────────────────
-    $profsList = $pdo->query("
-        SELECT p.id_profesor, p.nombre || ' ' || p.apellidos AS nom_complet,
-               COUNT(rpt.id_proyecto) AS total_tribunals
-        FROM app.profesores p
-        LEFT JOIN app.rel_profesores_tribunal rpt ON rpt.profesor_id = p.id_profesor
-        WHERE p.activo = true
-        GROUP BY p.id_profesor, p.nombre, p.apellidos
-        ORDER BY total_tribunals ASC, p.apellidos, p.nombre
-    ")->fetchAll(PDO::FETCH_ASSOC);
-    foreach ($profsList as &$pr) { $pr['id_profesor'] = (int)$pr['id_profesor']; }
-    unset($pr);
+    // Quantes hauria de tenir cada professor en total (sobre el global, no sobre les lliures)
+    $mitjanaTotalPerProf = $profsActius > 0 ? ($totalProjectes * 3) / $profsActius : 0;
+
+    // Quantes li queden a ell: objectiu total - les que ja té
+    $rangMin = max(0, (int)floor($mitjanaTotalPerProf) - $apuntatsJo);
+    $rangMax = max(0, (int)ceil($mitjanaTotalPerProf)  - $apuntatsJo);
+    if ($rangMin === $rangMax && $rangMin > 0) $rangMax++;
 
     // ── 7. Blocs ──────────────────────────────────────────────────────
     $blocs       = ['tarda' => null, 'mati' => null];

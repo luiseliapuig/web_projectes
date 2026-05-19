@@ -235,7 +235,7 @@ if (!function_exists('renderCardEntrega')) {
         $ckMemoria   = !empty($p['ruta_memoria']);
         $ckFuncional = !empty($p['ruta_funcional']);
         $ckStack     = !empty($p['stack']);
-        $ckGestio    = $p['num_gestio'] > 0;
+        $ckGestio = ($p['num_gestio'] > 0) || ($p['num_planificacio'] > 0);
         $numArxius   = (int)$p['num_arxius'];
 
         $ckGithub    = !empty($p['url_github']);
