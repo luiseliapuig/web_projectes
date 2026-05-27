@@ -122,13 +122,16 @@ function generarMailProyecto(array $proyecto): string
         $destinatarios = array_filter(array_map('trim', explode(',', $proyecto['emails_alumnos'])));
     }
 
-    $asunto = 'Accés i gestió del vostre projecte';
+    //$asunto = 'Accés i gestió del vostre projecte';
+    $asunto = 'Últim pas del projecte · Pujada de la presentació';
 
     // Cada proyecto tiene su UUID único
     $enlace_acceso = 'https://projectes.elpuig.xeill.net/login/alumnes/' . $proyecto['uuid'];
 
     $saludo = formatearNombres($proyecto['nombres_alumnos']);
 
+
+// EMAIL DE ENTRADA PARA EDITAR LA FICHA
 $cuerpo = $saludo . "
 
 Us fem arribar l'enllaç d'accés al vostre projecte a la web de Projectes Puig Castellar:
@@ -152,6 +155,32 @@ Encara que no tingueu la memòria o el projecte finalitzat, ja hi ha moltes part
 No ho deixeu per a l'últim moment.
 
 Una salutació.";
+
+
+// EMAIL PARA QUE SUBAN LA DEFENSA
+$cuerpo = $saludo . "
+
+Us fem arribar novament l'enllaç d'accés al vostre projecte a la web de Projectes Puig Castellar:
+
+" . $enlace_acceso . "
+
+La fase de defensa ja ha finalitzat i ara només queda una última acció per deixar la fitxa del projecte completament tancada.
+
+
+IMPORTANT:
+
+* Heu de pujar el PDF de la presentació utilitzada durant la defensa.
+
+
+
+Un cop pujada la presentació, la fitxa del vostre projecte quedarà completada i passarà a formar part de l’arxiu de Projectes Puig Castellar.
+
+Gràcies per la vostra implicació i bon estiu!.
+
+";
+
+
+
 
     $gmail = 'https://mail.google.com/mail/?view=cm'
         . '&to='   . rawurlencode(implode(',', $destinatarios))

@@ -578,6 +578,18 @@ window.PAGE_TITLE = '<?= h($proyecto['nombre'] ?? '') ?> | <?= h($proyecto['cicl
                             </div>
                         </div>
 
+                        <?php if (!empty($proyecto['presentacion_defensa'])): ?>
+                        <div class="mb-30">
+                            <h3 class="h3fichas">Defensa</h3>
+
+                            <div class="inner-ficha">
+                                <a href="/<?= h($proyecto['presentacion_defensa']) ?>" target="_blank" class="enlace">
+                                    Presentació de la defensa
+                                </a>
+                            </div>
+                        </div>
+                        <?php endif; ?>
+
                     </div>
 
                 </div>

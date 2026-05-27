@@ -291,9 +291,18 @@ if (!$headerIsLogged) {
                     <i class="lni lni-files me-2"></i>La meva fitxa
                 </a>
             </li>
+
+            <?php if (configuracion('permitir_editar')): ?>
             <li>
                 <a class="dropdown-item" href="/projecte/<?= (int) $_SESSION['projecte_id'] ?>/editar">
                     <i class="lni lni-pencil me-2"></i>Editar fitxa
+                </a>
+            </li>
+            <?php endif; ?>
+            
+            <li>
+                <a class="dropdown-item" href="/projecte/<?= (int) $_SESSION['projecte_id'] ?>/defensa">
+                    <i class="lni lni-upload me-2"></i>Pujar presentació defensa
                 </a>
             </li>
         <?php endif; ?>

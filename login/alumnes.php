@@ -49,5 +49,11 @@ $_SESSION['projecte_uuid'] = (string) $projecte['uuid'];
 $_SESSION['projecte_nom'] = (string) $projecte['nombre'];
 $_SESSION['last_access'] = time();
 
-header('Location: /projecte/' . (int) $projecte['id_proyecto'] . '/editar');
+// SE LES DERIVA A LA EDICIÓN DE LA FICHA
+//header('Location: /projecte/' . (int) $projecte['id_proyecto'] . '/editar');
+
+// SE LES DERIVA AL FORM PARA SUBIR LA PRESENTACIÓN DE LA DEFENSA
+header('Location: /projecte/' . (int) $projecte['id_proyecto'] . '/defensa');
+
+
 exit;

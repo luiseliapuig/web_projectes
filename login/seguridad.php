@@ -91,6 +91,39 @@ if ($main === 'ficha_accion' && $method === 'POST') {
     }
 }
 
+
+// SUBIDA PDF DEFENSA
+if ($main === 'ficha-defensa-accion' && $method === 'POST') {
+
+    $idProyectoPost = isset($_POST['id_proyecto'])
+        ? (int)$_POST['id_proyecto']
+        : 0;
+
+    if (
+        !esSuperadmin() &&
+        !$isAlumne &&
+        !esTutorDelProyecto($idProyectoPost)
+    ) {
+        exit;
+    }
+
+    // Validación estricta alumno
+    if ($isAlumne && !esSuperadmin()) {
+
+        $idSesion   = (int)$_SESSION['projecte_id'];
+        $uuidSesion = (string)$_SESSION['projecte_uuid'];
+        $uuidPost   = trim((string)($_POST['uuid'] ?? ''));
+
+        if (
+            $idProyectoPost !== $idSesion ||
+            $uuidPost !== $uuidSesion
+        ) {
+            exit;
+        }
+    }
+}
+
+
 // Futuro:
 // Profesores, fases del sistema y permisos avanzados
 
