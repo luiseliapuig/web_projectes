@@ -92,6 +92,8 @@
                       </li>
                   <?php endif; ?>
                     
+
+                     <li><a class="nav-link" href="/entregues/SMX">Notes finals</a></li>
             <?php } ?>
 
 
