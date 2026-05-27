@@ -1,6 +1,13 @@
 <?php
 // entregas.php — vista
 
+$professor_id = isset($_SESSION['professor_id']) ? (int)$_SESSION['professor_id'] : null;
+
+if (!$professor_id) {
+    echo '<div class="alert alert-warning rounded-4">Has d\'estar identificat com a professor per veure les teves defenses.</div>';
+    return;
+}
+
 $cicleActiu = $_GET['cicle'] ?? null;
 
 // Cicles disponibles (els que tenen projectes)
