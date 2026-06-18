@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<title>Seguiment del projecte</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #f3f4f6;
+  color: #1f2937;
+}
+
+.container {
+  max-width: 1000px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+h1 { margin-bottom: 6px; }
+
+.intro {
+  color: #6b7280;
+  margin-bottom: 22px;
+}
+
+.actions-top {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 26px;
+}
+
+.card {
+  display: none;
+  background: #fff;
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.06);
+  margin-bottom: 32px;
+}
+
+.card:target {
+  display: block;
+}
+
+h2 { margin-top: 0; }
+
+.objectiu-anterior {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.objectiu-anterior strong { color: #1d4ed8; }
+
+.radio-group {
+  display: flex;
+  gap: 18px;
+  margin: 8px 0 22px;
+}
+
+.radio-group label { font-weight: 500; }
+
+label {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+textarea,
+select {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 15px;
+  font-family: inherit;
+  background: #f9fafb;
+  margin-bottom: 18px;
+}
+
+textarea {
+  min-height: 95px;
+  resize: vertical;
+}
+
+.btn {
+  display: inline-block;
+  border: none;
+  border-radius: 999px;
+  padding: 12px 22px;
+  background: #2563eb;
+  color: white;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.btn.secondary {
+  background: #374151;
+}
+
+.audit-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.timeline-title {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.entry {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.entry-date {
+  width: 115px;
+  flex-shrink: 0;
+  text-align: right;
+  color: #6b7280;
+  font-size: 14px;
+  padding-top: 10px;
+}
+
+.bubble {
+  flex: 1;
+  background: white;
+  border-radius: 18px;
+  padding: 20px 22px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.05);
+  border-left: 6px solid #2563eb;
+}
+
+.bubble.success { border-left-color: #10b981; }
+.bubble.warning { border-left-color: #f59e0b; }
+.bubble.danger { border-left-color: #ef4444; }
+.bubble.audit { border-left-color: #7c3aed; background: #fdfcff; }
+
+.entry-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.entry-header strong { font-size: 17px; }
+
+.tag {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.tag.success {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.tag.warning {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.tag.danger {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.tag.audit {
+  background: #ede9fe;
+  color: #5b21b6;
+}
+
+.section {
+  margin-bottom: 14px;
+}
+
+.section-title {
+  font-weight: 700;
+  color: #374151;
+  margin-bottom: 4px;
+}
+
+.section p {
+  margin: 0;
+  color: #4b5563;
+  line-height: 1.45;
+}
+
+.tutor-comment {
+  margin-top: 18px;
+  padding: 15px 17px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 14px;
+}
+
+.tutor-comment strong { color: #9a3412; }
+
+.audit-status {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  margin: 16px 0;
+}
+
+.audit-item {
+  background: #f9fafb;
+  border-radius: 14px;
+  padding: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.audit-item small {
+  display: block;
+  color: #6b7280;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+@media (max-width: 900px) {
+  .audit-grid,
+  .audit-status {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .entry {
+    flex-direction: column;
+  }
+
+  .entry-date {
+    width: auto;
+    text-align: left;
+  }
+
+  .radio-group {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>Seguiment del projecte</h1>
+  <p class="intro">
+    Espai de registre setmanal i d’auditories puntuals per deixar constància del procés real del projecte.
+  </p>
+
+  <div class="actions-top">
+    <a href="#form-seguiment" class="btn">+ Seguiment setmanal</a>
+    <a href="#form-auditoria" class="btn secondary">+ Auditoria</a>
+  </div>
+
+  <div id="form-seguiment" class="card">
+    <h2>Nova entrada setmanal</h2>
+
+    <div class="objectiu-anterior">
+      <strong>Objectiu d'aquesta setmana:</strong><br>
+      Connectar el panell d'usuari amb les dades reals i començar la part d'administració.
+    </div>
+
+    <label>S'ha completat aquest objectiu?</label>
+    <div class="radio-group">
+      <label><input type="radio" name="complert"> Sí</label>
+      <label><input type="radio" name="complert"> Parcialment</label>
+      <label><input type="radio" name="complert"> No</label>
+    </div>
+
+    <label>Què heu fet aquesta setmana?</label>
+    <textarea placeholder="Tasques realitzades, funcionalitats implementades, reunions, proves..."></textarea>
+
+    <label>Incidències, dificultats i decisions importants</label>
+    <textarea placeholder="Problemes tècnics, canvis de plantejament, decisions preses o aspectes que cal tenir en compte."></textarea>
+
+    <label>Objectius per a la setmana vinent</label>
+    <textarea placeholder="Què us comprometeu a tenir acabat o avançat abans de la propera revisió."></textarea>
+
+    <button class="btn">Guardar seguiment</button>
+  </div>
+
+  <div id="form-auditoria" class="card">
+    <h2>Nova auditoria del tutor</h2>
+
+    <div class="audit-grid">
+      <div>
+        <label>Entorn</label>
+        <select>
+          <option>Operatiu</option>
+          <option>Parcialment operatiu</option>
+          <option>No operatiu</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Git</label>
+        <select>
+          <option>Activitat regular</option>
+          <option>Activitat irregular</option>
+          <option>Repositori sense activitat</option>
+          <option>Sense repositori</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Gestió</label>
+        <select>
+          <option>Gestió correcta</option>
+          <option>Gestió mínima</option>
+          <option>Sense gestió</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Evidència</label>
+        <select>
+          <option>Producte verificable</option>
+          <option>Evidències parcials</option>
+          <option>Sense evidències</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Documentació</label>
+        <select>
+          <option>Correcta</option>
+          <option>Bàsica</option>
+          <option>Insuficient</option>
+        </select>
+      </div>
+    </div>
+
+    <label>Observacions del tutor</label>
+    <textarea placeholder="Valoració general de l’estat tècnic del projecte, riscos detectats o aspectes que cal prioritzar."></textarea>
+
+    <button class="btn">Guardar auditoria</button>
+  </div>
+
+  <h2 class="timeline-title">Historial de seguiment</h2>
+
+
+
+<div class="entry">
+  <div class="entry-date">Setmana 9<br>24 març</div>
+
+  <div class="bubble success">
+    <div class="entry-header">
+      <strong>Entrada de l'alumnat</strong>
+      <span class="tag success">Objectiu completat</span>
+    </div>
+
+
+<div class="section objectiu-anterior">
+  <div class="section-title">Objectius d'aquesta setmana</div>
+  <p>Connectar el panell d'usuari amb les dades reals i començar la part d'administració.</p>
+</div>
+
+<div class="section">
+  <div class="section-title">Què hem fet aquesta setmana?</div>
+  <p>Hem connectat el panell d'usuari amb la base de dades i ja es mostren les dades reals de cada usuari. També hem creat les primeres pantalles d'administració per gestionar usuaris i modificar els seus permisos.</p>
+</div>
+
+<div class="section">
+  <div class="section-title">Incidències, dificultats i decisions importants</div>
+  <p>Hem detectat que algunes consultes es repetien en diferents pantalles. Per evitar duplicar codi hem creat una capa de funcions comunes per accedir a la base de dades. També hem decidit implementar un sistema de rols simple (administrador i usuari) per no complicar la primera versió.</p>
+</div>
+
+<div class="section">
+  <div class="section-title">Objectius per a la setmana vinent</div>
+  <p>Completar les funcionalitats bàsiques del panell d'administració i començar les proves d'ús amb dades reals.</p>
+</div>
+
+<div class="tutor-comment">
+  <strong>Comentari del tutor:</strong>
+  Bon progrés. La decisió de centralitzar les consultes és encertada i us facilitarà el manteniment. A mesura que avanceu, aneu documentant també l'estructura dels rols i els permisos, ja que serà una part important de la memòria.
+</div>
+
+
+  </div>
+</div>
+
+
+
+  <div class="entry">
+    <div class="entry-date">Setmana 8<br>17 març</div>
+
+    <div class="bubble success">
+      <div class="entry-header">
+        <strong>Entrada de l'alumnat</strong>
+        <span class="tag success">Objectiu completat</span>
+      </div>
+
+      <div class="section objectiu-anterior">
+        <div class="section-title">Objectius d'aquesta setmana</div>
+        <p>Acabar el sistema de login i registrar nous usuaris a la base de dades.</p>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Què hem fet aquesta setmana?</div>
+        <p>Hem acabat el sistema de login, hem creat la pantalla principal i ja podem guardar usuaris a la base de dades.</p>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Incidències, dificultats i decisions importants</div>
+        <p>Ens ha costat validar correctament els formularis i mostrar els errors sense perdre les dades introduïdes. Hem separat la validació en una funció pròpia.</p>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Objectius per a la setmana vinent</div>
+        <p>Connectar el panell d'usuari amb les dades reals i començar la part d'administració.</p>
+      </div>
+
+      <div class="tutor-comment">
+        <strong>Comentari del tutor:</strong>
+        Bon avanç. Intenteu documentar ja les decisions tècniques, sobretot el sistema de validació i l'estructura de la base de dades.
+      </div>
+    </div>
+  </div>
+
+
+
+  <div class="entry">
+    <div class="entry-date">Auditoria<br>15 març</div>
+
+    <div class="bubble audit">
+      <div class="entry-header">
+        <strong>Auditoria tècnica del tutor</strong>
+        <span class="tag audit">Revisió mensual</span>
+      </div>
+
+      <div class="audit-status">
+        <div class="audit-item">
+          <small>Entorn</small>
+          <span class="tag success">Operatiu</span>
+        </div>
+
+        <div class="audit-item">
+          <small>Git</small>
+          <span class="tag success">Activitat regular</span>
+        </div>
+
+        <div class="audit-item">
+          <small>Gestió</small>
+          <span class="tag warning">Gestió mínima</span>
+        </div>
+
+        <div class="audit-item">
+          <small>Evidència</small>
+          <span class="tag warning">Evidències parcials</span>
+        </div>
+
+        <div class="audit-item">
+          <small>Documentació</small>
+          <span class="tag danger">Insuficient</span>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Observacions del tutor</div>
+        <p>El projecte ja té una base tècnica sòlida i es pot executar en local. El repositori mostra activitat regular, però la gestió de tasques és encara poc clara. Cal començar a documentar millor la instal·lació i preparar una evidència més fàcil de mostrar.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-date">Setmana 7<br>10 març</div>
+
+    <div class="bubble warning">
+      <div class="entry-header">
+        <strong>Entrada de l'alumnat</strong>
+        <span class="tag warning">Objectiu parcial</span>
+      </div>
+
+      <div class="section objectiu-anterior">
+        <div class="section-title">Objectius d'aquesta setmana</div>
+        <p>Crear la base de dades inicial i començar el sistema de registre.</p>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Què hem fet aquesta setmana?</div>
+        <p>Hem creat les primeres taules i hem començat la connexió amb la base de dades.</p>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Incidències, dificultats i decisions importants</div>
+        <p>No teníem clar si separar usuaris i perfils en dues taules o fer-ho tot en una sola. Finalment hem optat per una estructura més simple.</p>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Objectius per a la setmana vinent</div>
+        <p>Acabar el login i permetre registrar usuaris nous.</p>
+      </div>
+
+      <div class="tutor-comment">
+        <strong>Comentari del tutor:</strong>
+        Bona decisió. Per al projecte és millor una versió senzilla però funcional que una estructura massa ambiciosa que després no arribi a temps.
+      </div>
+    </div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-date">Auditoria<br>28 febrer</div>
+
+    <div class="bubble audit">
+      <div class="entry-header">
+        <strong>Auditoria tècnica del tutor</strong>
+        <span class="tag audit">Revisió mensual</span>
+      </div>
+
+      <div class="audit-status">
+        <div class="audit-item">
+          <small>Entorn</small>
+          <span class="tag warning">Parcialment operatiu</span>
+        </div>
+
+        <div class="audit-item">
+          <small>Git</small>
+          <span class="tag warning">Activitat irregular</span>
+        </div>
+
+        <div class="audit-item">
+          <small>Gestió</small>
+          <span class="tag danger">Sense gestió</span>
+        </div>
+
+        <div class="audit-item">
+          <small>Evidència</small>
+          <span class="tag danger">Sense evidències</span>
+        </div>
+
+        <div class="audit-item">
+          <small>Documentació</small>
+          <span class="tag danger">Insuficient</span>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Observacions del tutor</div>
+        <p>El projecte encara està en una fase inicial. Hi ha una idea clara, però falten evidències tècniques visibles. Cal configurar bé l’entorn, començar a fer commits de manera regular i utilitzar una eina senzilla de gestió per ordenar les tasques.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-date">Setmana 6<br>3 març</div>
+
+    <div class="bubble danger">
+      <div class="entry-header">
+        <strong>Entrada de l'alumnat</strong>
+        <span class="tag danger">Objectiu no completat</span>
+      </div>
+
+      <div class="section objectiu-anterior">
+        <div class="section-title">Objectius d'aquesta setmana</div>
+        <p>Definir totes les pantalles principals de l'aplicació.</p>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Què hem fet aquesta setmana?</div>
+        <p>Hem revisat el document funcional i hem començat a dibuixar les pantalles principals, però encara no les tenim totes tancades.</p>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Incidències, dificultats i decisions importants</div>
+        <p>Ens hem adonat que havíem plantejat massa funcionalitats per a la primera versió. Hem decidit separar les funcionalitats imprescindibles de les opcionals.</p>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Objectius per a la setmana vinent</div>
+        <p>Tancar les pantalles bàsiques i començar la base de dades inicial.</p>
+      </div>
+
+      <div class="tutor-comment">
+        <strong>Comentari del tutor:</strong>
+        Aquesta separació entre imprescindible i opcional és clau. No passa res per retallar si això ajuda a arribar a una primera versió funcional.
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<title>Revisió de la memòria - Tutor</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #f3f4f6;
+  color: #1f2937;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+h1 {
+  margin-bottom: 6px;
+}
+
+.intro {
+  color: #6b7280;
+  margin-bottom: 22px;
+}
+
+.top-actions {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  display: inline-block;
+  border: none;
+  border-radius: 999px;
+  padding: 12px 22px;
+  background: #2563eb;
+  color: white;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.btn.secondary {
+  background: #374151;
+}
+
+.memory-block {
+  background: white;
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.06);
+  border-left: 7px solid #d1d5db;
+  margin-bottom: 20px;
+}
+
+.memory-block.ok { border-left-color: #10b981; }
+.memory-block.work { border-left-color: #f59e0b; }
+.memory-block.incomplete { border-left-color: #ef4444; }
+.memory-block.pending { border-left-color: #9ca3af; }
+
+.block-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 18px;
+}
+
+.block-header h2 {
+  margin: 0 0 6px;
+  font-size: 22px;
+}
+
+.block-header p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.guide-link {
+  color: #2563eb;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+.block-body {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 18px;
+}
+
+label {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+select,
+textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  padding: 11px 13px;
+  font-size: 15px;
+  font-family: inherit;
+  background: #f9fafb;
+}
+
+textarea {
+  min-height: 105px;
+  resize: vertical;
+}
+
+.meta {
+  margin-top: 14px;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.save-actions {
+  text-align: right;
+  margin-top: 28px;
+}
+
+@media (max-width: 800px) {
+  .block-body {
+    grid-template-columns: 1fr;
+  }
+
+  .block-header {
+    flex-direction: column;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>Revisió de la memòria</h1>
+  <p class="intro">
+    Panell del tutor per revisar l’estat dels blocs principals de la memòria i deixar indicacions concretes de millora.
+  </p>
+
+  <div class="top-actions">
+    <a class="btn" href="#">Obrir document de la memòria</a>
+    
+  </div>
+
+  <form>
+
+    <div class="memory-block ok">
+      <div class="block-header">
+        <div>
+          <h2>1. Presentació del projecte</h2>
+          <p>Introducció, context, justificació i objectius generals.</p>
+        </div>
+        <a class="guide-link" href="#">Guia per fer aquest apartat</a>
+      </div>
+
+      <div class="block-body">
+        <div>
+          <label>Estat</label>
+          <select>
+            <option>Complet</option>
+            <option>A treballar</option>
+            <option>Incomplet</option>
+            <option>No revisat</option>
+          </select>
+          <div class="meta">Última revisió: 18 març</div>
+        </div>
+
+        <div>
+          <label>Comentaris del tutor</label>
+          <textarea>La introducció és clara i els objectius estan ben plantejats. Caldria revisar una mica la justificació.</textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="memory-block work">
+      <div class="block-header">
+        <div>
+          <h2>2. Estratègia i planificació</h2>
+          <p>Estratègia de desenvolupament, metodologia i planificació temporal.</p>
+        </div>
+        <a class="guide-link" href="#">Guia per fer aquest apartat</a>
+      </div>
+
+      <div class="block-body">
+        <div>
+          <label>Estat</label>
+          <select>
+            <option>A treballar</option>
+            <option>Complet</option>
+            <option>Incomplet</option>
+            <option>No revisat</option>
+          </select>
+          <div class="meta">Última revisió: 18 març</div>
+        </div>
+
+        <div>
+          <label>Comentaris del tutor</label>
+          <textarea>La metodologia està explicada, però la planificació encara és massa genèrica. Cal concretar millor les fases.</textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="memory-block incomplete">
+      <div class="block-header">
+        <div>
+          <h2>3. Anàlisi</h2>
+          <p>Casos d’ús, requisits i alternatives tecnològiques.</p>
+        </div>
+        <a class="guide-link" href="#">Guia per fer aquest apartat</a>
+      </div>
+
+      <div class="block-body">
+        <div>
+          <label>Estat</label>
+          <select>
+            <option>Incomplet</option>
+            <option>A treballar</option>
+            <option>Complet</option>
+            <option>No revisat</option>
+          </select>
+          <div class="meta">Última revisió: 18 març</div>
+        </div>
+
+        <div>
+          <label>Comentaris del tutor</label>
+          <textarea>Falten els requisits no funcionals i l’anàlisi d’alternatives tecnològiques.</textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="memory-block work">
+      <div class="block-header">
+        <div>
+          <h2>4. Disseny</h2>
+          <p>Arquitectura del sistema, model de dades i disseny d’interfície.</p>
+        </div>
+        <a class="guide-link" href="#">Guia per fer aquest apartat</a>
+      </div>
+
+      <div class="block-body">
+        <div>
+          <label>Estat</label>
+          <select>
+            <option>A treballar</option>
+            <option>Complet</option>
+            <option>Incomplet</option>
+            <option>No revisat</option>
+          </select>
+          <div class="meta">Última revisió: 18 març</div>
+        </div>
+
+        <div>
+          <label>Comentaris del tutor</label>
+          <textarea>El model de dades està força bé, però falta explicar millor l’arquitectura general.</textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="memory-block work">
+      <div class="block-header">
+        <div>
+          <h2>5. Desenvolupament</h2>
+          <p>Estructura del projecte, funcionalitats implementades i proves.</p>
+        </div>
+        <a class="guide-link" href="#">Guia per fer aquest apartat</a>
+      </div>
+
+      <div class="block-body">
+        <div>
+          <label>Estat</label>
+          <select>
+            <option>A treballar</option>
+            <option>Complet</option>
+            <option>Incomplet</option>
+            <option>No revisat</option>
+          </select>
+          <div class="meta">Última revisió: 18 març</div>
+        </div>
+
+        <div>
+          <label>Comentaris del tutor</label>
+          <textarea>Aquest apartat hauria de ser més narratiu. Expliqueu què heu implementat i quines dificultats heu trobat.</textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="memory-block incomplete">
+      <div class="block-header">
+        <div>
+          <h2>6. Conclusions</h2>
+          <p>Conclusions generals, assoliment d’objectius i línies de futur.</p>
+        </div>
+        <a class="guide-link" href="#">Guia per fer aquest apartat</a>
+      </div>
+
+      <div class="block-body">
+        <div>
+          <label>Estat</label>
+          <select>
+            <option>Incomplet</option>
+            <option>A treballar</option>
+            <option>Complet</option>
+            <option>No revisat</option>
+          </select>
+          <div class="meta">Última revisió: 18 març</div>
+        </div>
+
+        <div>
+          <label>Comentaris del tutor</label>
+          <textarea>Encara no està desenvolupat. Caldrà valorar què s’ha aconseguit, què no i què es podria millorar.</textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="memory-block ok">
+      <div class="block-header">
+        <div>
+          <h2>7. Glossari</h2>
+          <p>Definició dels termes tècnics més importants.</p>
+        </div>
+        <a class="guide-link" href="#">Guia per fer aquest apartat</a>
+      </div>
+
+      <div class="block-body">
+        <div>
+          <label>Estat</label>
+          <select>
+            <option>Complet</option>
+            <option>A treballar</option>
+            <option>Incomplet</option>
+            <option>No revisat</option>
+          </select>
+          <div class="meta">Última revisió: 18 març</div>
+        </div>
+
+        <div>
+          <label>Comentaris del tutor</label>
+          <textarea>Correcte. Reviseu només que tots els termes apareguin realment a la memòria.</textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="memory-block work">
+      <div class="block-header">
+        <div>
+          <h2>8. Bibliografia</h2>
+          <p>Fonts consultades, documentació tècnica, webs i recursos utilitzats.</p>
+        </div>
+        <a class="guide-link" href="#">Guia per fer aquest apartat</a>
+      </div>
+
+      <div class="block-body">
+        <div>
+          <label>Estat</label>
+          <select>
+            <option>A treballar</option>
+            <option>Complet</option>
+            <option>Incomplet</option>
+            <option>No revisat</option>
+          </select>
+          <div class="meta">Última revisió: 18 març</div>
+        </div>
+
+        <div>
+          <label>Comentaris del tutor</label>
+          <textarea>Cal ordenar millor les fonts i afegir la documentació tècnica consultada.</textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="memory-block incomplete">
+      <div class="block-header">
+        <div>
+          <h2>9. Annexos</h2>
+          <p>Documentació complementària, captures, esquemes i proves.</p>
+        </div>
+        <a class="guide-link" href="#">Guia per fer aquest apartat</a>
+      </div>
+
+      <div class="block-body">
+        <div>
+          <label>Estat</label>
+          <select>
+            <option>Incomplet</option>
+            <option>A treballar</option>
+            <option>Complet</option>
+            <option>No revisat</option>
+          </select>
+          <div class="meta">Última revisió: 18 març</div>
+        </div>
+
+        <div>
+          <label>Comentaris del tutor</label>
+          <textarea>Encara falten annexos. Podeu afegir captures del procés, proves i esquemes de la base de dades.</textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="save-actions">
+      <button class="btn">Guardar revisió de la memòria</button>
+    </div>
+
+  </form>
+
+</div>
+
+</body>
+</html>

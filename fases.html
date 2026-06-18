@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<title>Fases del projecte</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #f3f4f6;
+  color: #1f2937;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+h1 {
+  margin-bottom: 6px;
+}
+
+.intro {
+  color: #6b7280;
+  margin-bottom: 28px;
+}
+
+.phases-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.phase-card {
+  background: #fff;
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.06);
+  border-left: 7px solid #d1d5db;
+}
+
+.phase-card.completed {
+  border-left-color: #10b981;
+}
+
+.phase-card.progress {
+  border-left-color: #f59e0b;
+}
+
+.phase-card.pending {
+  border-left-color: #9ca3af;
+}
+
+.phase-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.phase-card h2 {
+  margin: 0;
+  font-size: 21px;
+}
+
+.status {
+  padding: 5px 11px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.status.completed {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status.progress {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status.pending {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.phase-card p {
+  color: #6b7280;
+  line-height: 1.45;
+  margin: 0 0 18px;
+}
+
+.btn {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 11px 20px;
+  background: #2563eb;
+  color: white;
+  font-weight: 700;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+@media (max-width: 800px) {
+  .phases-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .phase-header {
+    flex-direction: column;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>Fases del projecte</h1>
+  <p class="intro">
+    Punt d’entrada a les diferents fases del projecte, des de la idea inicial fins a la defensa final.
+  </p>
+
+  <div class="phases-grid">
+
+    <div class="phase-card completed">
+      <div class="phase-header">
+        <h2>Fase 1 · Pluja d'idees i formació de grups</h2>
+        <span class="status completed">Completada</span>
+      </div>
+      <p>Definició inicial d’idees, exploració de possibilitats i configuració dels equips de treball.</p>
+      <a href="#" class="btn">Entrar</a>
+    </div>
+
+    <div class="phase-card completed">
+      <div class="phase-header">
+        <h2>Fase 2 · Proposta de projecte</h2>
+        <span class="status completed">Completada</span>
+      </div>
+      <p>Presentació formal de la proposta inicial, objectius generals i validació del tema del projecte.</p>
+      <a href="#" class="btn">Entrar</a>
+    </div>
+
+    <div class="phase-card progress">
+      <div class="phase-header">
+        <h2>Fase 3 · Document funcional</h2>
+        <span class="status progress">En procés</span>
+      </div>
+      <p>Construcció i revisió del document funcional com a base del desenvolupament posterior.</p>
+      <a href="#" class="btn">Entrar</a>
+    </div>
+
+    <div class="phase-card progress">
+      <div class="phase-header">
+        <h2>Fase 4 · Planificació i gestió</h2>
+        <span class="status progress">En procés</span>
+      </div>
+      <p>Organització de tasques, calendari de treball, eines de gestió i seguiment dels compromisos.</p>
+      <a href="#" class="btn">Entrar</a>
+    </div>
+
+    <div class="phase-card progress">
+      <div class="phase-header">
+        <h2>Fase 5 · Desenvolupament del projecte</h2>
+        <span class="status progress">En procés</span>
+      </div>
+      <p>Implementació del producte, seguiment setmanal, auditories puntuals i evidències tècniques.</p>
+      <a href="#" class="btn">Entrar</a>
+    </div>
+
+    <div class="phase-card pending">
+      <div class="phase-header">
+        <h2>Fase 6 · Memòria</h2>
+        <span class="status pending">Pendent</span>
+      </div>
+      <p>Redacció, revisió per blocs i millora progressiva de la memòria final del projecte.</p>
+      <a href="#" class="btn">Entrar</a>
+    </div>
+
+    <div class="phase-card pending">
+      <div class="phase-header">
+        <h2>Fase 7 · Defensa</h2>
+        <span class="status pending">Pendent</span>
+      </div>
+      <p>Preparació de la presentació final, lliurament de materials i defensa davant del tribunal.</p>
+      <a href="#" class="btn">Entrar</a>
+    </div>
+
+  </div>
+
+</div>
+
+</body>
+</html>
