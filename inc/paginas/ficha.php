@@ -618,7 +618,17 @@ window.PAGE_TITLE = '<?= h($proyecto['nombre'] ?? '') ?> | <?= h($proyecto['cicl
             || esProfesor()
         ) {
             include('bloque-tutor.php');
+            
             include('bloque-tribunal.php');
+        echo '<small class="text-muted" style="margin: -30px 0 10px 0">
+    
+    <span class="star filled">★</span> = 2 pts ·
+    <span class="star filled">★</span><span class="star filled">★</span> = 4 pts·
+    <span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span> = 6 pts ·
+    <span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span> = 8 pts ·
+    <span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span> = 10 pts
+</small>';
+
         }
 
         // la nota final la ven los alumnos si se permite y los profesores siempre

@@ -118,6 +118,11 @@ function notaAmbAjust(?float $base, float $ajust): string {
 }
 ?>
 
+<style>
+    .nota-final, .nota-max, .btn-ajuste-circulo, .etiqueta-ajust { display: none;}
+
+</style>
+
 <div class="mb-30" id="bloque-nota-final">
   <div class="bloque-final rounded-4 p-4 p-md-5">
     <div class="row align-items-center">
