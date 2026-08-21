@@ -65,23 +65,22 @@ $headerFallbackIcon = '👤';
  * o alumnos asociados para mostrarlo en el header.
  * ============================================================
  */
-if ($headerAuthTipo === 'alumne' && isset($_SESSION['projecte_id'])) {
-    $idProyectoHeader = (int) $_SESSION['projecte_id'];
+if ($headerAuthTipo === 'alumne' && isset($_SESSION['alumno_id'])) {
+    $idAlumnoHeader = (int) $_SESSION['alumno_id'];
 
-    if ($idProyectoHeader > 0) {
+    if ($idAlumnoHeader > 0) {
         try {
             $stmt = $pdo->prepare("
                 SELECT
                     a.nombre,
                     a.apellidos
-                FROM rel_proyectos_alumnos r
-                INNER JOIN alumnos a
-                    ON a.id_alumno = r.alumno_id
-                WHERE r.proyecto_id = :id_proyecto
-                ORDER BY a.apellidos, a.nombre
+                FROM alumnos a
+                WHERE a.id_alumno = :id_alumno
+                  AND a.activo = true
+                LIMIT 1
             ");
             $stmt->execute([
-                'id_proyecto' => $idProyectoHeader
+                'id_alumno' => $idAlumnoHeader
             ]);
             $alumnosHeader = $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
@@ -104,10 +103,10 @@ if ($headerAuthTipo === 'alumne' && isset($_SESSION['projecte_id'])) {
         $headerIsLogged = true;
         $headerProfileName = !empty($nombres) ? implode(', ', $nombres) : 'Alumnat';
         $headerProfileRole = count($nombres) > 1 ? 'Alumnes' : 'Alumne';
-        $headerProfileEmail = '';
+        $headerProfileEmail = (string) ($_SESSION['alumno_email'] ?? '');
         $headerProfileImage = '';
         $headerHasImage = false;
-        $headerMainLink = '/projecte/' . $idProyectoHeader;
+        $headerMainLink = isset($_SESSION['projecte_id']) ? '/projecte/' . (int) $_SESSION['projecte_id'] : '/';
         $headerFallbackIcon = '👥';
     }
 }
@@ -123,7 +122,7 @@ if ($headerAuthTipo === 'alumne' && isset($_SESSION['projecte_id'])) {
  * ============================================================
  */
 if (
-    in_array($headerAuthTipo, ['professor', 'professor_pending'], true) &&
+    $headerAuthTipo === 'professor' &&
     isset($_SESSION['professor_id'])
 ) {
     $idProfesorHeader = (int) $_SESSION['professor_id'];
@@ -197,7 +196,7 @@ if (
  */
 if (!$headerIsLogged) {
     $headerProfileName = 'Accedir';
-    $headerProfileRole = 'Professorat';
+    $headerProfileRole = 'Usuaris';
     $headerMainLink = '/accedir';
 }
 ?>
@@ -307,20 +306,43 @@ if (!$headerIsLogged) {
             </li>
         <?php endif; ?>
 
-        <?php if (in_array($headerAuthTipo, ['professor', 'professor_pending'], true)): ?>
+        <?php if ($headerAuthTipo === 'professor'): ?>
+            <!-- La gestió de projectes només apareix amb grups docents assignats. -->
+            <?php if ($mostrarAdministrarProyectos): ?>
             <li>
-                <a class="dropdown-item" href="/password">
-                    <i class="lni lni-lock me-2"></i>Canviar contrasenya
+                <a class="dropdown-item" href="/index.php?main=projectes-grup">
+                    <i class="lni lni-folder me-2"></i>Administrar projectes
                 </a>
             </li>
+            <?php endif; ?>
+
+            <?php if ($mostrarAdministrarAlumnado): ?>
+            <li>
+                <a class="dropdown-item" href="/index.php?main=alumnat-tutor">
+                    <i class="lni lni-users me-2"></i>Administrar alumnat
+                </a>
+            </li>
+            <?php endif; ?>
+
         <?php endif; ?>
 
         <li><hr class="dropdown-divider"></li>
 
         <li>
-            <a class="dropdown-item text-danger" href="/logout">
-                <i class="lni lni-exit me-2"></i>Tancar sessió
+            <a class="dropdown-item" href="/canviar-contrasenya">
+                <i class="lni lni-lock me-2"></i>Canviar contrasenya
             </a>
+        </li>
+
+        <li><hr class="dropdown-divider"></li>
+
+        <li>
+            <form method="post" action="/logout">
+                <input type="hidden" name="csrf_token" value="<?= h(tokenCsrf()) ?>">
+                <button type="submit" class="dropdown-item text-danger">
+                    <i class="lni lni-exit me-2"></i>Tancar sessió
+                </button>
+            </form>
         </li>
     </ul>
 

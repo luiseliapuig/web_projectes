@@ -1,4 +1,23 @@
+<?php
+// Estado general de navegación. Las reglas de configuración controlan la
+// visibilidad; las relaciones del profesor siguen decidiendo qué enlaces aplican.
+$esProfesorMenu = esProfesor();
+$esSuperadminMenu = $esProfesorMenu && esSuperadmin();
 
+// La inscripción en tribunales depende de su regla específica. El
+// superadministrador conserva el acceso para supervisar incluso al cerrarla.
+$mostrarCalendarioDefensas = $esProfesorMenu
+    && (configuracion('seleccionar_defensas') || $esSuperadminMenu);
+
+// El resto de enlaces docentes mantiene sus reglas y requisitos contextuales.
+$mostrarMisDefensas = $esProfesorMenu
+    && (configuracion('mostrar_mis_defensas') || $esSuperadminMenu);
+$mostrarNotasFinales = $esProfesorMenu
+    && (configuracion('mostrar_notes_finals') || $esSuperadminMenu);
+$mostrarAdministrarProyectos = $esProfesorMenu && esTutor();
+$mostrarAdministrarAlumnado = $mostrarAdministrarProyectos;
+$mostrarProyectosTutorizados = $esProfesorMenu && esTutor();
+?>
 <!-- ===== HEADER PROJECTES ===== -->
 <header class="site-header border-bottom">
 
@@ -74,79 +93,19 @@
             </ul>
             </li>
 
-             <?php if (esProfesor()) { ?>
-
-
-                    <?php  if ( configuracion('seleccionar_defensas')  || esSuperadmin()) { ?>
-                      <li class="nav-item">
-                        <a class="nav-link" href="/calendari-defenses">Calendari defenses</a>
-                      </li>
-                    <?php } ?>
-
-
-
-
-                   <?php if (tieneDefensas()): ?>
-                      <li class="nav-item">
-                          <a class="nav-link" href="/les-meves-defenses">Les meves defenses</a>
-                      </li>
-                  <?php endif; ?>
-                    
-
-                     <li><a class="nav-link" href="/entregues/SMX">Notes finals</a></li>
-            <?php } ?>
-
-
-            <?php if (esTutor()) { ?>
-            <li class="nav-item">
-              <a class="nav-link" href="/projectes-tutoritzats">Projectes tutoritzats</a>
-            </li>
-            <?php } ?>
-
-            <?php if (esSuperadmin()): ?>
-            <li class="nav-item dropdown">
-              <a
-                class="nav-link dropdown-toggle"
-                href="#"
-                id="adminDropdown"
-                role="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
-                Administració
-              </a>
-              <ul class="dropdown-menu" aria-labelledby="adminDropdown">
-                <li><a class="dropdown-item" href="/entregues/SMX">Entregues</a></li>
-                <hr>
-                <li><a class="dropdown-item" href="/index.php?main=configuracion">Configuració</a></li>
-                <li><a class="dropdown-item" href="/index.php?main=calendari_drag">Planificació defenses</a></li>
-                <li><a class="dropdown-item" href="/index.php?main=defensas_print">Imprimir defenses</a></li>
-                <hr>
-                <li><a class="dropdown-item" href="/index.php?main=emails-profesores">Emails professorat</a></li>
-                <li><a class="dropdown-item" href="/index.php?main=emails-tutores">Emails tutors</a></li>
-                <li><a class="dropdown-item" href="/index.php?main=emails-alumnos">Emails alumnes</a></li>
-                <li><a class="dropdown-item" href="/index.php?main=lista-emails-profesores">Llista emails professors</a></li>
-                <li><a class="dropdown-item" href="/index.php?main=lista-emails-tutores">Llista emails tutors</a></li>
-                <li><a class="dropdown-item" href="/index.php?main=lista-emails-alumnos">Llista emails alumnes</a></li>
-                <hr>
-                <li><a class="dropdown-item" href="/index.php?main=profesor">Professorat</a></li>
-                <li><a class="dropdown-item" href="/index.php?main=aula">Aules</a></li>
-                <li><a class="dropdown-item" href="/index.php?main=grupos">Grups</a></li>
-                <hr>
-                <li><a class="dropdown-item" href="/index.php?main=proyecto">Projectes</a></li>
-                <li><a class="dropdown-item" href="/index.php?main=alumno">Alumnat</a></li>
-                
-                
-              </ul>
-            </li>
-            <?php endif; ?>
-
-
           </ul>
         </div>
       </div>
     </nav>
   </div>
+
+  <?php if (($_SESSION['auth_tipo'] ?? '') === 'alumne'): ?>
+    <?php include __DIR__ . '/../paginas/alumnos/menu.php'; ?>
+  <?php elseif ($esSuperadminMenu): ?>
+    <?php include __DIR__ . '/../paginas/admin/menu.php'; ?>
+  <?php elseif (($_SESSION['auth_tipo'] ?? '') === 'professor'): ?>
+    <?php include __DIR__ . '/../paginas/profesores/menu.php'; ?>
+  <?php endif; ?>
 
 </header>
 <!-- ===== /HEADER PROJECTES ===== -->

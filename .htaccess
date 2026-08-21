@@ -9,38 +9,43 @@ RewriteCond %{REQUEST_FILENAME} !-d
 
 
 # LISTADO DE PROYECTOS POR CICLO
+RewriteRule ^inici$ /index.php?main=main [L,QSA]
 RewriteRule ^projectes/([A-Za-z0-9_-]+)$ /index.php?main=llistat-projectes&cicle=$1 [L,QSA]
 
-# LISTADO ENTREGAS
-RewriteRule ^entregues/([A-Za-z0-9_-]+)$ /index.php?main=entregas&cicle=$1 [L,QSA]
+# NOTES FINALS DEL PROFESSORAT
+RewriteRule ^notes-finals$ /index.php?main=notes-finals [L,QSA]
+RewriteRule ^notes-finals/([A-Za-z0-9_-]+)$ /index.php?main=notes-finals&cicle=$1 [L,QSA]
 
 # FICHA EDICIÓN POR ID
-RewriteRule ^projecte/([0-9]+)/editar$ /index.php?main=ficha_form&id=$1 [L,QSA]
+RewriteRule ^projecte/([0-9]+)/editar$ /index.php?main=ficha_proyecto_form&id=$1 [L,QSA]
+
+# ESPAI PRIVAT DE L'ALUMNAT
+RewriteRule ^el-meu-projecte$ /index.php?main=alumne-projecte [L,QSA]
+RewriteRule ^el-meu-projecte/fase-1/definir-grup$ /index.php?main=alumne-fase-1-grup-form [L,QSA]
+RewriteRule ^el-meu-projecte/fase-1/compromis$ /index.php?main=alumne-fase-1-compromis-form [L,QSA]
+RewriteRule ^el-meu-projecte/fase-([1-7])$ /index.php?main=alumne-fase-$1 [L,QSA]
 
 # FICHA PÚBLICA POR ID
 RewriteRule ^projecte/([0-9]+)$ /index.php?main=ficha&id=$1 [L,QSA]
 
 # FICHA SUBIR DEFENSA POR ID
-RewriteRule ^projecte/([0-9]+)/defensa$ /index.php?main=ficha-defensa_form&id=$1 [L,QSA]
-RewriteRule ^guardar-presentacio-defensa$ /index.php?main=ficha-defensa_accion [L,QSA]
+RewriteRule ^projecte/([0-9]+)/defensa$ /index.php?main=ficha_proyecto_defensa_form&id=$1 [L,QSA]
+RewriteRule ^guardar-presentacio-defensa$ /index.php?main=ficha_proyecto_defensa_accion [L,QSA]
 
 # DEFENSAS
-RewriteRule ^calendari-defenses$ /index.php?main=calendari_tribunal [L,QSA]
+RewriteRule ^assignar-defenses$ /index.php?main=assignar-defenses [L,QSA]
+# Compatibilitat temporal amb l’enllaç públic anterior.
+RewriteRule ^calendari-defenses$ /assignar-defenses [R=302,L]
 RewriteRule ^les-meves-defenses$ /index.php?main=les-meves-defenses [L,QSA]
+RewriteRule ^les-meves-defenses/llista$ /index.php?main=les-meves-defenses-lista [L,QSA]
 RewriteRule ^projectes-tutoritzats$ /index.php?main=proyectos-tutorizados [L,QSA]
+RewriteRule ^projectes-tutoritzats/llista$ /index.php?main=proyectos-tutorizados-lista [L,QSA]
 
 # LOGIN 
-RewriteRule ^login/alumnes/([0-9a-fA-F\-]+)$ /login/alumnes.php?token=$1 [L,QSA]
-
-RewriteRule ^login/([0-9a-fA-F\-]+)$ /login/profesores.php?token=$1 [L,QSA]
-
 RewriteRule ^acces$ /index.php?main=login [L,QSA]
+RewriteRule ^recuperar-contrasenya$ /index.php?main=recuperar_password [L,QSA]
+RewriteRule ^restablir-contrasenya$ /index.php?main=restablecer_password [L,QSA]
+RewriteRule ^canviar-contrasenya$ /index.php?main=cambiar_password [L,QSA]
 
-
-
-# Pantalla integrada de password
-
-RewriteRule ^password$ /index.php?main=password-profesor [L,QSA]
-
-RewriteRule ^logout$ /login/logout.php [L,QSA]
+RewriteRule ^logout$ /index.php?main=logout_accion [L,QSA]
 

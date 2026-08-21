@@ -3,9 +3,15 @@
 .DS_Store
 Thumbs.db
 backups/
+/vendor/
+/composer.phar
+/composer-setup.php
+/composer-setup.sig
 
 # DB
 *.sql
+!migrations/
+!migrations/*.sql
 
 # uploads
 uploads/

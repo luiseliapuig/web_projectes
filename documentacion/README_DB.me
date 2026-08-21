@@ -96,12 +96,12 @@ Representa el profesorado.
 - `email`
 - `departamento`
 - `activo`
-- `uuid_acceso` → acceso directo sin login (autogenerado)
+- `password_hash` → hash de la contraseña
 - `rol` → actualmente solo usado para `superadmin`
 
 ## Notas
 
-- `uuid_acceso` permite acceso mediante enlace único
+- El acceso usa email y contraseña; el alta inicial y la recuperación usan tokens temporales almacenados con hash.
 
 ---
 
