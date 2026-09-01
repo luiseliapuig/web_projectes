@@ -8,6 +8,7 @@ if (PHP_SAPI !== 'cli') {
 
 $pdo = require dirname(__DIR__, 2) . '/config/db.php';
 require_once __DIR__ . '/bootstrap.php';
+require_once __DIR__ . '/procesar_cola.php';
 
 $config = EmailConfig::fromEnvironment();
 if (!$config->isReady()) {
@@ -15,28 +16,7 @@ if (!$config->isReady()) {
     exit(2);
 }
 
-$queue = new EmailQueue($pdo);
-$service = new EmailService($config);
-$messages = $queue->claimBatch($config->batchSize);
-$sent = 0;
-$failed = 0;
+$resultado = emailProcesarColaPendent(new EmailQueue($pdo), new EmailService($config), $config->batchSize);
 
-foreach ($messages as $message) {
-    try {
-        $service->send($message);
-        $queue->markSent((int) $message['id_email']);
-        $sent++;
-    } catch (Throwable $e) {
-        $queue->markFailed(
-            (int) $message['id_email'],
-            (int) $message['intentos'] + 1,
-            (int) $message['max_intentos'],
-            $e->getMessage()
-        );
-        error_log('Email #' . (int) $message['id_email'] . ' no enviado: ' . $e->getMessage());
-        $failed++;
-    }
-}
-
-echo "Procesados: " . count($messages) . "; enviados: $sent; fallidos: $failed" . PHP_EOL;
-exit($failed > 0 ? 1 : 0);
+echo "Procesados: {$resultado['procesados']}; enviados: {$resultado['enviados']}; fallidos: {$resultado['fallidos']}" . PHP_EOL;
+exit($resultado['fallidos'] > 0 ? 1 : 0);

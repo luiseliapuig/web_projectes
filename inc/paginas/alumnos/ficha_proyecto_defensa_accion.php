@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+require_once dirname(__DIR__, 2) . '/pdf/funciones.php';
+
 $idProyecto = (int) ($_POST['id_proyecto'] ?? 0);
 
 // La acción vuelve a comprobar método, CSRF y propiedad antes de aceptar el PDF.
@@ -39,82 +41,26 @@ if (!$proyecto) {
     die('Projecte no trobat.');
 }
 
-/* =========================
-   VALIDAR ARCHIVO
-========================= */
-
-if (
-    !isset($_FILES['presentacion_defensa']) ||
-    $_FILES['presentacion_defensa']['error'] !== UPLOAD_ERR_OK
-) {
+$nombreArchivo = 'presentacion-defensa-' . $idProyecto . '.pdf';
+$archivo = $_FILES['presentacion_pdf'] ?? null;
+if (!is_array($archivo)) {
     die('Error pujant el fitxer.');
 }
 
-$archivo = $_FILES['presentacion_defensa'];
-
-$extension = strtolower(pathinfo($archivo['name'], PATHINFO_EXTENSION));
-
-if ($extension !== 'pdf') {
-    die('Només es permeten fitxers PDF.');
+$resultat = pdfGuardarDefinitiu(
+    $archivo,
+    (string) $proyecto['curso_academico'],
+    (string) $proyecto['ciclo'],
+    $idProyecto,
+    $nombreArchivo
+);
+if (!$resultat['ok']) {
+    die(htmlspecialchars($resultat['error'] ?? 'No s’ha pogut guardar el fitxer.', ENT_QUOTES, 'UTF-8'));
 }
 
-/* =========================
-   VALIDAR MIME
-========================= */
-
-$finfo = finfo_open(FILEINFO_MIME_TYPE);
-$mime = finfo_file($finfo, $archivo['tmp_name']);
-finfo_close($finfo);
-
-if ($mime !== 'application/pdf') {
-    die('El fitxer no és un PDF vàlid.');
-}
-
-/* =========================
-   TAMAÑO MÁXIMO
-========================= */
-
-$maxSize = 20 * 1024 * 1024;
-
-if ($archivo['size'] > $maxSize) {
-    die('El PDF supera el límit de 20 MB.');
-}
-
-/* =========================
-   CREAR CARPETA
-========================= */
-
-$directorio = dirname(__DIR__, 3) . '/uploads/' .
-    $proyecto['curso_academico'] . '/' .
-    $proyecto['ciclo'] . '/' .
-    $proyecto['id_proyecto'] . '/';
-
-if (!is_dir($directorio)) {
-    mkdir($directorio, 0775, true);
-}
-
-/* =========================
-   NOMBRE ARCHIVO
-========================= */
-
-$nombreArchivo = 'presentacion-defensa-' . $idProyecto . '.pdf';
-
-$rutaFisica = $directorio . $nombreArchivo;
-
-$rutaBD =
-    'uploads/' .
-    $proyecto['curso_academico'] . '/' .
-    $proyecto['ciclo'] . '/' .
-    $proyecto['id_proyecto'] . '/' .
-    $nombreArchivo;
-
-/* =========================
-   MOVER ARCHIVO
-========================= */
-
-if (!move_uploaded_file($archivo['tmp_name'], $rutaFisica)) {
-    die('No s’ha pogut guardar el fitxer.');
-}
+// Es conserva el format històric sense barra inicial perquè ficha.php ja la
+// prefixa en construir l'enllaç públic.
+$rutaBD = ltrim((string) $resultat['ruta_rel'], '/');
 
 /* =========================
    GUARDAR EN BD
@@ -122,7 +68,7 @@ if (!move_uploaded_file($archivo['tmp_name'], $rutaFisica)) {
 
 $stmt = $pdo->prepare("
     UPDATE app.proyectos
-    SET presentacion_defensa = :ruta
+    SET presentacion_pdf = :ruta
     WHERE id_proyecto = :id
 ");
 

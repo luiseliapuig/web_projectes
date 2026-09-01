@@ -16,31 +16,12 @@ if (
     return;
 }
 
-function comprimirPdf(string $rutaAbs): void
-{
-    $rutaTmp = $rutaAbs . '.tmp.pdf';
-
-    $cmd = sprintf(
-        'gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook ' .
-        '-dNOPAUSE -dQUIET -dBATCH ' .
-        '-sOutputFile=%s %s 2>/dev/null',
-        escapeshellarg($rutaTmp),
-        escapeshellarg($rutaAbs)
-    );
-
-    shell_exec($cmd);
-
-    // Solo sustituir si la compresión generó un archivo válido y más pequeño
-    if (
-        file_exists($rutaTmp) &&
-        filesize($rutaTmp) > 0 &&
-        filesize($rutaTmp) < filesize($rutaAbs)
-    ) {
-        rename($rutaTmp, $rutaAbs);
-    } else {
-        @unlink($rutaTmp);
-    }
-}
+// La validació, el guardat i l'optimització dels PDF definitius (document
+// funcional, memòria, fitxa d'entrega) viuen a inc/pdf/funciones.php: capa
+// única compartida amb la resta de PDFs del projecte (vegeu Proposta a
+// fase-2_accion.php). Aquest fitxer ja no en manté una còpia pròpia.
+require_once dirname(__DIR__, 2) . '/pdf/funciones.php';
+require_once dirname(__DIR__, 2) . '/imagenes/funciones.php';
 
 function slugify(string $text): string
 {
@@ -76,71 +57,6 @@ function irAFicha(int $idProyecto, string $msg = ''): never
     echo '<script>location.href=' . json_encode($to) . ';</script>';
     echo '<noscript><meta http-equiv="refresh" content="0;url=' . htmlspecialchars($to, ENT_QUOTES) . '"></noscript>';
     exit;
-}
-
-function detectarExtensionImagen(array $file): ?string
-{
-    if (!isset($file['tmp_name']) || !is_uploaded_file($file['tmp_name'])) return null;
-    $imageInfo = @getimagesize($file['tmp_name']);
-    if ($imageInfo === false) return null;
-    return match ($imageInfo[2]) {
-        IMAGETYPE_JPEG => 'jpg',
-        IMAGETYPE_PNG  => 'png',
-        IMAGETYPE_WEBP => 'webp',
-        default        => null,
-    };
-}
-
-function guardarImagenWeb(array $file, string $rutaDestinoAbs, int $maxAncho = 1600, int $maxAlto = 1200, int $calidadJpg = 85): bool
-{
-    if (!isset($file['error']) || $file['error'] === UPLOAD_ERR_NO_FILE) return false;
-    if ($file['error'] !== UPLOAD_ERR_OK) return false;
-    if ((int) ($file['size'] ?? 0) > 20 * 1024 * 1024) return false;
-    $extension = detectarExtensionImagen($file);
-    if ($extension === null) return false;
-    $imageInfo = @getimagesize($file['tmp_name']);
-    if ($imageInfo === false) return false;
-    [$anchoOriginal, $altoOriginal, $tipo] = $imageInfo;
-    if ($anchoOriginal <= 0 || $altoOriginal <= 0) return false;
-    $ratio = min($maxAncho / $anchoOriginal, $maxAlto / $altoOriginal, 1);
-    $nuevoAncho = (int) round($anchoOriginal * $ratio);
-    $nuevoAlto  = (int) round($altoOriginal * $ratio);
-    $origen = match ($tipo) {
-        IMAGETYPE_JPEG => @imagecreatefromjpeg($file['tmp_name']),
-        IMAGETYPE_PNG  => @imagecreatefrompng($file['tmp_name']),
-        IMAGETYPE_WEBP => function_exists('imagecreatefromwebp') ? @imagecreatefromwebp($file['tmp_name']) : false,
-        default        => false,
-    };
-    if ($origen === false) return false;
-    $destino = imagecreatetruecolor($nuevoAncho, $nuevoAlto);
-    $blanco  = imagecolorallocate($destino, 255, 255, 255);
-    imagefilledrectangle($destino, 0, 0, $nuevoAncho, $nuevoAlto, $blanco);
-    imagecopyresampled($destino, $origen, 0, 0, 0, 0, $nuevoAncho, $nuevoAlto, $anchoOriginal, $altoOriginal);
-    $ok = imagejpeg($destino, $rutaDestinoAbs, $calidadJpg);
-    imagedestroy($origen);
-    imagedestroy($destino);
-    return $ok;
-}
-
-function guardarPdf(array $file, string $rutaDestinoAbs): bool
-{
-    if (!isset($file['error']) || $file['error'] === UPLOAD_ERR_NO_FILE) return false;
-    if ($file['error'] !== UPLOAD_ERR_OK) return false;
-    $extension = strtolower((string) pathinfo($file['name'] ?? '', PATHINFO_EXTENSION));
-    if ($extension !== 'pdf') return false;
-    if (!is_uploaded_file($file['tmp_name'])) return false;
-    if ((int) ($file['size'] ?? 0) > 20 * 1024 * 1024) return false;
-
-    $finfo = finfo_open(FILEINFO_MIME_TYPE);
-    $mime = $finfo !== false ? finfo_file($finfo, $file['tmp_name']) : false;
-    if ($finfo !== false) finfo_close($finfo);
-    if ($mime !== 'application/pdf') return false;
-
-    if (!move_uploaded_file($file['tmp_name'], $rutaDestinoAbs)) return false;
-
-    comprimirPdf($rutaDestinoAbs);
-
-    return true;
 }
 
 // Cargar proyecto
@@ -244,32 +160,32 @@ if (!empty($_FILES['imagen']['name'] ?? '')) {
 
 // Documento funcional
 if (!empty($_FILES['funcional']['name'] ?? '')) {
-    $rutaAbs = $rutaProyectoAbs . '/' . $nombreFuncional;
-    if (!guardarPdf($_FILES['funcional'], $rutaAbs)) {
+    $resultat = pdfGuardarDefinitiu($_FILES['funcional'], $cursoAcademico, $ciclo, $idProyecto, $nombreFuncional);
+    if (!$resultat['ok']) {
         echo '<div class="alert alert-danger">El document funcional ha de ser un PDF vàlid.</div>';
         return;
     }
-    $data['ruta_funcional'] = $rutaProyectoRel . '/' . $nombreFuncional . '?v=' . time();
+    $data['funcional_pdf'] = $resultat['ruta_rel'] . '?v=' . time();
 }
 
 // Memoria
 if (!empty($_FILES['memoria']['name'] ?? '')) {
-    $rutaAbs = $rutaProyectoAbs . '/' . $nombreMemoria;
-    if (!guardarPdf($_FILES['memoria'], $rutaAbs)) {
+    $resultat = pdfGuardarDefinitiu($_FILES['memoria'], $cursoAcademico, $ciclo, $idProyecto, $nombreMemoria);
+    if (!$resultat['ok']) {
         echo '<div class="alert alert-danger">La memòria ha de ser un PDF vàlid.</div>';
         return;
     }
-    $data['ruta_memoria'] = $rutaProyectoRel . '/' . $nombreMemoria . '?v=' . time();
+    $data['memoria_pdf'] = $resultat['ruta_rel'] . '?v=' . time();
 }
 
 // Ficha de entrega
 if (!empty($_FILES['ficha_entrega']['name'] ?? '')) {
-    $rutaAbs = $rutaProyectoAbs . '/' . $nombreFichaEntrega;
-    if (!guardarPdf($_FILES['ficha_entrega'], $rutaAbs)) {
+    $resultat = pdfGuardarDefinitiu($_FILES['ficha_entrega'], $cursoAcademico, $ciclo, $idProyecto, $nombreFichaEntrega);
+    if (!$resultat['ok']) {
         echo '<div class="alert alert-danger">La fitxa d\'entrega ha de ser un PDF vàlid.</div>';
         return;
     }
-    $data['ruta_ficha_entrega'] = $rutaProyectoRel . '/' . $nombreFichaEntrega . '?v=' . time();
+    $data['ruta_ficha_entrega'] = $resultat['ruta_rel'] . '?v=' . time();
 }
 
 // Update

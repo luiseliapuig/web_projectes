@@ -16,7 +16,7 @@ Valores de `$_SESSION['auth_tipo']`:
 
 - sin valor: no autenticado;
 - `professor`: profesor autenticado;
-- `alumne`: alumno autenticado mediante el UUID de su proyecto.
+- `alumne`: alumno autenticado mediante email y contraseña.
 
 Profesor:
 
@@ -51,7 +51,8 @@ El router ejecuta estas comprobaciones antes de incluir la página. La misma pol
 La autorización general del área no basta:
 
 - Un alumno solo puede consultar o modificar proyectos vinculados mediante `rel_proyectos_alumnos`.
-- Un tutor o cotutor solo puede actuar si existe su asignación en `rel_proyectos_profesores`; los campos heredados de `proyectos` no son la autoridad del flujo nuevo.
+- La consulta docente del recorrido de fases de un proyecto se autoriza mediante la asignación del profesor al grupo y curso en `rel_profesores_grupos`; el identificador recibido nunca basta por sí solo.
+- Las intervenciones formales sobre un proyecto exigen además la relación específica correspondiente en `rel_proyectos_profesores` y, cuando la acción pertenece exclusivamente al tutor principal, el rol `tutor`. Los campos heredados de `proyectos` no son autoridad.
 - El panel docente de alumnado se limita a las matrículas de `rel_alumnos_grupos` cuyos grupos y cursos estén asignados al profesor mediante `rel_profesores_grupos`. Listado, formulario y acción repiten este alcance.
 - Un tutor puede desactivar una identidad de su alumnado. Solo puede eliminarla si no pertenece a ningún proyecto ni conserva matrículas de otros cursos; en caso contrario debe desactivarla para preservar el historial.
 - El envío colectivo de invitaciones exige un grupo concreto asignado al profesor y solo selecciona alumnado activo de ese grupo que todavía no tenga contraseña.
@@ -71,7 +72,7 @@ Si todavía no existe un modelo de asignación de tribunal, no concedas acceso b
 - Al incorporar alumnado a un proyecto se puede enviar la misma clase de invitación. El token se guarda exclusivamente en `alumno_password_reset` y solo se genera para una incorporación nueva que todavía no tenga contraseña.
 - Una invitación caducada dirige al profesor o alumno al flujo normal de recuperación de contraseña, que conserva su caducidad más corta.
 - `/login` usa email, `password_verify()` y comprueba que la identidad encontrada está activa.
-- Tras autenticarse, profesorado y alumnado se dirigen siempre a `/inici`; no se conserva una URL anterior en la sesión. Mientras se construye la v2, esta ruta muestra la portada vigente.
+- El destino inmediatamente posterior al login es una decisión exclusiva del rol en servidor: el alumnado entra en `/fases-del-projecte` y el profesorado ordinario en `/resum`. Para ambos se ignoran la página pública previa, `Referer` y cualquier parámetro de retorno proporcionado por el cliente. El superadministrador todavía no tiene una landing canónica nueva y conserva el comportamiento anterior, `/inici`.
 - Cinco intentos fallidos de acceso dentro de quince minutos bloquean temporalmente ese identificador de email.
 - `/logout` destruye la sesión y redirige a `/login`.
 

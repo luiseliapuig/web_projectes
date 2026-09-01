@@ -122,6 +122,53 @@ function esTutorDelProyecto(int $idProjecte): bool
     return $cache[$claveCache];
 }
 
+// esTutorDelProyecto() trata tutor y cotutor por igual (rel_proyectos_profesores
+// sin filtrar por rol), correcto para la intervención habitual ya usada en
+// Autoseguiment/Memòria. Algunas tareas necesitan en cambio la autoridad
+// formal SINGULAR del proyecto (por ejemplo, validar formalment una tasca):
+// esa autoridad es siempre quien tiene rol = 'tutor', nunca un cotutor
+// (asignado automáticamente a todo el profesorado del grupo al crear el
+// proyecto, vegeu fase-1_grup_accion.php).
+function esTutorFormalDelProyecto(int $idProjecte): bool
+{
+    if ($idProjecte <= 0 || !esProfesor()) {
+        return false;
+    }
+
+    global $pdo;
+    if (!$pdo instanceof PDO) {
+        return false;
+    }
+
+    static $cache = [];
+    $idProfessor = (int) $_SESSION['professor_id'];
+    $claveCache = $idProfessor . ':' . $idProjecte;
+
+    if (array_key_exists($claveCache, $cache)) {
+        return $cache[$claveCache];
+    }
+
+    try {
+        $stmt = $pdo->prepare("
+            SELECT 1
+            FROM app.rel_proyectos_profesores
+            WHERE proyecto_id = :id_proyecto
+              AND profesor_id = :id_profesor
+              AND rol = 'tutor'
+            LIMIT 1
+        ");
+        $stmt->execute([
+            ':id_proyecto' => $idProjecte,
+            ':id_profesor' => $idProfessor,
+        ]);
+        $cache[$claveCache] = (bool) $stmt->fetchColumn();
+    } catch (PDOException $e) {
+        $cache[$claveCache] = false;
+    }
+
+    return $cache[$claveCache];
+}
+
 // -----------------------------------------------------------------------------
 // Función contextual de tutor
 // Un profesor dispone de herramientas de tutoría cuando imparte en algún grupo

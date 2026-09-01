@@ -19,8 +19,8 @@ SELECT
     p.descripcion,
     p.stack,
     p.ruta_imagen,
-    p.ruta_memoria,
-    p.ruta_funcional,
+    p.memoria_pdf,
+    p.funcional_pdf,
     p.url_github,
     p.url_proyecto,
     c.abr AS ciclo,
@@ -101,7 +101,7 @@ WHERE p.curso_academico = :curso_academico
 
 GROUP BY
     p.id_proyecto, p.uuid, p.nombre, p.resumen, p.descripcion, p.stack,
-    p.ruta_imagen, p.ruta_memoria, p.ruta_funcional, p.url_github, p.url_proyecto,
+    p.ruta_imagen, p.memoria_pdf, p.funcional_pdf, p.url_github, p.url_proyecto,
     c.abr, c.orden, g.grupo, p.curso_academico, p.defensa_fecha, p.defensa_aula_id,
     p.autoev1, p.autoev2, p.autoev3, p.autoev4,
     p.nota_tutor_planificacion, p.nota_tutor_gestion, p.nota_tutor_memoria,
@@ -124,7 +124,7 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
     $row['ajustos']  = json_decode($row['ajustos'], true);
 
     $obligatoris = !empty($row['nombre'])
-                && !empty($row['ruta_memoria']);
+                && !empty($row['memoria_pdf']);
 
     $presentacioCompleta = !empty($row['ruta_imagen'])
                         && !empty($row['resumen'])
@@ -227,8 +227,8 @@ if (!function_exists('renderCardEntrega')) {
         $ckResum  = !empty($p['resumen']);
         $ckDesc   = !empty($p['descripcion']);
 
-        $ckMemoria   = !empty($p['ruta_memoria']);
-        $ckFuncional = !empty($p['ruta_funcional']);
+        $ckMemoria   = !empty($p['memoria_pdf']);
+        $ckFuncional = !empty($p['funcional_pdf']);
         $ckStack     = !empty($p['stack']);
         $ckGestio = ($p['num_gestio'] > 0) || ($p['num_planificacio'] > 0);
         $numArxius   = (int)$p['num_arxius'];

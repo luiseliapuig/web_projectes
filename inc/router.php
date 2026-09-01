@@ -49,18 +49,58 @@ $rutasMigradas = [
         'area' => 'public',
     ],
     // Área del alumnado: dashboard por fases, edición y entrega final del proyecto vinculado.
-    'alumne-projecte' => ['archivo' => __DIR__ . '/paginas/alumnos/projecte.php', 'area' => 'alumno'],
-    'alumne-fase-1' => ['archivo' => __DIR__ . '/paginas/alumnos/fase-1.php', 'area' => 'alumno'],
-    'alumne-fase-1-grup-form' => ['archivo' => __DIR__ . '/paginas/alumnos/fase-1_grup_form.php', 'area' => 'alumno'],
-    'alumne-fase-1-grup-accion' => ['archivo' => __DIR__ . '/paginas/alumnos/fase-1_grup_accion.php', 'area' => 'alumno'],
-    'alumne-fase-1-compromis-form' => ['archivo' => __DIR__ . '/paginas/alumnos/fase-1_compromis_form.php', 'area' => 'alumno'],
-    'alumne-fase-1-compromis-accion' => ['archivo' => __DIR__ . '/paginas/alumnos/fase-1_compromis_accion.php', 'area' => 'alumno'],
-    'alumne-fase-2' => ['archivo' => __DIR__ . '/paginas/alumnos/fase-2.php', 'area' => 'alumno'],
-    'alumne-fase-3' => ['archivo' => __DIR__ . '/paginas/alumnos/fase-3.php', 'area' => 'alumno'],
-    'alumne-fase-4' => ['archivo' => __DIR__ . '/paginas/alumnos/fase-4.php', 'area' => 'alumno'],
-    'alumne-fase-5' => ['archivo' => __DIR__ . '/paginas/alumnos/fase-5.php', 'area' => 'alumno'],
-    'alumne-fase-6' => ['archivo' => __DIR__ . '/paginas/alumnos/fase-6.php', 'area' => 'alumno'],
-    'alumne-fase-7' => ['archivo' => __DIR__ . '/paginas/alumnos/fase-7.php', 'area' => 'alumno'],
+    'alumne-fases-projecte' => ['archivo' => __DIR__ . '/paginas/alumnos/fases_projecte.php', 'area' => 'alumno'],
+    // Fases 1-7: implementació de l'arquitectura 'informatica' (vegeu
+    // inc/fases/funciones.php i inc/paginas/alumnos/informatica/fases.php).
+    // Les URLs públiques es mantenen; només canvia la ubicació física.
+    'alumne-fase-1' => ['archivo' => __DIR__ . '/paginas/alumnos/informatica/fase-1.php', 'area' => 'alumno'],
+    'alumne-fase-1-grup-form' => ['archivo' => __DIR__ . '/paginas/alumnos/informatica/fase-1_grup_form.php', 'area' => 'alumno'],
+    'alumne-fase-1-grup-accion' => ['archivo' => __DIR__ . '/paginas/alumnos/informatica/fase-1_grup_accion.php', 'area' => 'alumno'],
+    'alumne-fase-1-compromis-form' => ['archivo' => __DIR__ . '/paginas/alumnos/informatica/fase-1_compromis_form.php', 'area' => 'alumno'],
+    'alumne-fase-1-compromis-accion' => ['archivo' => __DIR__ . '/paginas/alumnos/informatica/fase-1_compromis_accion.php', 'area' => 'alumno'],
+    'alumne-fase-2' => ['archivo' => __DIR__ . '/paginas/alumnos/informatica/fase-2.php', 'area' => 'alumno'],
+    'alumne-fase-2-proposta' => ['archivo' => __DIR__ . '/paginas/alumnos/informatica/fase-2_proposta.php', 'area' => 'alumno'],
+    'alumne-fase-2-accion' => [
+        'archivo' => __DIR__ . '/paginas/alumnos/informatica/fase-2_accion.php',
+        'area' => 'alumno',
+        'tipo' => 'api',
+    ],
+    'alumne-fase-3' => ['archivo' => __DIR__ . '/paginas/alumnos/informatica/fase-3.php', 'area' => 'alumno'],
+    'alumne-fase-3-document-funcional' => ['archivo' => __DIR__ . '/paginas/alumnos/informatica/fase-3_document_funcional.php', 'area' => 'alumno'],
+    'alumne-fase-3-accion' => ['archivo' => __DIR__ . '/paginas/alumnos/informatica/fase-3_accion.php', 'area' => 'alumno', 'tipo' => 'api'],
+    'alumne-fase-4' => ['archivo' => __DIR__ . '/paginas/alumnos/informatica/fase-4.php', 'area' => 'alumno'],
+    'alumne-fase-4-planificacio' => ['archivo' => __DIR__ . '/paginas/alumnos/informatica/fase-4_planificacio.php', 'area' => 'alumno'],
+    'alumne-fase-4-gestio' => ['archivo' => __DIR__ . '/paginas/alumnos/informatica/fase-4_gestio.php', 'area' => 'alumno'],
+    'alumne-fase-4-accion' => ['archivo' => __DIR__ . '/paginas/alumnos/informatica/fase-4_accion.php', 'area' => 'alumno', 'tipo' => 'api'],
+    'alumne-fase-5' => ['archivo' => __DIR__ . '/paginas/alumnos/informatica/fase-5.php', 'area' => 'alumno'],
+    'alumne-fase-5-preparacio-entorn' => ['archivo' => __DIR__ . '/paginas/alumnos/informatica/fase-5_preparacio_entorn.php', 'area' => 'alumno'],
+    'alumne-fase-5-repositoris' => ['archivo' => __DIR__ . '/paginas/alumnos/informatica/fase-5_repositoris.php', 'area' => 'alumno'],
+    'alumne-fase-5-tecnologies-eines' => ['archivo' => __DIR__ . '/paginas/alumnos/informatica/fase-5_tecnologies_eines.php', 'area' => 'alumno'],
+    'alumne-fase-5-stack-accion' => ['archivo' => __DIR__ . '/paginas/alumnos/informatica/fase-5_stack_accion.php', 'area' => 'alumno', 'tipo' => 'api'],
+    'alumne-fase-5-projecte-produccio' => ['archivo' => __DIR__ . '/paginas/alumnos/informatica/fase-5_projecte_produccio.php', 'area' => 'alumno'],
+    'alumne-fase-5-produccio-accio' => ['archivo' => __DIR__ . '/paginas/alumnos/informatica/fase-5_produccio_accion.php', 'area' => 'alumno', 'tipo' => 'api'],
+    'alumne-fase-5-autoavaluacio' => ['archivo' => __DIR__ . '/paginas/alumnos/informatica/fase-5_autoavaluacio.php', 'area' => 'alumno'],
+    'alumne-fase-5-autoavaluacio-accio' => ['archivo' => __DIR__ . '/paginas/alumnos/informatica/fase-5_autoavaluacio_accion.php', 'area' => 'alumno', 'tipo' => 'api'],
+    'alumne-fase-5-repositoris-accion' => ['archivo' => __DIR__ . '/paginas/alumnos/informatica/fase-5_repositoris_accion.php', 'area' => 'alumno', 'tipo' => 'api'],
+    'alumne-fase-5-entorn-accion' => ['archivo' => __DIR__ . '/paginas/alumnos/informatica/fase-5_entorn_accion.php', 'area' => 'alumno', 'tipo' => 'api'],
+    'alumne-fase-6' => ['archivo' => __DIR__ . '/paginas/alumnos/informatica/fase-6.php', 'area' => 'alumno'],
+    'alumne-fase-6-document-memoria' => ['archivo' => __DIR__ . '/paginas/alumnos/informatica/fase-6_document_memoria.php', 'area' => 'alumno'],
+    'alumne-fase-6-memoria-accio' => ['archivo' => __DIR__ . '/paginas/alumnos/informatica/fase-6_memoria_accion.php', 'area' => 'alumno', 'tipo' => 'api'],
+    'alumne-fase-6-fitxa-publica' => ['archivo' => __DIR__ . '/paginas/alumnos/informatica/fase-6_fitxa_publica.php', 'area' => 'alumno'],
+    'alumne-fase-6-fitxa-publica-accio' => ['archivo' => __DIR__ . '/paginas/alumnos/informatica/fase-6_fitxa_publica_accion.php', 'area' => 'alumno', 'tipo' => 'api'],
+    'alumne-fase-6-entrega-memoria' => ['archivo' => __DIR__ . '/paginas/alumnos/informatica/fase-6_entrega_memoria.php', 'area' => 'alumno'],
+    'alumne-fase-6-entrega-memoria-accio' => ['archivo' => __DIR__ . '/paginas/alumnos/informatica/fase-6_entrega_memoria_accion.php', 'area' => 'alumno', 'tipo' => 'api'],
+      'alumne-fase-7' => ['archivo' => __DIR__ . '/paginas/alumnos/informatica/fase-7.php', 'area' => 'alumno'],
+      'alumne-fase-7-presentacio-defensa' => ['archivo' => __DIR__ . '/paginas/alumnos/informatica/fase-7_presentacio_defensa.php', 'area' => 'alumno'],
+      'alumne-fase-7-presentacio-defensa-accio' => ['archivo' => __DIR__ . '/paginas/alumnos/informatica/fase-7_presentacio_defensa_accion.php', 'area' => 'alumno', 'tipo' => 'api'],
+    'alumne-autoseguiment' => ['archivo' => __DIR__ . '/paginas/alumnos/autoseguiment.php', 'area' => 'alumno'],
+    'alumne-autoseguiment-accion' => ['archivo' => __DIR__ . '/paginas/alumnos/autoseguiment_accion.php', 'area' => 'alumno'],
+    'alumne-memoria' => ['archivo' => __DIR__ . '/paginas/alumnos/memoria.php', 'area' => 'alumno'],
+    'alumne-memoria-accion' => [
+        'archivo' => __DIR__ . '/paginas/alumnos/memoria_accion.php',
+        'area' => 'alumno',
+        'tipo' => 'api',
+    ],
     'ficha_proyecto_form' => [
         'archivo' => __DIR__ . '/paginas/alumnos/ficha_proyecto_form.php',
         'area' => 'alumno',
@@ -152,6 +192,14 @@ $rutasMigradas = [
     ],
     'configuracion_accion' => [
         'archivo' => __DIR__ . '/paginas/admin/configuracion_accion.php',
+        'area' => 'admin',
+    ],
+    'autoseguiment-control' => [
+        'archivo' => __DIR__ . '/paginas/admin/autoseguiment-control.php',
+        'area' => 'admin',
+    ],
+    'autoseguiment-control_accion' => [
+        'archivo' => __DIR__ . '/paginas/admin/autoseguiment-control_accion.php',
         'area' => 'admin',
     ],
     'planificacio' => [
@@ -263,6 +311,23 @@ $rutasMigradas = [
         'archivo' => __DIR__ . '/paginas/admin/tipus-projectes_accion.php',
         'area' => 'admin',
     ],
+    'memoria-estructura' => [
+        'archivo' => __DIR__ . '/paginas/admin/memoria-estructura.php',
+        'area' => 'admin',
+    ],
+    'memoria-estructura_form' => [
+        'archivo' => __DIR__ . '/paginas/admin/memoria-estructura_form.php',
+        'area' => 'admin',
+    ],
+    'memoria-estructura_accion' => [
+        'archivo' => __DIR__ . '/paginas/admin/memoria-estructura_accion.php',
+        'area' => 'admin',
+    ],
+    'memoria-estructura_orden_accion' => [
+        'archivo' => __DIR__ . '/paginas/admin/memoria-estructura_orden_accion.php',
+        'area' => 'admin',
+        'tipo' => 'api',
+    ],
     // Supervisió global dels projectes i edició administrativa excepcional.
     'proyectos' => [
         'archivo' => __DIR__ . '/paginas/admin/proyectos.php',
@@ -311,6 +376,77 @@ $rutasMigradas = [
     'alumnat-tutor_invitaciones_accion' => [
         'archivo' => __DIR__ . '/paginas/profesores/tutor/alumnat-tutor_invitaciones_accion.php',
         'area' => 'profesor',
+    ],
+    // Vista del tutor sobre l'Autoseguiment del seu alumnat (setmanes tancades).
+    'autoseguiment-tutor' => [
+        'archivo' => __DIR__ . '/paginas/profesores/tutor/autoseguiment-tutor.php',
+        'area' => 'profesor',
+    ],
+    // "Resum": pantalla principal del professorat (abans anomenada
+    // "Dashboard"). Mapa general dels seus projectes i la feina pendent.
+    'resum-tutor' => [
+        'archivo' => __DIR__ . '/paginas/profesores/tutor/resum-tutor.php',
+        'area' => 'profesor',
+    ],
+    // Navegació contextual genèrica del professorat pel recorregut de fases
+    // d'un projecte (proyecto_id + fase per GET). Substitueix l'antic
+    // 'fase-2-tutor', específic d'una sola fase.
+    // Equivalent contextual, per al professorat, de "Fases del projecte":
+    // llistat general de les 7 fases d'UN projecte (proyecto_id per GET).
+    'fases-tutor' => [
+        'archivo' => __DIR__ . '/paginas/profesores/tutor/fases-tutor.php',
+        'area' => 'profesor',
+    ],
+    'fase-tutor' => [
+        'archivo' => __DIR__ . '/paginas/profesores/tutor/fase-tutor.php',
+        'area' => 'profesor',
+    ],
+    'fase-1-tutor-compromis' => [
+        'archivo' => __DIR__ . '/paginas/profesores/tutor/fase-1-tutor_compromis.php',
+        'area' => 'profesor',
+    ],
+    'fase-2-tutor-proposta' => [
+        'archivo' => __DIR__ . '/paginas/profesores/tutor/fase-2-tutor_proposta.php',
+        'area' => 'profesor',
+    ],
+    'fase-2-tutor_accion' => [
+        'archivo' => __DIR__ . '/paginas/profesores/tutor/fase-2-tutor_accion.php',
+        'area' => 'profesor',
+        'tipo' => 'api',
+    ],
+    'stack-tecnologies' => ['archivo' => __DIR__ . '/paginas/admin/stack-tecnologies.php', 'area' => 'admin'],
+    'stack-tecnologies_form' => ['archivo' => __DIR__ . '/paginas/admin/stack-tecnologies_form.php', 'area' => 'admin'],
+    'stack-tecnologies_accion' => ['archivo' => __DIR__ . '/paginas/admin/stack-tecnologies_accion.php', 'area' => 'admin'],
+    'stack-eines' => ['archivo' => __DIR__ . '/paginas/admin/stack-eines.php', 'area' => 'admin'],
+    'stack-eines_form' => ['archivo' => __DIR__ . '/paginas/admin/stack-eines_form.php', 'area' => 'admin'],
+    'stack-eines_accion' => ['archivo' => __DIR__ . '/paginas/admin/stack-eines_accion.php', 'area' => 'admin'],
+    'fase-3-tutor-document-funcional' => ['archivo' => __DIR__ . '/paginas/profesores/tutor/fase-3-tutor_document_funcional.php', 'area' => 'profesor'],
+    'fase-3-tutor_accion' => ['archivo' => __DIR__ . '/paginas/profesores/tutor/fase-3-tutor_accion.php', 'area' => 'profesor', 'tipo' => 'api'],
+    'fase-4-tutor-planificacio' => ['archivo' => __DIR__ . '/paginas/profesores/tutor/fase-4-tutor_planificacio.php', 'area' => 'profesor'],
+    'fase-4-tutor-gestio' => ['archivo' => __DIR__ . '/paginas/profesores/tutor/fase-4-tutor_gestio.php', 'area' => 'profesor'],
+    'fase-5-tutor-preparacio-entorn' => ['archivo' => __DIR__ . '/paginas/profesores/tutor/fase-5-tutor_preparacio_entorn.php', 'area' => 'profesor'],
+    'fase-5-tutor-repositoris' => ['archivo' => __DIR__ . '/paginas/profesores/tutor/fase-5-tutor_repositoris.php', 'area' => 'profesor'],
+    'fase-5-tutor-tecnologies-eines' => ['archivo' => __DIR__ . '/paginas/profesores/tutor/fase-5-tutor_tecnologies_eines.php', 'area' => 'profesor'],
+    'fase-5-tutor-projecte-produccio' => ['archivo' => __DIR__ . '/paginas/profesores/tutor/fase-5-tutor_projecte_produccio.php', 'area' => 'profesor'],
+    'fase-5-tutor-autoavaluacio' => ['archivo' => __DIR__ . '/paginas/profesores/tutor/fase-5-tutor_autoavaluacio.php', 'area' => 'profesor'],
+    'fase-5-tutor-entorn-accion' => ['archivo' => __DIR__ . '/paginas/profesores/tutor/fase-5-tutor_entorn_accion.php', 'area' => 'profesor', 'tipo' => 'api'],
+    'fase-6-tutor-document-memoria' => ['archivo' => __DIR__ . '/paginas/profesores/tutor/fase-6-tutor_document_memoria.php', 'area' => 'profesor'],
+    'fase-6-tutor-fitxa-publica' => ['archivo' => __DIR__ . '/paginas/profesores/tutor/fase-6-tutor_fitxa_publica.php', 'area' => 'profesor'],
+      'fase-6-tutor-entrega-memoria' => ['archivo' => __DIR__ . '/paginas/profesores/tutor/fase-6-tutor_entrega_memoria.php', 'area' => 'profesor'],
+      'fase-7-tutor-presentacio-defensa' => ['archivo' => __DIR__ . '/paginas/profesores/tutor/fase-7-tutor_presentacio_defensa.php', 'area' => 'profesor'],
+    'memoria-tutor' => [
+        'archivo' => __DIR__ . '/paginas/profesores/tutor/memoria-tutor.php',
+        'area' => 'profesor',
+    ],
+    'memoria-tutor_accion' => [
+        'archivo' => __DIR__ . '/paginas/profesores/tutor/memoria-tutor_accion.php',
+        'area' => 'profesor',
+        'tipo' => 'api',
+    ],
+    'autoseguiment-tutor_accion' => [
+        'archivo' => __DIR__ . '/paginas/profesores/tutor/autoseguiment-tutor_accion.php',
+        'area' => 'profesor',
+        'tipo' => 'api',
     ],
     // Projectes vinculats al professor: vista principal de fitxes i alternativa en llista.
     'proyectos-tutorizados' => [

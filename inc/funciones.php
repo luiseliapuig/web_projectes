@@ -32,6 +32,35 @@ function cursoAcademicoDefensas(): string
     return cursoAcademicoActual();
 }
 
+// Dates naturals en català amb noms controlats per l'aplicació.
+function dataCatalanaNatural(?string $valor): string
+{
+    $valor = trim((string) $valor);
+    if ($valor === '') {
+        return '';
+    }
+
+    $fragment = substr($valor, 0, 10);
+    $data = DateTimeImmutable::createFromFormat('!Y-m-d', $fragment);
+    if ($data === false || $data->format('Y-m-d') !== $fragment) {
+        $data = DateTimeImmutable::createFromFormat('!d/m/Y', $fragment);
+        if ($data === false || $data->format('d/m/Y') !== $fragment) {
+            return $valor;
+        }
+    }
+
+    $dies = ['diumenge', 'dilluns', 'dimarts', 'dimecres', 'dijous', 'divendres', 'dissabte'];
+    $mesos = [
+        1 => 'de gener', 2 => 'de febrer', 3 => 'de març', 4 => 'd’abril',
+        5 => 'de maig', 6 => 'de juny', 7 => 'de juliol', 8 => 'd’agost',
+        9 => 'de setembre', 10 => 'd’octubre', 11 => 'de novembre', 12 => 'de desembre',
+    ];
+
+    return $dies[(int) $data->format('w')]
+        . ', ' . (int) $data->format('j')
+        . ' ' . $mesos[(int) $data->format('n')];
+}
+
 // -----------------------------------------------------------------------------
 // Protección CSRF
 // Un único token de sesión protege los formularios internos con escritura.
@@ -111,4 +140,14 @@ function clasesColorCiclo(string $color): string
         'info' => 'bg-info-subtle text-dark border-info-subtle',
         default => 'bg-secondary-subtle text-dark border-secondary-subtle',
     };
+}
+
+// Variante sólida del mismo color de ciclo, para marcar una selección sin
+// perder la información cromática del ciclo (p. ej. navegación por grupos).
+// Bootstrap 5.3 ya resuelve el contraste del texto en text-bg-*.
+function clasesColorCicloSolid(string $color): string
+{
+    return in_array($color, coloresCicloPermitidos(), true)
+        ? 'text-bg-' . $color
+        : 'text-bg-secondary';
 }

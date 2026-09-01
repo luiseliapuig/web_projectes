@@ -13,6 +13,7 @@ $resumen = $pdo->query("
 $ultimos = $pdo->query("
     SELECT id_email, destinatario, asunto, tipo, estado, intentos, creado_en, enviado_en
     FROM app.email_outbox
+    WHERE estado != 'enviado'
     ORDER BY creado_en DESC, id_email DESC
     LIMIT 20
 ")->fetchAll(PDO::FETCH_ASSOC);
@@ -43,6 +44,12 @@ unset($_SESSION['emails_error']);
 
     <?php if ($mensaje === 'encolat'): ?>
         <div class="alert alert-success">El missatge s’ha afegit a la cua.</div>
+    <?php elseif ($mensaje === 'cua_processada'): ?>
+        <div class="alert alert-success">
+            Cua processada: <?= (int) ($_GET['enviats'] ?? 0) ?> enviats,
+            <?= (int) ($_GET['pendents'] ?? 0) ?> pendents,
+            <?= (int) ($_GET['fallits'] ?? 0) ?> errors.
+        </div>
     <?php elseif ($error): ?>
         <div class="alert alert-danger"><?= htmlspecialchars((string) $error, ENT_QUOTES, 'UTF-8') ?></div>
     <?php endif; ?>
@@ -80,13 +87,20 @@ unset($_SESSION['emails_error']);
         </div>
         <div class="col-xl-7">
             <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-                <div class="card-body p-4 border-bottom">
-                    <h2 class="h5 mb-2">Estat de la cua</h2>
-                    <div class="d-flex flex-wrap gap-3 text-muted small">
-                        <span>Pendents: <?= (int) ($resumen['pendiente'] ?? 0) ?></span>
-                        <span>Enviats: <?= (int) ($resumen['enviado'] ?? 0) ?></span>
-                        <span>Errors: <?= (int) ($resumen['error'] ?? 0) ?></span>
+                <div class="card-body p-4 border-bottom d-flex flex-wrap justify-content-between align-items-start gap-2">
+                    <div>
+                        <h2 class="h5 mb-2">Estat de la cua</h2>
+                        <div class="d-flex flex-wrap gap-3 text-muted small">
+                            <span>Pendents: <?= (int) ($resumen['pendiente'] ?? 0) ?></span>
+                            <span>Enviats: <?= (int) ($resumen['enviado'] ?? 0) ?></span>
+                            <span>Errors: <?= (int) ($resumen['error'] ?? 0) ?></span>
+                        </div>
                     </div>
+                    <form method="post" action="/index.php?main=emails_accion" class="mb-0">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(tokenCsrf(), ENT_QUOTES, 'UTF-8') ?>">
+                        <input type="hidden" name="accio" value="enviar_cola">
+                        <button type="submit" class="btn btn-puig btn-sm">Enviar cua</button>
+                    </form>
                 </div>
                 <div class="table-responsive">
                     <table class="table email-queue-table align-middle mb-0">

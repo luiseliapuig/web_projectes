@@ -12,13 +12,19 @@ if (!function_exists('h')) {
     }
 }
 
+require_once __DIR__ . '/destinos.php';
+
 /**
- * Si ya hay una sesión de profesor activa,
+ * Si ya hay una sesión autenticada activa,
  * no tiene sentido mostrar otra vez el login.
  */
 if (esProfesor() || esAlumno()) {
-    echo '<script>location.href=' . json_encode('/') . ';</script>';
-    echo '<noscript><meta http-equiv="refresh" content="0;url=/"></noscript>';
+    $destino = loginDestinoPostAutenticacion(
+        (string) ($_SESSION['auth_tipo'] ?? ''),
+        isset($_SESSION['professor_rol']) ? (string) $_SESSION['professor_rol'] : null
+    );
+    echo '<script>location.href=' . json_encode($destino) . ';</script>';
+    echo '<noscript><meta http-equiv="refresh" content="0;url=' . h($destino) . '"></noscript>';
     exit;
 }
 

@@ -39,15 +39,15 @@ window.PAGE_TITLE = 'Pujar presentació de defensa';
       <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(tokenCsrf(), ENT_QUOTES, 'UTF-8') ?>">
 
       <div class="mb-4">
-        <label for="presentacion_defensa" class="form-label fw-semibold">
+        <label for="presentacion_pdf" class="form-label fw-semibold">
           PDF de la presentació de defensa
         </label>
 
         <input
           type="file"
           class="form-control"
-          id="presentacion_defensa"
-          name="presentacion_defensa"
+          id="presentacion_pdf"
+          name="presentacion_pdf"
           accept="application/pdf"
           required
         >

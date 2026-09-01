@@ -32,15 +32,63 @@ Motor: PostgreSQL. Base: `web_proyectos`. Esquema: `app`.
 - Al crear o editar un proyecto, el alumnado se selecciona entre las identidades activas matriculadas en su grupo; el proyecto no crea ni modifica fichas de alumnos.
 - Un alumno no puede estar vinculado a más de un proyecto activo durante el mismo curso académico.
 - Eliminar un proyecto elimina en cascada sus relaciones, incluidas las asignaciones de tribunal, pero conserva las identidades de `alumnos` y sus matrículas históricas.
-- El acceso del profesorado a un proyecto se comprueba mediante `rel_proyectos_profesores`.
+- La consulta docente del recorrido se limita a proyectos de grupos y cursos asignados mediante `rel_profesores_grupos`; las intervenciones formales exigen además la relación específica y el rol correspondiente en `rel_proyectos_profesores`.
 - El grupo del proyecto se identifica exclusivamente mediante `proyectos.grupo_id`.
 - El ciclo y la familia de un proyecto se derivan de `proyectos.grupo_id -> grupos.id_ciclo -> ciclos.familia_ciclo_id`; no se duplican en `proyectos`.
 - `evaluacion_tribunal` impone `UNIQUE (proyecto_id, profesor_id)`.
 - Los archivos viven en disco y la base de datos conserva sus rutas.
+- Los documentos de trabajo y sus evidencias definitivas usan pares canónicos distintos: `propuesta_url`/`propuesta_pdf`, `funcional_url`/`funcional_pdf`, `entorno_desarrollo_url`/`entorno_desarrollo_pdf` y `memoria_url`/`memoria_pdf`. El campo `*_url` conserva el documento vivo y `*_pdf` la evidencia definitiva; `entorno_desarrollo_validado_en` registra la validación previa a su PDF.
+- La planificación temporal y el tablero de gestión de la Fase 4 tienen como fuentes únicas V2 `proyectos.planificacion_url` y `proyectos.gestion_url`. Los adjuntos históricos `proyecto_adjuntos.tipo='planificacio'/'gestio'` son legacy y no se usan como fallback ni reciben nuevas escrituras desde Fase 4.
+- Los repositorios Git de Fase 5 usan `proyectos.git_url`/`git_etiqueta` para el principal y filas `proyecto_adjuntos.tipo='git'` para los adicionales (`ruta` URL, `nom` etiqueta breve). `url_github` es legacy y no recibe escrituras V2.
+- La URL pública de `Entrega del projecte` de Fase 5 usa el campo existente `proyectos.url_proyecto`; no se crea un duplicado V2. Guardar el input vacío persiste `NULL`.
+- `Autoavaluació final` de Fase 5 usa los campos existentes `proyectos.autoev1..4`; se guardan conjuntamente, admiten `NULL` y la tarea solo se completa cuando los cuatro están informados.
+- La revisión formal del documento de preparación del entorno usa `app.revisiones_solicitudes.tipo='entorn_desenvolupament'`; cerrar la solicitud solo informa `resuelto_en` y no altera URL, validación ni PDF.
+- `ruta_funcional` y `ruta_memoria` son columnas legacy redundantes retiradas por `20260826_consolidar_pdfs_documentales.sql`; todos los consumidores, incluida la ficha V1, usan `funcional_pdf` y `memoria_pdf`.
+- `ruta_imagen` y `ruta_ficha_entrega` siguen vigentes porque no existe un sustituto canónico equivalente. `proyecto_adjuntos.ruta` conserva la ruta propia de cada adjunto y tampoco equivale a esos documentos.
+- `presentacion_pdf` conserva el PDF definitivo usado en la defensa. Es un concepto distinto, no un sustituto de `ruta_ficha_entrega`, y su escritura también pasa por `pdfGuardarDefinitiu()`.
 - Las relaciones usan claves internas, no nombres o emails.
 - Las notificaciones ordinarias se encolan y las procesa el worker. Las recuperaciones de contraseña e invitaciones de acceso se envían directamente porque forman parte de un flujo transaccional inmediato.
 
 ## Valoraciones
+
+### Autoseguiment setmanal
+
+La generació setmanal és idempotent: la restricció única de
+`app.seguimiento_alumnos` sobre `(proyecto_id, alumno_id, semana)` i
+`INSERT ... ON CONFLICT DO NOTHING` impedeixen duplicats i preserven els
+seguiments existents. El cron i la reconciliació manual de superadministració
+criden la mateixa operació canònica; el diagnòstic administratiu reutilitza la
+mateixa definició de període, setmana i candidats.
+
+El procés es pot executar qualsevol dia. Totes les execucions d’una mateixa
+setmana natural de dilluns a diumenge apunten al dilluns–diumenge de la setmana
+natural immediatament posterior. Això permet diversos cron i reconciliacions
+manuals durant la setmana sense canviar el període objectiu.
+
+`app.seguimiento_ejecuciones` és només un log d’observabilitat, mai la font de
+veritat. L’estat funcional es calcula en viu comparant els candidats canònics
+amb `app.seguimiento_alumnos`. Per això la integritat (esperats/existents) i el
+nombre d’execucions de l’automatisme són senyals independents.
+
+En cada execució, `candidatos` és el nombre de parelles alumne/projecte
+elegibles; `creados`, les files inserides; `ya_existentes`, els conflictes
+idempotents; i `errores`, els candidats que no s’han pogut processar.
+`numero_ejecucion` és el comptador consecutiu que comença en 1 per cada parella
+`(fecha_inicio, fecha_fin)`. El detall operatiu i de concurrència viu a
+[`autoseguiment-generacio.md`](autoseguiment-generacio.md).
+
+`app.seguimiento_alumnos.valoracion_tutor` és una valoració ordinal del tutor
+o tutora amb quatre nivells:
+
+- `0` — **Sense avanç**: absència efectiva d'avanç durant la setmana (vermell).
+- `1` — **Poc avanç**: hi ha hagut treball, però l'avanç és insuficient (groc).
+- `2` — **Avanç adequat**: comportament normal i progrés esperat (verd).
+- `3` — **Avanç destacat**: avanç especialment bo (verd més intens).
+
+Els colors són només la representació visual d'aquesta valoració docent. La
+declaració de l'alumnat sobre els objectius (`Sí / Parcialment / No`) és una
+dada informativa independent i no utilitza aquesta semàntica cromàtica. No hi
+ha encara cap fórmula definida per agregar longitudinalment aquestes dades.
 
 La valoración del tutor está actualmente en `proyectos`:
 

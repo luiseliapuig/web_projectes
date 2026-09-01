@@ -97,8 +97,8 @@ if (!empty($proyecto['stack'])) {
 }
 
 $rutaImagen = absolutizePath($proyecto['ruta_imagen'] ?? '');
-$rutaFuncional = absolutizePath($proyecto['ruta_funcional'] ?? '');
-$rutaMemoria = absolutizePath($proyecto['ruta_memoria'] ?? '');
+$rutaFuncional = absolutizePath($proyecto['funcional_pdf'] ?? '');
+$rutaMemoria = absolutizePath($proyecto['memoria_pdf'] ?? '');
 
 // ── Adjunts extra ─────────────────────────────────────────────────
 try {
@@ -205,7 +205,7 @@ window.PAGE_TITLE = '<?= h($proyecto['nombre'] ?? '') ?> | <?= h($proyecto['cicl
                          <?php
                         $hayDemo   = !empty($proyecto['url_proyecto']);
                         $hayGithub = !empty($proyecto['url_github']);
-                        $hayMemoria = !empty($proyecto['ruta_memoria']);
+                        $hayMemoria = !empty($proyecto['memoria_pdf']);
                         ?>
 
                         <div class="mega-buttons mt-4 pb-30">
@@ -586,12 +586,12 @@ window.PAGE_TITLE = '<?= h($proyecto['nombre'] ?? '') ?> | <?= h($proyecto['cicl
                             </div>
                         </div>
 
-                        <?php if (!empty($proyecto['presentacion_defensa'])): ?>
+                        <?php if (!empty($proyecto['presentacion_pdf'])): ?>
                         <div class="mb-30">
                             <h3 class="h3fichas">Defensa</h3>
 
                             <div class="inner-ficha">
-                                <a href="/<?= h($proyecto['presentacion_defensa']) ?>" target="_blank" class="enlace">
+                                <a href="/<?= h($proyecto['presentacion_pdf']) ?>" target="_blank" class="enlace">
                                     Presentació de la defensa
                                 </a>
                             </div>

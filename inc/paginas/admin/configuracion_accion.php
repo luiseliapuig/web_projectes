@@ -17,7 +17,7 @@ $accion = isset($_POST['accio']) && is_string($_POST['accio'])
     : '';
 if (
     ($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST'
-    || !in_array($accion, ['toggle', 'crear', 'actualizar', 'eliminar'], true)
+    || !in_array($accion, ['toggle', 'crear', 'actualizar', 'eliminar', 'autoseguiment'], true)
     || !validarTokenCsrf($_POST['csrf_token'] ?? null)
 ) {
     $_SESSION['configuracion_error'] = 'La sol·licitud no és vàlida o ha caducat.';
@@ -49,6 +49,52 @@ if ($accion === 'toggle') {
     } catch (Throwable $e) {
         error_log('Error canviant configuració: ' . $e->getMessage());
         $_SESSION['configuracion_error'] = 'No s’ha pogut actualitzar la regla.';
+        $redirigirConfiguracion();
+    }
+}
+
+// Període de l'Autoseguiment: bloc independent de les regles de app.config,
+// sempre sobre l'únic registre id = 1 que ja garanteix la BD.
+if ($accion === 'autoseguiment') {
+    $fechaInicio = isset($_POST['fecha_inicio']) && is_string($_POST['fecha_inicio'])
+        ? trim($_POST['fecha_inicio'])
+        : '';
+    $fechaFin = isset($_POST['fecha_fin']) && is_string($_POST['fecha_fin'])
+        ? trim($_POST['fecha_fin'])
+        : '';
+
+    $inicioValido = DateTimeImmutable::createFromFormat('!Y-m-d', $fechaInicio);
+    $finValido = DateTimeImmutable::createFromFormat('!Y-m-d', $fechaFin);
+
+    // Es repeteixen en servidor les mateixes regles que ja garanteix la BD:
+    // dilluns d'inici, diumenge de fi, i el període en ordre correcte.
+    if (
+        !$inicioValido || $inicioValido->format('Y-m-d') !== $fechaInicio
+        || !$finValido || $finValido->format('Y-m-d') !== $fechaFin
+        || (int) $inicioValido->format('N') !== 1
+        || (int) $finValido->format('N') !== 7
+        || $finValido < $inicioValido
+    ) {
+        $_SESSION['autoseguiment_error'] = 'La data d’inici ha de ser un dilluns, la data de finalització un diumenge, i el període ha de ser vàlid.';
+        $redirigirConfiguracion();
+    }
+
+    try {
+        $stmt = $pdo->prepare("
+            UPDATE app.seguimiento_config
+            SET fecha_inicio = :fecha_inicio,
+                fecha_fin = :fecha_fin,
+                updated_at = NOW()
+            WHERE id = 1
+        ");
+        $stmt->execute([
+            ':fecha_inicio' => $fechaInicio,
+            ':fecha_fin' => $fechaFin,
+        ]);
+        $redirigirConfiguracion('&msg=autoseguiment_guardat');
+    } catch (Throwable $e) {
+        error_log('Error guardant la configuració de l’autoseguiment: ' . $e->getMessage());
+        $_SESSION['autoseguiment_error'] = 'No s’ha pogut guardar la configuració de l’autoseguiment.';
         $redirigirConfiguracion();
     }
 }

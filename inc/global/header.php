@@ -17,6 +17,9 @@ $mostrarNotasFinales = $esProfesorMenu
 $mostrarAdministrarProyectos = $esProfesorMenu && esTutor();
 $mostrarAdministrarAlumnado = $mostrarAdministrarProyectos;
 $mostrarProyectosTutorizados = $esProfesorMenu && esTutor();
+$mostrarAutoseguimentTutor = $esProfesorMenu && esTutor();
+$mostrarMemoriaTutor = $esProfesorMenu && esTutor();
+$mostrarResumTutor = $esProfesorMenu && esTutor();
 ?>
 <!-- ===== HEADER PROJECTES ===== -->
 <header class="site-header border-bottom">

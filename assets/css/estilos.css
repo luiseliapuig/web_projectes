@@ -320,6 +320,34 @@ color: #fff;
   background: #970a2c;
 }
 
+/* Separador discret entre el bloc principal (eines d'ús habitual) i el
+ * bloc secundari (eines ocasionals/contextuals) del menú del professorat.
+ * Línia vertical fina, mai un caràcter de text ni un element protagonista.
+ */
+.area-nav-separador {
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  padding: 0 6px;
+}
+
+.area-nav-separador::before {
+  content: "";
+  display: block;
+  width: 1px;
+  height: 22px;
+  background: #d8dce2;
+}
+
+@media (max-width: 767.98px) {
+  /* Sota el punt on el menú es col·lapsa i els elements passen a apilar-se
+     verticalment, una línia vertical no té sentit visual: s'amaga en lloc
+     de generar un artefacte entre files. */
+  .area-nav-separador {
+    display: none;
+  }
+}
+
 .area-nav .navbar-toggler {
   color: #970a2c;
   border-color: #d1d5db;
@@ -344,7 +372,28 @@ color: #fff;
   background: #f8f9fa;
 }
 
-/* Navegació lateral de les fases del projecte de l’alumnat. */
+/* Navegació lateral de les fases del projecte de l’alumnat.
+ *
+ * Tres dimensions independents, que no s'han de confondre:
+ *   - ESTAT   → determina el color semàntic (granate = activa, gris =
+ *               bloquejada, groc = atenció pendent, verd = completada).
+ *               Classes .projecte-fase-enllac-pendent / -atencio /
+ *               -completada; l'estat "activa" és l'absència d'aquests
+ *               modificadors.
+ *   - SELECCIÓ → mai canvia el color per un altre que contradigui l'estat;
+ *               només en reforça l'èmfasi (marc/contrast més marcat).
+ *               Classe .active, composable amb qualsevol estat.
+ *   - HOVER   → feedback d'interacció ("puc clicar"), transitori i separat
+ *               de la selecció ("estic aquí"). No ha de semblar selecció.
+ *
+ * "Atenció pendent" (groc) és un estat AGREGAT: la fase el mostra quan
+ * alguna de les seves tasques té una situació oberta que requereix
+ * intervenció (per exemple, una revisió sol·licitada) — mai pel simple fet
+ * que l'alumnat hagi començat a treballar-hi. Mateix estat per a alumnat i
+ * professorat: el rol no el canvia, només determina quines accions es
+ * poden executar. Prioritat quan coincideixen senyals: bloquejada >
+ * completada > atenció pendent > activa (vegeu fases_navegacion.php).
+ */
 .projecte-fases-nav {
   position: sticky;
   top: 1rem;
@@ -390,11 +439,22 @@ color: #fff;
   opacity: 1;
 }
 
-.projecte-fase-enllac-pendent,
-.projecte-fase-enllac-pendent.active {
+.projecte-fase-enllac-pendent {
   color: #737d8c;
   background: #f6f7f9;
   border-color: #dfe4ea;
+}
+
+/* Bloquejada + seleccionada: "estic aquí" + "encara bloquejada", sense
+ * mesclar-ho amb granate. Continua sent grisa, però amb un marc i un
+ * contrast més marcats que la bloquejada no seleccionada, perquè es
+ * distingeixi que és la fase consultada. Reutilitza el mateix nivell de
+ * contrast que ja fa servir el hover d'aquest mateix estat (referència ja
+ * provada dins el propi sistema, no un to nou). */
+.projecte-fase-enllac-pendent.active {
+  color: #596271;
+  background: #f0f2f5;
+  border-color: #cbd1d9;
 }
 
 .projecte-fase-enllac-pendent .projecte-fase-fletxa,
@@ -411,11 +471,20 @@ color: #fff;
   box-shadow: 0 5px 14px rgba(15, 23, 42, .04);
 }
 
-.projecte-fase-enllac-completada,
-.projecte-fase-enllac-completada.active {
+.projecte-fase-enllac-completada {
   color: #397154;
   background: #f5faf7;
   border-color: #a9c8b8;
+}
+
+/* Completada + seleccionada: reforça el mateix verd de completat, mai
+ * granate pel simple fet d'estar seleccionada. Mateix criteri que la
+ * bloquejada seleccionada: reutilitza el contrast que ja existeix al hover
+ * d'aquest estat. */
+.projecte-fase-enllac-completada.active {
+  color: #2f6247;
+  background: #eef7f2;
+  border-color: #8fb5a1;
 }
 
 .projecte-fase-enllac-completada .projecte-fase-fletxa,
@@ -429,6 +498,38 @@ color: #fff;
   color: #2f6247;
   background: #eef7f2;
   border-color: #8fb5a1;
+}
+
+/* Atenció pendent: mateixa recepta que la resta d'estats (to de l'estat
+ * sobre un fons pàl·lid), reutilitzant el mateix groc ja establert per a
+ * l'estat "atenció" de les tasques (.bloc-atencio / text-bg-warning). */
+.projecte-fase-enllac-atencio {
+  color: #8a6d1a;
+  background: #fffaf0;
+  border-color: #f0dfa8;
+}
+
+/* Atenció + seleccionada: reforça el mateix groc (mai granate ni cap altre
+ * color pel simple fet d'estar seleccionada). Mateix criteri que la resta
+ * d'estats seleccionats: reutilitza el contrast que ja existeix al hover. */
+.projecte-fase-enllac-atencio.active {
+  color: #6b5313;
+  background: #fff3d6;
+  border-color: #e0b94a;
+}
+
+.projecte-fase-enllac-atencio .projecte-fase-fletxa,
+.projecte-fase-enllac-atencio.active .projecte-fase-fletxa {
+  color: #8a6d1a;
+  background: #fbe8b8;
+}
+
+.projecte-fase-enllac-atencio:hover,
+.projecte-fase-enllac-atencio:focus-visible {
+  color: #6b5313;
+  background: #fff3d6;
+  border-color: #e0b94a;
+  box-shadow: 0 5px 14px rgba(15, 23, 42, .04);
 }
 
 .projecte-fase-enllac small,
@@ -455,8 +556,12 @@ color: #fff;
   flex: 0 0 32px;
   width: 32px;
   height: 32px;
-  color: #1676c4;
-  background: #eaf4fc;
+  /* Estat "activa" (sense seleccionar): mateix llenguatge granate que la
+     resta del sistema, en to suau (mateixa recepta que -pendent/-completada:
+     color de l'estat sobre un fons pàl·lid del mateix to). Sense èmfasi de
+     selecció. */
+  color: #970a2c;
+  background: #f7e6ea;
   border-radius: 50%;
 }
 
@@ -472,6 +577,11 @@ color: #fff;
 .projecte-fase-enllac.active.projecte-fase-enllac-pendent .projecte-fase-fletxa {
     color: #eaf4fc;
     background: #7f8997;
+}
+
+.projecte-fase-enllac.active.projecte-fase-enllac-atencio .projecte-fase-fletxa {
+    color: #fff;
+    background: #c9971a;
 }
 
 /* Caixes de contingut de les fases.
@@ -498,6 +608,108 @@ color: #fff;
 .bloc-informacio::before { background: #aeb6c2; }
 .bloc-completat::before { background: #198754; }
 .bloc-bloquejat::before { background: #c5cbd3; }
+/* .bloc-atencio: intervenció pendent del tutor/a (per exemple, una revisió
+   sol·licitada i encara sense resoldre). Ribet groc, mateixa família visual
+   que la resta de blocs d'estat. */
+.bloc-atencio::before { background: #ffc107; }
+
+/* Historial d'Autoseguiment: la franja conserva la mateixa escala cromàtica
+ * suau que la valoració del tutor, sense alterar la resta del bloc. */
+.bloc.autoseguiment-valoracio-sense::before,
+.bloc.bloc-memoria-corregir::before { background: #f5c6cb; }
+.bloc.autoseguiment-valoracio-poc::before,
+.bloc.bloc-memoria-revisio::before { background: #ffd08a; }
+.bloc.autoseguiment-valoracio-adequat::before,
+.bloc.bloc-memoria-complet::before { background: #c8e6c9; }
+.bloc.autoseguiment-valoracio-destacat::before { background: #9dd0a2; }
+.pill-neutral.autoseguiment-valoracio-sense,
+.memoria-estat-badge.memoria-estat-corregir { background: #fdecea; color: #c62828; border-color: #f5c6cb; }
+.pill-neutral.autoseguiment-valoracio-poc,
+.memoria-estat-badge.memoria-estat-revisio { background: #fff4e5; color: #a65f00; border-color: #ffd08a; }
+.pill-neutral.autoseguiment-valoracio-adequat,
+.memoria-estat-badge.memoria-estat-complet { background: #e8f5e9; color: #08751c; border-color: #c8e6c9; }
+.pill-neutral.autoseguiment-valoracio-destacat { background: #c8e6c9; color: #0b5d17; border-color: #9dd0a2; }
+.memoria-estat-badge.memoria-estat-pendent { background: #f1f3f5; color: #7a838d; border-color: #dee2e6; }
+.memoria-estat-badge { border: 1px solid; }
+.memoria-comentaris-cap {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  margin-bottom: .75rem !important;
+  color: #496B88 !important;
+}
+.memoria-comentaris-cap::before,
+.memoria-comentaris-cap::after {
+  content: "";
+  flex: 1 1 auto;
+  height: 1px;
+  background: #dee2e6;
+}
+.memoria-resultat-opcio {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 16px;
+  border: 1px solid #dee2e6;
+  border-radius: 999px;
+  font-size: .85rem;
+  font-weight: 600;
+  background: #f1f3f5;
+  color: #7a838d;
+  cursor: pointer;
+  transition: background-color .15s, border-color .15s, color .15s;
+}
+.btn-check[value="corregir"]:checked + .memoria-resultat-opcio {
+  background: #fdecea;
+  color: #c62828;
+  border-color: #f5c6cb;
+}
+.btn-check[value="completo"]:checked + .memoria-resultat-opcio {
+  background: #e8f5e9;
+  color: #08751c;
+  border-color: #c8e6c9;
+}
+.memoria-resultat-validacio {
+  color: #c62828;
+}
+.memoria-comentaris-columna {
+  --memoria-chevron-amplada: .7rem;
+  --memoria-chevron-separacio: .35rem;
+}
+.memoria-comentari-item {
+  display: grid;
+  grid-template-columns: var(--memoria-chevron-amplada) minmax(0, 1fr);
+  column-gap: var(--memoria-chevron-separacio);
+  align-items: start;
+}
+.memoria-comentari-item::before {
+  content: "›";
+  color: #496B88;
+  line-height: 1.5;
+}
+.memoria-comentari-cos {
+  min-width: 0;
+}
+.memoria-historial-toggle {
+  margin-left: calc(var(--memoria-chevron-amplada) + var(--memoria-chevron-separacio));
+}
+.memoria-revisio-bloc {
+  margin-left: calc(var(--memoria-chevron-amplada) + var(--memoria-chevron-separacio));
+}
+.bloc .memoria-ultima-revisio-etiqueta {
+  color: #8a94a4;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: .055em;
+  text-transform: uppercase;
+}
+.memoria-comentari-item + .memoria-comentari-item {
+  margin-top: 1.5rem;
+}
+.memoria-historial-bloc > .memoria-historial-comentaris:first-child {
+  margin-top: 1rem !important;
+}
+/* Setmana oberta: granate suau d'interacció, independent de la valoració. */
+.pill-neutral.autoseguiment-setmana-activa { background: #f7e7ec; color: #970a2c; border-color: #e7b4c3; }
 
 .bloc-bloquejat {
   background: #f7f8fa;
@@ -521,6 +733,79 @@ color: #fff;
 .bloc-informacio .bloc-tipus { color: #778292; }
 .bloc-completat .bloc-tipus { color: #198754; }
 .bloc-bloquejat .bloc-tipus { color: #8a94a4; }
+.bloc-atencio .bloc-tipus { color: #8a6d1a; }
+.bloc-memoria-revisio .bloc-tipus { color: #a65f00; }
+.bloc-memoria-corregir .bloc-tipus { color: #c62828; }
+.bloc-memoria-complet .bloc-tipus { color: #08751c; }
+
+/* Zona d'intervenció contextual dins d'un .bloc: una intervenció d'un rol
+ * sobre un pas concret (per exemple, la intervenció del tutor dins la
+ * "Proposta de projecte") es representa com una franja interna del mateix
+ * bloc, mai com una subtargeta. .bloc-zona compensa amb marges negatius el
+ * padding de .bloc-contingut (24px 28px 26px) perquè el fons arribi fins
+ * als límits interiors del bloc — inclosos els cantons inferiors, que ja
+ * queden retallats pel propi overflow:hidden de .bloc — i el restaura dins
+ * seu. El seu border-top fa alhora de separador superior: no calen
+ * simultàniament una <hr> i una vora. Genèric i reutilitzable: no és
+ * específic de cap tasca ni de cap rol.
+ */
+.bloc-zona {
+  margin: 1.5rem -28px -26px;
+  padding: 1.25rem 28px 26px;
+  border-top: 1px solid transparent;
+}
+
+/* Variant "atenció": fons groc molt suau, mateixa família cromàtica que
+ * .bloc-atencio (vora #ffe9b3, capçalera #8a6d1a ja usada a .bloc-tipus). */
+.bloc-zona-atencio {
+  background: #fffaf0;
+  border-top-color: #ffe9b3;
+}
+
+.bloc-zona-titol {
+  margin-bottom: 7px;
+}
+
+.bloc-zona-atencio .bloc-zona-titol { color: #8a6d1a; }
+
+.bloc-zona-tancar {
+  color: var(--bs-warning-text);
+  opacity: .7;
+  transition: opacity .15s ease;
+}
+
+.bloc-zona-tancar:hover,
+.bloc-zona-tancar:focus-visible {
+  color: var(--bs-warning-text);
+  opacity: 1;
+}
+
+/* Llista compacta de sol·licituds del resum del tutor. El separador viu a
+ * la fila; l'enllaç interior conserva tota la superfície interactiva. */
+.resum-solicitud-fila {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.resum-solicitud-fila:last-child {
+  border-bottom: 0;
+}
+
+.resum-solicitud-context {
+  font-size: .675em;
+}
+
+.resum-solicitud-item {
+  display: block;
+  padding: .7rem .5rem;
+  margin: 0 -.5rem;
+  overflow-wrap: anywhere;
+  transition: background-color .15s ease;
+}
+
+.resum-solicitud-item:hover,
+.resum-solicitud-item:focus-visible {
+  background-color: #f7f8fa;
+}
 
 .bloc h2 {
   margin: 0 0 8px;
@@ -533,19 +818,114 @@ color: #fff;
   line-height: 1.55;
 }
 
+/* Estat visual d'una tasca (targeta-resum i detall): pastilla de granate
+ * corporatiu quan la tasca està activa/en treball. Els estats "atenció"
+ * (groc) i "completat" (verd) ja tenen equivalent directe amb
+ * text-bg-warning i text-bg-success de Bootstrap; només calia aquest per
+ * al granate, que no té utilitat pròpia a Bootstrap.
+ */
+.badge-activitat {
+  background-color: #ad0735;
+  color: #fff;
+}
+
+/* Enllaç informatiu secundari (color corporatiu blau-grisós), reutilitzat
+ * per a enllaços auxiliars del detall/resum d'una tasca: "Veure document
+ * viu", "Tornar a la fase", etc. Mai un botó.
+ */
+.link-secundari-puig {
+  color: #496B88;
+  text-decoration: none;
+}
+.link-secundari-puig:hover {
+  color: #35506b;
+}
+
+/* Recursos/plantilles del detall d'una tasca: documents de suport, no
+ * accions. S'hi dona una mica més de presència que a un enllaç informatiu
+ * (icona + pes tipogràfic moderat) sense arribar a semblar un botó.
+ */
+.tasca-recursos {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .4rem 1.1rem;
+}
+.tasca-recurs-link {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  color: #496B88;
+  font-weight: 600;
+  text-decoration: none;
+}
+.tasca-recurs-link:hover {
+  color: #35506b;
+  text-decoration: underline;
+}
+/* Separador purament visual entre recursos d'una mateixa fila (per exemple,
+ * les plantilles CA/ES): no és cap enllaç, per això va marcat aria-hidden. */
+.tasca-recursos-separador {
+  color: #aeb6c2;
+}
+
+/* Enllaç "resultat" d'una targeta-resum (per exemple, el PDF definitiu de
+ * Proposta de projecte): mateixa tipografia de recurs (.tasca-recurs-link)
+ * però amb el color de l'estat de la PRÒPIA targeta, no el blau-grisós per
+ * defecte dels recursos de suport (plantilles). Mateixos tons ja establerts
+ * a .bloc-tipus per a cada estat; només afecta els enllaços que porten
+ * explícitament una d'aquestes classes, mai els recursos existents. */
+.tasca-recurs-link.tasca-recurs-resultat--completat { color: #237549 !important; }
+.tasca-recurs-link.tasca-recurs-resultat--completat:hover,
+.tasca-recurs-link.tasca-recurs-resultat--completat:focus-visible { color: #146c43 !important; }
+.tasca-recurs-link.tasca-recurs-resultat--atencio { color: #8a6d1a; }
+.tasca-recurs-link.tasca-recurs-resultat--activitat { color: #ad0735; }
+
 .fase-introduccio {
   max-width: 72ch;
   color: #465166;
   line-height: 1.65;
 }
 
-.btn-fase-informacio {
+/* Geometria comuna dels botons del sistema de fases: alçada, padding, mida
+ * tipogràfica i border-radius. Referència real: "Veure projectes" de Fase 1
+ * (mateixos valors que ja tenia .btn-fase-informacio). Es combina amb la
+ * classe de color/jerarquia que correspongui (.btn-puig, .btn-puig-solid,
+ * .btn-fase-informacio, .btn-outline-success…): unifica FORMA, mai color ni
+ * jerarquia — cada variant conserva el seu significat.
+ *
+ * No s'aplica als botons fusionats a un input-group (input-group-sm ja els
+ * dona la mida coherent amb el camp adjacent; el seu border-radius parcial
+ * és necessari perquè el botó i el camp es vegin com una sola peça).
+ */
+.btn-fase {
   padding: .28rem .7rem;
+  font-size: .9rem;
+  border-radius: .55rem;
+}
+
+/* Textarea autoajustable: la classe activa el helper genèric de main.js. */
+textarea.auto-grow {
+  overflow-y: hidden;
+  resize: none;
+}
+
+/* Superfície neutra reutilitzable per a textarea. La mida continua sent
+ * responsabilitat de .form-control / .form-control-sm i el creixement, de
+ * .auto-grow. */
+textarea.textarea-neutral,
+textarea.textarea-neutral:hover,
+textarea.textarea-neutral:focus {
+  background-color: #fafbfc;
+  border-color: #d1d5db;
+  box-shadow: none;
+}
+
+.btn-fase-informacio {
   color: #626d80;
   background: #fff;
   border: 1px solid #aeb6c2;
-  border-radius: .55rem;
-  font-size: .9rem;
 }
 
 .btn-fase-informacio:hover,
@@ -558,6 +938,40 @@ color: #fff;
 .fase-etiqueta {
   color: #970a2c;
   font-weight: 600;
+}
+
+/* Variants d'estat de l'eyebrow "Fase N" de la capçalera interior
+ * (fase_base.php): el granate per defecte de .fase-etiqueta ja representa
+ * "activa"; aquests modificadors el sobreescriuen quan l'estat real és un
+ * altre, reutilitzant exactament els mateixos tons ja establerts a
+ * .bloc-tipus per fase/tasca (.bloc-completat/.bloc-atencio/.bloc-bloquejat
+ * .bloc-tipus) — mai un verd o un granate nous. */
+.fase-etiqueta--completada { color: #198754; }
+.fase-etiqueta--atencio { color: #8a6d1a; }
+.fase-etiqueta--bloquejada { color: #8a94a4; }
+
+/* Breadcrumb comú de les vistes internes de tasca (vegeu fase_base.php):
+ * discret, mai una barra pesada. Reutilitza el mateix color secundari ja
+ * establert a .link-secundari-puig i el mateix gris de separador ja usat a
+ * .tasca-recursos-separador. Genèric i reutilitzable, no específic de cap
+ * fase ni de cap tasca. */
+.fase-breadcrumb {
+  font-size: .8125rem;
+}
+.fase-breadcrumb a {
+  color: #496B88;
+  text-decoration: none;
+}
+.fase-breadcrumb a:hover {
+  color: #35506b;
+  text-decoration: underline;
+}
+.fase-breadcrumb-separador {
+  color: #aeb6c2;
+  margin: 0 .35rem;
+}
+.fase-breadcrumb [aria-current="page"] {
+  color: #6b7280;
 }
 
 .fase-modalitat {
@@ -574,6 +988,14 @@ color: #fff;
   align-items: center;
   gap: .5rem;
   color: #237549 !important;
+  font-weight: 600;
+}
+
+.fase-resultat-pendent {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  color: #ad0735 !important;
   font-weight: 600;
 }
 
@@ -1626,6 +2048,38 @@ a.text-muted span:first-child {
     color: #fff;
 }
 
+/* Variant sòlida per a un CTA sobre l'estat "atenció pendent" (mateix groc
+ * que .bloc-atencio / .badge-activitat / text-bg-warning). Es combina amb
+ * .btn-fase per a la geometria, mai un botó específic d'una tasca. */
+.btn-atencio-solid {
+    border: 1px solid #e0b94a;
+    background: #ffc107;
+    color: #4a3a0a;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.btn-atencio-solid:hover {
+    background: #e0a800;
+    border-color: #cc9a06;
+    color: #4a3a0a;
+}
+
+/* Variant outline del mateix groc, mateixa parella outline/sòlid que
+ * .btn-puig / .btn-puig-solid: recursos i acció secundària sobre l'estat
+ * "atenció pendent", mai un botó específic d'una tasca. */
+.btn-atencio {
+    border: 1px solid #e0b94a;
+    background: #fff;
+    color: #8a6d1a;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.btn-atencio:hover {
+    border-color: #e0b94a;
+    color: #8a6d1a;
+    background: #fff3d6;
+}
+
 a.text-muted span:first-child {
     opacity: 0.7;
 }
@@ -1641,6 +2095,26 @@ a.text-muted span:first-child {
 .form-select:focus {
     border-color: #c08497;
     box-shadow: 0 0 0 0.2rem rgba(151, 10, 44, 0.08);
+}
+
+/* Estat "completat" general d'un camp de formulari (select, input...):
+ * indica que el valor ja és vàlid/tancat, MAI que el camp estigui bloquejat
+ * — segueix sent totalment editable. Reutilitzable per qualsevol input/select
+ * del sistema, no específic de cap tasca. Manté fons blanc, geometria, mida,
+ * padding i border-radius del propi .form-control/.form-select; només
+ * canvia el color de la vora (suau) i del text. Sense fons verd, sense
+ * icones. Mateixos tons ja establerts a .projecte-fase-enllac-completada. */
+.form-control.form-completat,
+.form-select.form-completat {
+    background-color: #fff;
+    border-color: #a9c8b8;
+    color: #397154;
+}
+
+.form-control.form-completat:focus,
+.form-select.form-completat:focus {
+    border-color: #397154;
+    box-shadow: 0 0 0 0.2rem rgba(57, 113, 84, 0.12);
 }
 
 .form-text {
@@ -2063,6 +2537,23 @@ th.fw-semibold.text-center.py-3 {
     box-shadow: 0 6px 14px rgba(0,0,0,0.08);
 }
 
+.mega-btn--natural {
+    flex: 0 1 auto;
+    width: fit-content;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.mega-btn--completat,
+.mega-btn--completat:hover,
+.mega-btn--completat:focus-visible {
+    color: #fff;
+}
+
+.mega-btn--completat { border-color: #198754; background: #198754; }
+.mega-btn--completat:hover,
+.mega-btn--completat:focus-visible { border-color: #146c43; background: #146c43; }
+
 .mega-arrow {
     margin-left: auto;
     font-size: 18px;
@@ -2123,6 +2614,20 @@ th.fw-semibold.text-center.py-3 {
 .char-counter {text-align: right; font-size: 0.75rem; color: #9ca3af; margin-top: 4px;}
 .char-counter.limit {color: #dc2626; font-weight: 600;}
 .char-counter.ok {color: #16a34a; font-weight: 600;}
+
+.fase6-fitxa-imatge {
+  display: block;
+  width: min(100%, 760px);
+  max-height: 460px;
+  object-fit: cover;
+}
+
+.fase6-fitxa-miniatura {
+  display: block;
+  width: 9rem;
+  height: 5.5rem;
+  object-fit: cover;
+}
 
 .alerta-llenguatge {  margin-top: 20px ; padding: 12px 16px; background: #fef3c7; border-left: 4px solid #f59e0b;  border-radius: 10px; display: flex; gap: 10px; font-size: 0.9rem; color: #7a4e00;}
 .alerta-llenguatge .icon { font-size: 1.2rem; line-height: 1.2; }
@@ -2312,3 +2817,222 @@ th.fw-semibold.text-center.py-3 {
 
 
 
+.fase5-stack-bloc {
+  overflow: visible;
+}
+
+.fase5-stack-bloc::before {
+  border-radius: 15px 15px 0 0;
+}
+
+.fase5-stack-bloc:focus-within {
+  z-index: 30;
+}
+
+.fase5-stack-resultats {
+  z-index: 20;
+  max-height: 18rem;
+  overflow-y: auto;
+}
+
+.fase5-stack-resultat,
+.fase5-stack-resultat-nom {
+  color: var(--bs-body-color);
+}
+
+.fase5-stack-resultat-descripcio {
+  display: block;
+  color: #737b85;
+}
+
+.fase5-stack-resultat:hover,
+.fase5-stack-resultat:focus-visible {
+  color: var(--bs-body-color);
+  background: #f6f7f9;
+}
+
+.fase5-stack-sense-resultats {
+  color: #737b85;
+  font-size: .875rem;
+  cursor: default;
+}
+
+.fase5-stack-sense-resultats:hover {
+  color: #737b85;
+  background: var(--bs-list-group-bg);
+}
+
+.fase5-stack-proposar {
+  color: #970a2c;
+  background: #f7e6ea;
+  cursor: pointer;
+}
+
+.fase5-stack-proposar:hover,
+.fase5-stack-proposar:focus-visible {
+  color: #970a2c;
+  background: #f0d6dd;
+}
+
+.fase5-stack-pill,
+.stack-tecnologia-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: .45rem .8rem;
+  border-radius: 999px;
+  background: #e9e9e9;
+  color: #555;
+  font-size: .92rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.stack-resum-titol {
+  margin-bottom: .4rem;
+  color: #198754;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.stack-eines-resum {
+  color: #737b85;
+  font-size: .9rem;
+  line-height: 1.45;
+}
+
+.fase5-stack-pendent {
+  color: #737b85;
+  font-weight: 400;
+}
+
+.fase5-stack-treure {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 1.1rem;
+  line-height: 1;
+  opacity: .65;
+  transition: opacity .15s ease;
+}
+
+.fase5-stack-treure:hover,
+.fase5-stack-treure:focus-visible {
+  color: inherit;
+  opacity: 1;
+}
+
+/* Lliurament final de Fase 5: component encapsulat per a la publicació. */
+.lliurament-final {
+  overflow: hidden;
+  border: 1px solid #ad0735;
+  border-radius: 18px;
+  background: #fff8fa;
+  box-shadow: 0 2px 8px rgba(20, 30, 50, .04);
+}
+
+.lliurament-final-cap {
+  padding: 14px 26px;
+  background: #ad0735;
+  color: #fff;
+  font-size: .82rem;
+  font-weight: 750;
+  letter-spacing: .045em;
+  text-transform: uppercase;
+}
+
+.lliurament-final-cos { padding: 30px 30px 32px; }
+.lliurament-final-intro h2 { margin: 0 0 10px; font-size: 1.65rem; line-height: 1.2; font-weight: 700; letter-spacing: -.02em; }
+.lliurament-final-intro p { max-width: 790px; margin: 0; color: #68738c; font-size: 1.02rem; line-height: 1.62; }
+.lliurament-final-opcions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 25px; }
+.lliurament-final-opcions--una { grid-template-columns: 1fr; }
+.lliurament-final-opcio { height: 100%; padding: 18px 20px; border-radius: 12px; background: rgba(173, 7, 53, .055); }
+.lliurament-final-opcio-titol { margin: 0 0 5px; font-size: 1rem; font-weight: 700; }
+.lliurament-final-opcio p { margin: 0; color: #68738c; line-height: 1.52; }
+.lliurament-final-exemples { margin-top: 26px; padding-top: 21px; border-top: 1px solid rgba(173, 7, 53, .16); color: #68738c; }
+.lliurament-final-exemples p { margin: 0; line-height: 1.55; }
+.lliurament-final-subtitol { margin-bottom: 7px; color: #ad0735; font-size: .76rem; font-weight: 750; letter-spacing: .045em; text-transform: uppercase; }
+.lliurament-final-important { margin-top: 22px; padding: 15px 18px; border-left: 4px solid #ad0735; border-radius: 8px; background: rgba(173, 7, 53, .075); color: #58637a; line-height: 1.55; }
+.lliurament-final-important strong { color: #ad0735; text-transform: uppercase; }
+.lliurament-final-enllac { color: #970a2c; text-underline-offset: .16em; }
+.lliurament-final-enllac:hover,
+.lliurament-final-enllac:focus-visible { color: #7a0823; text-decoration: underline; }
+.lliurament-final-entrega { margin-top: 29px; }
+.lliurament-final-edicio { margin-top: 18px; }
+.lliurament-final-formulari { display: flex; max-width: 760px; }
+.lliurament-final-formulari .form-control { min-width: 0; }
+.lliurament-final-formulari > .form-control { border-radius: var(--bs-border-radius) 0 0 var(--bs-border-radius); }
+.lliurament-final-formulari > .lliurament-final-btn { margin-left: -1px; border-radius: 0 var(--bs-border-radius) var(--bs-border-radius) 0; }
+.lliurament-final-btn { padding-inline: 23px; border-color: #ad0735; background: #ad0735; color: #fff; font-weight: 650; }
+.lliurament-final-btn:hover, .lliurament-final-btn:focus-visible { border-color: #970a2c; background: #970a2c; color: #fff; }
+
+.lliurament-final--completat { border-color: #198754; background: #f5faf7; }
+.lliurament-final--completat .lliurament-final-cap,
+.lliurament-final--completat .lliurament-final-btn { border-color: #198754; background: #198754; }
+.lliurament-final--completat .mega-btn-solid { border-color: #198754; background: #198754; color: #fff; }
+.lliurament-final--completat .mega-btn-solid:hover,
+.lliurament-final--completat .mega-btn-solid:focus-visible { border-color: #146c43; background: #146c43; color: #fff; }
+.lliurament-final--completat .lliurament-final-opcio { background: rgba(25, 135, 84, .055); }
+.lliurament-final--completat .lliurament-final-exemples { border-top-color: rgba(25, 135, 84, .16); }
+.lliurament-final--completat .lliurament-final-subtitol,
+.lliurament-final--completat .lliurament-final-important strong { color: #198754; }
+.lliurament-final--completat .lliurament-final-important { border-left-color: #198754; background: rgba(25, 135, 84, .075); }
+.lliurament-final--completat .lliurament-final-btn:hover,
+.lliurament-final--completat .lliurament-final-btn:focus-visible { border-color: #146c43; background: #146c43; }
+
+.lliurament-final--compacte {
+  border-radius: 16px;
+}
+
+.lliurament-final--compacte .lliurament-final-cap {
+  padding: 10px 24px;
+  font-size: .76rem;
+}
+
+.lliurament-final--compacte .lliurament-final-cos {
+  padding: 24px 28px 26px;
+}
+
+.lliurament-final--compacte h2 {
+  margin-bottom: .65rem;
+}
+
+.lliurament-final--compacte p {
+  max-width: 760px;
+  color: #68738c;
+  line-height: 1.55;
+}
+
+.lliurament-final--compacte .lliurament-final-opcions {
+  max-width: 690px;
+  gap: 16px;
+  margin-top: 22px;
+}
+
+.lliurament-final--compacte .lliurament-final-opcions--una {
+  width: 100%;
+  max-width: none;
+  grid-template-columns: 1fr;
+}
+
+.lliurament-final--compacte .lliurament-final-opcio {
+  padding: 16px 18px;
+}
+
+.lliurament-final--compacte .lliurament-final-accions {
+  margin-top: 24px;
+}
+
+@media (max-width: 700px) {
+  .lliurament-final-cos { padding: 24px 20px 25px; }
+  .lliurament-final--compacte .lliurament-final-cap { padding-inline: 20px; }
+  .lliurament-final--compacte .lliurament-final-cos { padding: 21px 20px 23px; }
+  .lliurament-final-opcions { grid-template-columns: 1fr; }
+  .lliurament-final-formulari { display: block; }
+  .lliurament-final-formulari > .form-control { width: 100%; border-radius: var(--bs-border-radius); }
+  .lliurament-final-formulari > .lliurament-final-btn { width: 100%; margin-top: 10px; margin-left: 0; border-radius: var(--bs-border-radius); }
+}

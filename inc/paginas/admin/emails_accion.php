@@ -15,6 +15,24 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST' || !validarTokenCsrf($_POST['c
     $redirect();
 }
 
+// Botó "Enviar cua": processa manualment un lot pendent, exactament igual
+// que ho fa el worker CLI (mateixa funció compartida, cap lògica nova).
+if (isset($_POST['accio']) && $_POST['accio'] === 'enviar_cola') {
+    require_once dirname(__DIR__, 2) . '/email/bootstrap.php';
+    require_once dirname(__DIR__, 2) . '/email/procesar_cola.php';
+
+    $config = EmailConfig::fromEnvironment();
+    if (!$config->isReady()) {
+        $_SESSION['emails_error'] = 'El servei de correu no està configurat: falten ' . implode(', ', $config->validationErrors()) . '.';
+        $redirect();
+    }
+
+    $resultado = emailProcesarColaPendent(new EmailQueue($pdo), new EmailService($config), $config->batchSize);
+    $pendientes = (int) $pdo->query("SELECT COUNT(*) FROM app.email_outbox WHERE estado = 'pendiente'")->fetchColumn();
+
+    $redirect('&msg=cua_processada&enviats=' . $resultado['enviados'] . '&fallits=' . $resultado['fallidos'] . '&pendents=' . $pendientes);
+}
+
 $destinatario = isset($_POST['destinatario']) && is_string($_POST['destinatario']) ? strtolower(trim($_POST['destinatario'])) : '';
 $asunto = isset($_POST['asunto']) && is_string($_POST['asunto']) ? trim($_POST['asunto']) : '';
 $contenido = isset($_POST['contenido']) && is_string($_POST['contenido']) ? trim($_POST['contenido']) : '';

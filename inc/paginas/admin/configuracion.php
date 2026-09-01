@@ -14,6 +14,17 @@ $reglas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $error = $_SESSION['configuracion_error'] ?? '';
 unset($_SESSION['configuracion_error']);
 $mensaje = isset($_GET['msg']) && is_string($_GET['msg']) ? $_GET['msg'] : '';
+
+// Període vigent de l'Autoseguiment: registre únic id = 1, ja garantit per la BD.
+$stmt = $pdo->query("
+    SELECT fecha_inicio, fecha_fin
+    FROM app.seguimiento_config
+    WHERE id = 1
+");
+$autoseguiment = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+
+$errorAutoseguiment = $_SESSION['autoseguiment_error'] ?? '';
+unset($_SESSION['autoseguiment_error']);
 ?>
 
 <script>
@@ -103,6 +114,47 @@ window.PAGE_TITLE = 'Configuració';
                     <?php endif; ?>
                 </tbody>
             </table>
+        </div>
+    </div>
+
+    <!-- Segona box, independent del bloc de regles de configuració anterior. -->
+    <div class="card shadow-sm border-0 rounded-4 mt-4">
+        <div class="card-body p-4">
+            <div class="mb-3">
+                <h2 class="h5 mb-1">Autoseguiment</h2>
+                <p class="text-muted mb-0">Configura el període durant el qual es generarà el seguiment setmanal de l'alumnat.</p>
+            </div>
+
+            <?php if ($autoseguiment === null): ?>
+                <div class="alert alert-warning mb-0" role="alert">No s’ha trobat la configuració de l’autoseguiment.</div>
+            <?php else: ?>
+                <?php if ($errorAutoseguiment !== ''): ?>
+                    <div class="alert alert-danger" role="alert"><?= htmlspecialchars($errorAutoseguiment, ENT_QUOTES, 'UTF-8') ?></div>
+                <?php endif; ?>
+                <?php if ($mensaje === 'autoseguiment_guardat'): ?>
+                    <div class="alert alert-success" role="alert">Període d’autoseguiment actualitzat correctament.</div>
+                <?php endif; ?>
+
+                <form method="post" action="/index.php?main=configuracion_accion">
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(tokenCsrf(), ENT_QUOTES, 'UTF-8') ?>">
+                    <input type="hidden" name="accio" value="autoseguiment">
+                    <div class="row">
+                        <div class="col-4">
+                            <label for="autoseguiment_fecha_inicio" class="form-label">Data d'inici</label>
+                            <input type="date" id="autoseguiment_fecha_inicio" name="fecha_inicio" class="form-control" required
+                                   value="<?= htmlspecialchars((string) $autoseguiment['fecha_inicio'], ENT_QUOTES, 'UTF-8') ?>">
+                            <div class="form-text">Ha de ser un dilluns.</div>
+                        </div>
+                        <div class="col-4">
+                            <label for="autoseguiment_fecha_fin" class="form-label">Data de finalització</label>
+                            <input type="date" id="autoseguiment_fecha_fin" name="fecha_fin" class="form-control" required
+                                   value="<?= htmlspecialchars((string) $autoseguiment['fecha_fin'], ENT_QUOTES, 'UTF-8') ?>">
+                            <div class="form-text">Ha de ser un diumenge.</div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-3">Guardar</button>
+                </form>
+            <?php endif; ?>
         </div>
     </div>
 </div>

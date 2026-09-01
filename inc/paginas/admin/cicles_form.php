@@ -2,12 +2,14 @@
 declare(strict_types=1);
 
 soloSuperadmin();
+require_once dirname(__DIR__, 2) . '/fases/funciones.php';
 
 // Preparación de los modos y valores del formulario único.
 $modo = isset($_GET['modo']) && is_string($_GET['modo']) ? $_GET['modo'] : 'new';
 $modo = in_array($modo, ['new', 'edit', 'delete'], true) ? $modo : 'new';
 $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 $colores = coloresCicloPermitidos();
+$arquitecturasFases = listarArquitecturasFases();
 $ciclo = [
     'id_ciclo' => 0,
     'abr' => '',
@@ -16,6 +18,7 @@ $ciclo = [
     'color' => 'secondary',
     'orden' => 1,
     'familia_ciclo_id' => 0,
+    'fases_clave' => null,
 ];
 
 if ($modo === 'new') {
@@ -25,7 +28,7 @@ if ($modo === 'new') {
 // En edición y borrado, el ciclo se recupera siempre desde la base de datos.
 if ($modo !== 'new') {
     $stmt = $pdo->prepare("
-        SELECT id_ciclo, abr, nombre, activo, color, orden, familia_ciclo_id
+        SELECT id_ciclo, abr, nombre, activo, color, orden, familia_ciclo_id, fases_clave
         FROM app.ciclos
         WHERE id_ciclo = :id
         LIMIT 1
@@ -123,6 +126,19 @@ window.PAGE_TITLE = '<?= $titulo ?>';
                                min="1" max="32767" required
                                value="<?= (int) $ciclo['orden'] ?>"
                                <?= $modo === 'delete' ? 'disabled' : '' ?>>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="fases_clave" class="form-label">Arquitectura de fases</label>
+                        <select id="fases_clave" name="fases_clave" class="form-select" <?= $modo === 'delete' ? 'disabled' : '' ?>>
+                            <option value="" <?= $ciclo['fases_clave'] === null ? 'selected' : '' ?>>Sense fases</option>
+                            <?php foreach ($arquitecturasFases as $arquitectura): ?>
+                                <option value="<?= htmlspecialchars($arquitectura['clave'], ENT_QUOTES, 'UTF-8') ?>"
+                                    <?= $ciclo['fases_clave'] === $arquitectura['clave'] ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($arquitectura['nombre'], ENT_QUOTES, 'UTF-8') ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <div class="form-text">Determina quina implementació de fases fa servir aquest cicle. Només canvia si se selecciona explícitament aquí.</div>
                     </div>
                 </div>
 

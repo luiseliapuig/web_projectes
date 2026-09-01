@@ -7,7 +7,7 @@ soloSuperadmin();
 $stmt = $pdo->query("
     SELECT cp.id_categoria_proyecto, cp.nombre, cp.activo, cp.orden,
            f.nombre AS familia
-    FROM app.categorias_proyectos cp
+    FROM app.proyecto_categorias cp
     INNER JOIN app.familias_ciclos f
         ON f.id_familia_ciclo = cp.familia_ciclo_id
     ORDER BY f.orden, f.nombre, cp.activo DESC, cp.orden, cp.nombre

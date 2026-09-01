@@ -16,7 +16,7 @@ $categoria = [
 ];
 
 if ($modo !== 'new') {
-    $stmt = $pdo->prepare("SELECT * FROM app.categorias_proyectos WHERE id_categoria_proyecto = :id LIMIT 1");
+    $stmt = $pdo->prepare("SELECT * FROM app.proyecto_categorias WHERE id_categoria_proyecto = :id LIMIT 1");
     $stmt->execute([':id' => $id]);
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
     if (!$row) {
@@ -38,7 +38,7 @@ $stmt->execute([':familia_actual' => (int) $categoria['familia_ciclo_id']]);
 $familias = $stmt->fetchAll(PDO::FETCH_ASSOC);
 if ($modo === 'new' && $familias !== []) {
     $categoria['familia_ciclo_id'] = (int) $familias[0]['id_familia_ciclo'];
-    $stmt = $pdo->prepare("SELECT COALESCE(MAX(orden), 0) + 1 FROM app.categorias_proyectos WHERE familia_ciclo_id = :familia_id");
+    $stmt = $pdo->prepare("SELECT COALESCE(MAX(orden), 0) + 1 FROM app.proyecto_categorias WHERE familia_ciclo_id = :familia_id");
     $stmt->execute([':familia_id' => $categoria['familia_ciclo_id']]);
     $categoria['orden'] = (int) $stmt->fetchColumn();
 }

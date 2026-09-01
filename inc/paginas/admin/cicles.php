@@ -2,17 +2,18 @@
 declare(strict_types=1);
 
 soloSuperadmin();
+require_once dirname(__DIR__, 2) . '/fases/funciones.php';
 
 // Listado administrativo de ciclos, incluidos los desactivados.
 $stmt = $pdo->query("
-    SELECT c.id_ciclo, c.abr, c.nombre, c.activo, c.color, c.orden,
+    SELECT c.id_ciclo, c.abr, c.nombre, c.activo, c.color, c.orden, c.fases_clave,
            f.nombre AS familia,
            COUNT(g.id_grupo) AS total_grupos
     FROM app.ciclos c
     INNER JOIN app.familias_ciclos f
         ON f.id_familia_ciclo = c.familia_ciclo_id
     LEFT JOIN app.grupos g ON g.id_ciclo = c.id_ciclo
-    GROUP BY c.id_ciclo, c.abr, c.nombre, c.activo, c.color, c.orden, f.nombre, f.orden
+    GROUP BY c.id_ciclo, c.abr, c.nombre, c.activo, c.color, c.orden, c.fases_clave, f.nombre, f.orden
     ORDER BY c.activo DESC, f.orden ASC, c.orden ASC, c.abr ASC
 ");
 $ciclos = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -57,6 +58,7 @@ window.PAGE_TITLE = 'Cicles';
                         <th>Nom</th>
                         <th>Família</th>
                         <th class="text-center">Ordre</th>
+                        <th>Arquitectura de fases</th>
                         <th class="text-center">Grups</th>
                         <th class="text-center">Actiu</th>
                         <th class="text-end pe-4">Accions</th>
@@ -73,6 +75,14 @@ window.PAGE_TITLE = 'Cicles';
                             <td><?= htmlspecialchars((string) $ciclo['nombre'], ENT_QUOTES, 'UTF-8') ?></td>
                             <td><?= htmlspecialchars((string) $ciclo['familia'], ENT_QUOTES, 'UTF-8') ?></td>
                             <td class="text-center"><?= (int) $ciclo['orden'] ?></td>
+                            <td>
+                                <?php $arquitectura = obtenerArquitecturaFases($ciclo['fases_clave']); ?>
+                                <?php if ($arquitectura !== null): ?>
+                                    <?= htmlspecialchars($arquitectura['nombre'], ENT_QUOTES, 'UTF-8') ?>
+                                <?php else: ?>
+                                    <span class="text-muted">Sense fases</span>
+                                <?php endif; ?>
+                            </td>
                             <td class="text-center"><?= (int) $ciclo['total_grupos'] ?></td>
                             <td class="text-center">
                                 <?php if ((bool) $ciclo['activo']): ?>
@@ -94,7 +104,7 @@ window.PAGE_TITLE = 'Cicles';
                         </tr>
                     <?php endforeach; ?>
                     <?php if ($ciclos === []): ?>
-                        <tr><td colspan="7" class="text-center text-muted py-5">No hi ha cicles creats.</td></tr>
+                        <tr><td colspan="8" class="text-center text-muted py-5">No hi ha cicles creats.</td></tr>
                     <?php endif; ?>
                 </tbody>
             </table>

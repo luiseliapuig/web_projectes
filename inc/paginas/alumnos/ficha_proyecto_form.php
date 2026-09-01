@@ -43,8 +43,8 @@ try {
         p.url_github,
         p.url_proyecto,
         p.ruta_imagen,
-        p.ruta_memoria,
-        p.ruta_funcional,
+        p.memoria_pdf,
+        p.funcional_pdf,
         c.abr AS ciclo,
         g.grupo,
         p.curso_academico,
@@ -96,8 +96,8 @@ $nombreTutor = trim((string) ($proyecto['tutor_nom'] ?? ''));
 $nombreCotutor = trim((string) ($proyecto['cotutors_nom'] ?? ''));
 
 $rutaImagen      = absolutizePath($proyecto['ruta_imagen'] ?? '');
-$rutaFuncional   = absolutizePath($proyecto['ruta_funcional'] ?? '');
-$rutaMemoria     = absolutizePath($proyecto['ruta_memoria'] ?? '');
+$rutaFuncional   = absolutizePath($proyecto['funcional_pdf'] ?? '');
+$rutaMemoria     = absolutizePath($proyecto['memoria_pdf'] ?? '');
 
 // ── Adjunts extra ─────────────────────────────────────────────────
 try {

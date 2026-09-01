@@ -19,11 +19,73 @@ RewriteRule ^notes-finals/([A-Za-z0-9_-]+)$ /index.php?main=notes-finals&cicle=$
 # FICHA EDICIÓN POR ID
 RewriteRule ^projecte/([0-9]+)/editar$ /index.php?main=ficha_proyecto_form&id=$1 [L,QSA]
 
-# ESPAI PRIVAT DE L'ALUMNAT
-RewriteRule ^el-meu-projecte$ /index.php?main=alumne-projecte [L,QSA]
-RewriteRule ^el-meu-projecte/fase-1/definir-grup$ /index.php?main=alumne-fase-1-grup-form [L,QSA]
-RewriteRule ^el-meu-projecte/fase-1/compromis$ /index.php?main=alumne-fase-1-compromis-form [L,QSA]
-RewriteRule ^el-meu-projecte/fase-([1-7])$ /index.php?main=alumne-fase-$1 [L,QSA]
+# ESPAI PRIVAT DE L'ALUMNAT: tres àrees germanes del menú (vegeu
+# inc/paginas/alumnos/menu.php). Autoseguiment i Memòria tenen entitat
+# pròpia, no són subrutes del recorregut de fases.
+RewriteRule ^fases-del-projecte$ /index.php?main=alumne-fases-projecte [L,QSA]
+RewriteRule ^fases-del-projecte/fase-1/definir-grup$ /index.php?main=alumne-fase-1-grup-form [L,QSA]
+RewriteRule ^fases-del-projecte/fase-1/compromis$ /index.php?main=alumne-fase-1-compromis-form [L,QSA]
+RewriteRule ^fases-del-projecte/fase-2/proposta$ /index.php?main=alumne-fase-2-proposta [L,QSA]
+RewriteRule ^fases-del-projecte/fase-3/document-funcional$ /index.php?main=alumne-fase-3-document-funcional [L,QSA]
+RewriteRule ^fases-del-projecte/fase-4/planificacio-temporal$ /index.php?main=alumne-fase-4-planificacio [L,QSA]
+RewriteRule ^fases-del-projecte/fase-4/gestio-projecte$ /index.php?main=alumne-fase-4-gestio [L,QSA]
+RewriteRule ^fases-del-projecte/fase-5/preparacio-entorn$ /index.php?main=alumne-fase-5-preparacio-entorn [L,QSA]
+RewriteRule ^fases-del-projecte/fase-5/repositoris-git$ /index.php?main=alumne-fase-5-repositoris [L,QSA]
+RewriteRule ^fases-del-projecte/fase-5/tecnologies-eines$ /index.php?main=alumne-fase-5-tecnologies-eines [L,QSA]
+RewriteRule ^fases-del-projecte/fase-5/projecte-en-produccio$ /index.php?main=alumne-fase-5-projecte-produccio [L,QSA]
+RewriteRule ^fases-del-projecte/fase-5/autoavaluacio-final$ /index.php?main=alumne-fase-5-autoavaluacio [L,QSA]
+RewriteRule ^fases-del-projecte/fase-6/document-memoria$ /index.php?main=alumne-fase-6-document-memoria [L,QSA]
+RewriteRule ^fases-del-projecte/fase-6/fitxa-publica$ /index.php?main=alumne-fase-6-fitxa-publica [L,QSA]
+RewriteRule ^fases-del-projecte/fase-6/entrega-memoria$ /index.php?main=alumne-fase-6-entrega-memoria [L,QSA]
+RewriteRule ^fases-del-projecte/fase-7/presentacio-defensa$ /index.php?main=alumne-fase-7-presentacio-defensa [L,QSA]
+RewriteRule ^fases-del-projecte/fase-([1-7])$ /index.php?main=alumne-fase-$1 [L,QSA]
+RewriteRule ^autoseguiment$ /index.php?main=alumne-autoseguiment [L,QSA]
+RewriteRule ^memoria$ /index.php?main=alumne-memoria [L,QSA]
+
+# COMPATIBILITAT TEMPORAL DE LES URL DOCENTS HERETADES
+# Les regles amb ^profesor/ només redirigeixen; no són rutes canòniques.
+# L'espai docent conserva les mateixes tres àrees germanes (vegeu
+# inc/paginas/profesores/menu.php) més el context d'UN projecte concret,
+# identificat sempre per id_proyecto (mai pel nom de l'alumnat). Internament
+# es resol amb els mateixos 'main' ja existents (resum-tutor,
+# autoseguiment-tutor, memoria-tutor, fases-tutor, fase-tutor,
+# fase-1-tutor-compromis, fase-2-tutor-proposta): res canvia salvo la URL
+# pública. Autoseguiment manté grup i alumne com a jerarquia explícita (cap
+# dels dos es pot derivar de l'altre amb el codi actual); a Memòria,
+# proyecto_id ja resol tot sol el grup (vegeu memoria-tutor.php), així que
+# mai apareixen tots dos junts a la mateixa URL.
+RewriteRule ^profesor/resum$ /resum [R=302,L]
+RewriteRule ^profesor/autoseguiment$ /seguiment-setmanal [R=302,L]
+RewriteRule ^profesor/autoseguiment/(.*)$ /seguiment-setmanal/$1 [R=302,L]
+RewriteRule ^profesor/memoria$ /revisio-memoria [R=302,L]
+RewriteRule ^profesor/memoria/(.*)$ /revisio-memoria/$1 [R=302,L]
+RewriteRule ^profesor/projecte/([0-9]+)/fases$ /projecte/$1/fases [R=302,L]
+RewriteRule ^profesor/projecte/([0-9]+)/fases/(.*)$ /projecte/$1/fases/$2 [R=302,L]
+
+# URL DOCENTS CANÒNIQUES
+RewriteRule ^resum$ /index.php?main=resum-tutor [L,QSA]
+RewriteRule ^seguiment-setmanal$ /index.php?main=autoseguiment-tutor [L,QSA]
+RewriteRule ^seguiment-setmanal/grup/([0-9]+)$ /index.php?main=autoseguiment-tutor&grupo_id=$1 [L,QSA]
+RewriteRule ^seguiment-setmanal/grup/([0-9]+)/alumne/([0-9]+)$ /index.php?main=autoseguiment-tutor&grupo_id=$1&alumno_id=$2 [L,QSA]
+RewriteRule ^revisio-memoria$ /index.php?main=memoria-tutor [L,QSA]
+RewriteRule ^revisio-memoria/grup/([0-9]+)$ /index.php?main=memoria-tutor&grupo_id=$1 [L,QSA]
+RewriteRule ^revisio-memoria/projecte/([0-9]+)$ /index.php?main=memoria-tutor&proyecto_id=$1 [L,QSA]
+RewriteRule ^projecte/([0-9]+)/fases$ /index.php?main=fases-tutor&proyecto_id=$1 [L,QSA]
+RewriteRule ^projecte/([0-9]+)/fases/fase-1/compromis$ /index.php?main=fase-1-tutor-compromis&proyecto_id=$1 [L,QSA]
+RewriteRule ^projecte/([0-9]+)/fases/fase-2/proposta$ /index.php?main=fase-2-tutor-proposta&proyecto_id=$1 [L,QSA]
+RewriteRule ^projecte/([0-9]+)/fases/fase-3/document-funcional$ /index.php?main=fase-3-tutor-document-funcional&proyecto_id=$1 [L,QSA]
+RewriteRule ^projecte/([0-9]+)/fases/fase-4/planificacio-temporal$ /index.php?main=fase-4-tutor-planificacio&proyecto_id=$1 [L,QSA]
+RewriteRule ^projecte/([0-9]+)/fases/fase-4/gestio-projecte$ /index.php?main=fase-4-tutor-gestio&proyecto_id=$1 [L,QSA]
+RewriteRule ^projecte/([0-9]+)/fases/fase-5/preparacio-entorn$ /index.php?main=fase-5-tutor-preparacio-entorn&proyecto_id=$1 [L,QSA]
+RewriteRule ^projecte/([0-9]+)/fases/fase-5/repositoris-git$ /index.php?main=fase-5-tutor-repositoris&proyecto_id=$1 [L,QSA]
+RewriteRule ^projecte/([0-9]+)/fases/fase-5/tecnologies-eines$ /index.php?main=fase-5-tutor-tecnologies-eines&proyecto_id=$1 [L,QSA]
+RewriteRule ^projecte/([0-9]+)/fases/fase-5/projecte-en-produccio$ /index.php?main=fase-5-tutor-projecte-produccio&proyecto_id=$1 [L,QSA]
+RewriteRule ^projecte/([0-9]+)/fases/fase-5/autoavaluacio-final$ /index.php?main=fase-5-tutor-autoavaluacio&proyecto_id=$1 [L,QSA]
+RewriteRule ^projecte/([0-9]+)/fases/fase-6/document-memoria$ /index.php?main=fase-6-tutor-document-memoria&proyecto_id=$1 [L,QSA]
+RewriteRule ^projecte/([0-9]+)/fases/fase-6/fitxa-publica$ /index.php?main=fase-6-tutor-fitxa-publica&proyecto_id=$1 [L,QSA]
+RewriteRule ^projecte/([0-9]+)/fases/fase-6/entrega-memoria$ /index.php?main=fase-6-tutor-entrega-memoria&proyecto_id=$1 [L,QSA]
+RewriteRule ^projecte/([0-9]+)/fases/fase-7/presentacio-defensa$ /index.php?main=fase-7-tutor-presentacio-defensa&proyecto_id=$1 [L,QSA]
+RewriteRule ^projecte/([0-9]+)/fases/fase-([1-7])$ /index.php?main=fase-tutor&proyecto_id=$1&fase=$2 [L,QSA]
 
 # FICHA PÚBLICA POR ID
 RewriteRule ^projecte/([0-9]+)$ /index.php?main=ficha&id=$1 [L,QSA]
@@ -48,4 +110,3 @@ RewriteRule ^restablir-contrasenya$ /index.php?main=restablecer_password [L,QSA]
 RewriteRule ^canviar-contrasenya$ /index.php?main=cambiar_password [L,QSA]
 
 RewriteRule ^logout$ /index.php?main=logout_accion [L,QSA]
-

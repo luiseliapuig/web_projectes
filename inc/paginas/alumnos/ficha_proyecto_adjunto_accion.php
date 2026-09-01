@@ -9,31 +9,11 @@ function jsonOut(bool $ok, array $extra = [], string $missatge = ''): never
     exit;
 }
 
-function comprimirPdf(string $rutaAbs): void
-{
-    $rutaTmp = $rutaAbs . '.tmp.pdf';
-
-    $cmd = sprintf(
-        'gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook ' .
-        '-dNOPAUSE -dQUIET -dBATCH ' .
-        '-sOutputFile=%s %s 2>/dev/null',
-        escapeshellarg($rutaTmp),
-        escapeshellarg($rutaAbs)
-    );
-
-    shell_exec($cmd);
-
-    // Solo sustituir si la compresión generó un archivo válido y más pequeño
-    if (
-        file_exists($rutaTmp) &&
-        filesize($rutaTmp) > 0 &&
-        filesize($rutaTmp) < filesize($rutaAbs)
-    ) {
-        rename($rutaTmp, $rutaAbs);
-    } else {
-        @unlink($rutaTmp);
-    }
-}
+// La validació, el guardat i l'optimització dels PDF definitius viuen a
+// inc/pdf/funciones.php: capa única compartida amb la resta de PDFs del
+// projecte (document funcional, memòria, proposta). Aquest fitxer ja no en
+// manté una còpia pròpia.
+require_once dirname(__DIR__, 2) . '/pdf/funciones.php';
 
 $accio      = trim($_POST['accio'] ?? '');
 $idProjecte = (int)($_POST['proyecto_id'] ?? 0);
@@ -93,41 +73,18 @@ if ($accio === 'afegir') {
 
     if ($tipo === 'arxiu') {
 
-        // Guardar PDF
+        // Guardar PDF — capa única (validació + optimització + guardat).
         $file = $_FILES['fitxer'] ?? null;
         if (!$file || $file['error'] !== UPLOAD_ERR_OK) {
             jsonOut(false, missatge: 'Error en la pujada del fitxer.');
         }
 
-        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-        if ($ext !== 'pdf') jsonOut(false, missatge: 'Només s\'admeten fitxers PDF.');
-        if (!is_uploaded_file($file['tmp_name'])) jsonOut(false, missatge: 'Fitxer no vàlid.');
-        if ((int) ($file['size'] ?? 0) > 20 * 1024 * 1024) {
-            jsonOut(false, missatge: 'El PDF supera el límit de 20 MB.');
-        }
-
-        $finfo = finfo_open(FILEINFO_MIME_TYPE);
-        $mime = $finfo !== false ? finfo_file($finfo, $file['tmp_name']) : false;
-        if ($finfo !== false) finfo_close($finfo);
-        if ($mime !== 'application/pdf') jsonOut(false, missatge: 'El fitxer no és un PDF vàlid.');
-
-        $ciclo          = preg_replace('/[^A-Za-z0-9\-_]/', '', (string)$proj['ciclo']);
-        $curs           = preg_replace('/[^A-Za-z0-9\-_]/', '', (string)$proj['curso_academico']);
-        $uploadsBaseAbs = dirname(__DIR__, 3) . '/uploads';
-        $dirAbs         = $uploadsBaseAbs . '/' . $curs . '/' . $ciclo . '/' . $proyectoId;
-        $dirRel         = '/uploads/' . $curs . '/' . $ciclo . '/' . $proyectoId;
-
-        if (!is_dir($dirAbs)) mkdir($dirAbs, 0775, true);
-
         $nomFitxer = 'adjunt-' . time() . '-' . preg_replace('/[^a-z0-9\-_]/', '', strtolower($nom)) . '.pdf';
-        $rutaAbs   = $dirAbs . '/' . $nomFitxer;
-        $rutaRel   = $dirRel . '/' . $nomFitxer;
-
-        if (!move_uploaded_file($file['tmp_name'], $rutaAbs)) {
-            jsonOut(false, missatge: 'No s\'ha pogut guardar el fitxer.');
+        $resultat = pdfGuardarDefinitiu($file, (string) $proj['curso_academico'], (string) $proj['ciclo'], $proyectoId, $nomFitxer);
+        if (!$resultat['ok']) {
+            jsonOut(false, missatge: $resultat['error'] ?? 'No s\'ha pogut guardar el fitxer.');
         }
-
-        comprimirPdf($rutaAbs);
+        $rutaRel = $resultat['ruta_rel'];
 
         try {
             $ins = $pdo->prepare("

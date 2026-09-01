@@ -17,13 +17,29 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST' || !validarTokenCsrf($_POST['c
 }
 $id = isset($_POST['id_categoria_proyecto']) ? (int) $_POST['id_categoria_proyecto'] : 0;
 
-// Todavía no hay proyectos vinculados; la futura FK impedirá borrar históricos.
+// Una categoria amb tipus o projectes vinculats forma part del model i no es
+// pot borrar; només es pot desactivar.
 if ($modo === 'delete') {
     if ($id <= 0) {
         $_SESSION['categories_projectes_error'] = 'Categoria no vàlida.';
         $redirigirCategories();
     }
-    $stmt = $pdo->prepare("DELETE FROM app.categorias_proyectos WHERE id_categoria_proyecto = :id");
+
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM app.proyecto_tipos WHERE categoria_proyecto_id = :id");
+    $stmt->execute([':id' => $id]);
+    if ((int) $stmt->fetchColumn() > 0) {
+        $_SESSION['categories_projectes_error'] = 'No es pot borrar una categoria amb tipus associats. Pots desactivar-la.';
+        $redirigirCategories();
+    }
+
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM app.proyectos WHERE categoria_proyecto_id = :id");
+    $stmt->execute([':id' => $id]);
+    if ((int) $stmt->fetchColumn() > 0) {
+        $_SESSION['categories_projectes_error'] = 'No es pot borrar una categoria amb projectes associats. Pots desactivar-la.';
+        $redirigirCategories();
+    }
+
+    $stmt = $pdo->prepare("DELETE FROM app.proyecto_categorias WHERE id_categoria_proyecto = :id");
     $stmt->execute([':id' => $id]);
     $redirigirCategories('&msg=' . urlencode('Categoria borrada correctament.'));
 }
@@ -32,7 +48,7 @@ $familiaId = isset($_POST['familia_ciclo_id']) ? (int) $_POST['familia_ciclo_id'
 $nombre = isset($_POST['nombre']) && is_string($_POST['nombre']) ? trim($_POST['nombre']) : '';
 $orden = isset($_POST['orden']) ? (int) $_POST['orden'] : 0;
 $activo = isset($_POST['activo']);
-$stmt = $pdo->prepare("SELECT COUNT(*) FROM app.familias_ciclos WHERE id_familia_ciclo = :id AND (activo = true OR id_familia_ciclo = (SELECT familia_ciclo_id FROM app.categorias_proyectos WHERE id_categoria_proyecto = :categoria_id))");
+$stmt = $pdo->prepare("SELECT COUNT(*) FROM app.familias_ciclos WHERE id_familia_ciclo = :id AND (activo = true OR id_familia_ciclo = (SELECT familia_ciclo_id FROM app.proyecto_categorias WHERE id_categoria_proyecto = :categoria_id))");
 $stmt->execute([':id' => $familiaId, ':categoria_id' => $id]);
 $familiaPermitida = (int) $stmt->fetchColumn() === 1;
 
@@ -43,11 +59,11 @@ if ($nombre === '' || mb_strlen($nombre) > 120 || $orden < 1 || $orden > 32767 |
 
 try {
     if ($modo === 'edit') {
-        $stmt = $pdo->prepare("UPDATE app.categorias_proyectos SET familia_ciclo_id=:familia, nombre=:nombre, activo=:activo, orden=:orden WHERE id_categoria_proyecto=:id");
+        $stmt = $pdo->prepare("UPDATE app.proyecto_categorias SET familia_ciclo_id=:familia, nombre=:nombre, activo=:activo, orden=:orden WHERE id_categoria_proyecto=:id");
         $stmt->execute([':familia' => $familiaId, ':nombre' => $nombre, ':activo' => $activo, ':orden' => $orden, ':id' => $id]);
         $msg = 'Categoria actualitzada correctament.';
     } else {
-        $stmt = $pdo->prepare("INSERT INTO app.categorias_proyectos (familia_ciclo_id, nombre, activo, orden) VALUES (:familia, :nombre, :activo, :orden)");
+        $stmt = $pdo->prepare("INSERT INTO app.proyecto_categorias (familia_ciclo_id, nombre, activo, orden) VALUES (:familia, :nombre, :activo, :orden)");
         $stmt->execute([':familia' => $familiaId, ':nombre' => $nombre, ':activo' => $activo, ':orden' => $orden]);
         $msg = 'Categoria creada correctament.';
     }

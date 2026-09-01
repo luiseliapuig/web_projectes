@@ -6,7 +6,7 @@ $cursoAcademico = cursoAcademicoActual();
 $proyectoSesionId = (int) ($_SESSION['projecte_id'] ?? 0);
 $soloCursoActual = !empty($contextoCursoActual);
 $stmt = $pdo->prepare("
-    SELECT p.id_proyecto, p.nombre, p.estado, p.grupo_id, c.abr AS ciclo, g.grupo
+    SELECT p.id_proyecto, p.nombre, p.estado, p.grupo_id, c.abr AS ciclo, g.grupo, c.fases_clave
     FROM app.proyectos p
     INNER JOIN app.rel_proyectos_alumnos rpa ON rpa.proyecto_id = p.id_proyecto
     INNER JOIN app.grupos g ON g.id_grupo = p.grupo_id
@@ -45,7 +45,7 @@ if (empty($permitirSinProyecto)) {
 // La Fase 1 debe poder empezar antes de que exista el proyecto. En ese caso,
 // el contexto académico procede de la matrícula vigente del alumno.
 $stmt = $pdo->prepare("
-    SELECT rag.grupo_id, c.abr AS ciclo, g.grupo
+    SELECT rag.grupo_id, c.abr AS ciclo, g.grupo, c.fases_clave
     FROM app.rel_alumnos_grupos rag
     INNER JOIN app.grupos g ON g.id_grupo = rag.grupo_id
     INNER JOIN app.ciclos c ON c.id_ciclo = g.id_ciclo
@@ -73,5 +73,6 @@ $proyectoAlumno = [
     'grupo_id' => (int) $matriculaAlumno['grupo_id'],
     'ciclo' => (string) $matriculaAlumno['ciclo'],
     'grupo' => (string) $matriculaAlumno['grupo'],
+    'fases_clave' => $matriculaAlumno['fases_clave'] !== null ? (string) $matriculaAlumno['fases_clave'] : null,
 ];
 return true;

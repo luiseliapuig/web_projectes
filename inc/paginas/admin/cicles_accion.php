@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 soloSuperadmin();
+require_once dirname(__DIR__, 2) . '/fases/funciones.php';
 
 // Redirección fija al listado sin exponer detalles internos.
 $redirigirCicles = static function (string $sufijo = ''): never {
@@ -52,6 +53,12 @@ $orden = isset($_POST['orden']) ? (int) $_POST['orden'] : 0;
 $familiaCicloId = isset($_POST['familia_ciclo_id']) ? (int) $_POST['familia_ciclo_id'] : 0;
 $activo = isset($_POST['activo']);
 
+// L'arquitectura de fases només pot ser una clau del registre hardcodejat o
+// "Sense fases" (NULL). No s'accepta mai una clau escrita lliurement.
+$fasesClavePost = isset($_POST['fases_clave']) && is_string($_POST['fases_clave']) ? trim($_POST['fases_clave']) : '';
+$fasesClave = $fasesClavePost !== '' ? $fasesClavePost : null;
+$fasesClaveValida = $fasesClave === null || existeArquitecturaFases($fasesClave);
+
 // La familia debe estar activa, salvo la familia ya vinculada al ciclo editado.
 $stmt = $pdo->prepare("
     SELECT COUNT(*)
@@ -78,6 +85,7 @@ if (
     || $orden < 1
     || $orden > 32767
     || !$familiaPermitida
+    || !$fasesClaveValida
     || ($modo === 'edit' && $id <= 0)
 ) {
     $_SESSION['cicles_error'] = 'Revisa els camps obligatoris del cicle.';
@@ -91,7 +99,8 @@ try {
             UPDATE app.ciclos
             SET abr = :abr, nombre = :nombre, activo = :activo,
                 color = :color, orden = :orden,
-                familia_ciclo_id = :familia_ciclo_id
+                familia_ciclo_id = :familia_ciclo_id,
+                fases_clave = :fases_clave
             WHERE id_ciclo = :id
         ");
         $stmt->execute([
@@ -101,13 +110,14 @@ try {
             ':color' => $color,
             ':orden' => $orden,
             ':familia_ciclo_id' => $familiaCicloId,
+            ':fases_clave' => $fasesClave,
             ':id' => $id,
         ]);
         $msg = 'Cicle actualitzat correctament.';
     } else {
         $stmt = $pdo->prepare("
-            INSERT INTO app.ciclos (abr, nombre, activo, color, orden, familia_ciclo_id)
-            VALUES (:abr, :nombre, :activo, :color, :orden, :familia_ciclo_id)
+            INSERT INTO app.ciclos (abr, nombre, activo, color, orden, familia_ciclo_id, fases_clave)
+            VALUES (:abr, :nombre, :activo, :color, :orden, :familia_ciclo_id, :fases_clave)
         ");
         $stmt->execute([
             ':abr' => $abr,
@@ -116,6 +126,7 @@ try {
             ':color' => $color,
             ':orden' => $orden,
             ':familia_ciclo_id' => $familiaCicloId,
+            ':fases_clave' => $fasesClave,
         ]);
         $msg = 'Cicle creat correctament.';
     }
