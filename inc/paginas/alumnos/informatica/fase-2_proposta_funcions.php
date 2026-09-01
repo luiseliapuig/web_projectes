@@ -39,19 +39,15 @@ function fase2PropostaObtenirEstat(PDO $pdo, int $idProjecte): array
     // intermedi, no el final del cicle — encara falta que l'alumnat
     // dipositi l'evidència definitiva.
     $completada = $validada && $pdf !== '';
-    // "Groc" té dos moments possibles, mai confosos amb un color nou:
-    // 1) hi ha una sol·licitud de revisió oberta (el tutor ha d'actuar);
-    // 2) ja no hi ha sol·licitud oberta (el tutor ja ha validat), però
-    //    encara falta el PDF definitiu (l'alumnat ha d'actuar). El color
-    //    groc només vol dir "hi ha una intervenció pendent"; el text de
-    //    l'estat és qui indica a qui li toca.
+    // Groc només quan el tutor ha d'actuar; un cop validada, si encara falta
+    // el PDF definitiu, la tasca torna al llenguatge actiu/granate perquè la
+    // intervenció pendent correspon a l'alumnat.
     $pendentPdf = $validada && !$completada;
-    $atencion = $pendentPdf || $solicitudOberta !== null;
+    $atencion = $solicitudOberta !== null;
 
     // Llenguatge cromàtic de tasca (vegeu docs/codex/arquitectura.md):
-    // granate = activa/en treball; groc = atenció pendent (revisió
-    // sol·licitada o validada-i-pendent-de-PDF); verd = completada
-    // (validada + PDF definitiu).
+    // granate = activa/en treball (també validada i pendent de PDF); groc =
+    // revisió pendent del tutor; verd = completada (validada + PDF definitiu).
     $texto = $completada
         ? 'Validada'
         : ($pendentPdf

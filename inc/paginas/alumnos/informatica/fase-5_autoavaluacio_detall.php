@@ -25,7 +25,7 @@ $hrefTornar = $esAlumnat
                     </div>
                 <?php endforeach; ?>
                 <div class="d-flex flex-wrap gap-2">
-                    <button type="submit" class="btn btn-fase btn-puig-solid" id="fase5-autoavaluacio-desar">Desar</button>
+                    <button type="submit" class="btn btn-fase <?= $estatAutoavaluacio['completada'] ? 'btn-success' : 'btn-puig-solid' ?>" id="fase5-autoavaluacio-desar">Desar</button>
                     <a href="<?= htmlspecialchars($hrefTornar, ENT_QUOTES, 'UTF-8') ?>" class="btn btn-fase btn-outline-secondary">Tornar</a>
                 </div>
                 <p class="small text-muted mb-0" id="fase5-autoavaluacio-missatge">&nbsp;</p>

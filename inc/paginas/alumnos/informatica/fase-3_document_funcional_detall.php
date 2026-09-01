@@ -11,7 +11,7 @@ $pas1Completat = $estat['validat'];
 $pas1Bloc = $pas1Completat ? 'bloc-completat' : ($estat['solicitud_oberta'] ? 'bloc-atencio' : 'bloc-activitat');
 $pas1Badge = $pas1Completat ? 'text-bg-success' : ($estat['solicitud_oberta'] ? 'text-bg-warning' : 'badge-activitat');
 $pas1Text = $pas1Completat ? 'Completat' : ($estat['solicitud_oberta'] ? 'Revisió sol·licitada' : 'En curs');
-$pas2Bloc = $estat['completada'] ? 'bloc-completat' : ($pas1Completat ? 'bloc-atencio' : 'bloc-bloquejat');
+$pas2Bloc = $estat['completada'] ? 'bloc-completat' : ($pas1Completat ? 'bloc-activitat' : 'bloc-bloquejat');
 ?>
 <div class="d-grid gap-4">
 <section class="bloc <?= $pas1Bloc ?>">
@@ -46,31 +46,37 @@ $pas2Bloc = $estat['completada'] ? 'bloc-completat' : ($pas1Completat ? 'bloc-at
           <p class="small text-muted mb-3" id="fase3-url-missatge">&nbsp;</p>
           <?php if ($estat['validat']): ?>
               <p class="small text-success mb-0"><i class="bi bi-check-circle-fill me-1" aria-hidden="true"></i> El document funcional ha estat validat. Continua al Pas 2 per pujar-ne la versió definitiva en PDF.</p>
-          <?php elseif ($estat['solicitud_oberta']): ?>
-              <p class="small text-muted mb-0">Revisió sol·licitada el <?= htmlspecialchars(fase3DocumentFuncionalData((string) $estat['solicitud_oberta']['solicitado_en']), ENT_QUOTES, 'UTF-8') ?>. Pots continuar editant l’enllaç mentre esperes.</p>
-          <?php else: ?>
+          <?php elseif (!$estat['solicitud_oberta']): ?>
               <button type="button" class="btn btn-fase btn-puig-solid" id="fase3-sollicitar" <?= $estat['url'] === '' ? 'disabled' : '' ?>>Sol·licitar revisió</button>
               <p class="small text-muted mb-0 mt-2" id="fase3-solicitar-missatge">&nbsp;</p>
           <?php endif; ?>
       </div>
   <?php endif; ?>
-  <?php if (!$esAlumnat && $potValidarFuncional && $estat['solicitud_oberta'] && !$estat['validat']): ?>
+  <?php
+      $intervencioTutorVisible = $estat['solicitud_oberta'] && !$estat['validat'];
+      $tutorInterventionVisible = $potValidarFuncional && $intervencioTutorVisible;
+  ?>
+  <?php if ($intervencioTutorVisible): ?>
       <div class="bloc-zona bloc-zona-atencio position-relative" data-proyecto-id="<?= $idProjecte ?>">
-          <button type="button" class="btn btn-link bloc-zona-tancar position-absolute top-0 end-0 mt-2 me-2 p-1" data-bs-toggle="modal" data-bs-target="#fase3-tancar-revisio-modal" aria-label="Tancar la sol·licitud de revisió">
-              <i class="bi bi-x-lg" aria-hidden="true"></i>
-          </button>
-          <p class="text-uppercase small fw-semibold bloc-zona-titol">La teva intervenció com a tutor</p>
+          <?php if ($tutorInterventionVisible): ?>
+              <button type="button" class="btn btn-link bloc-zona-tancar position-absolute top-0 end-0 mt-2 me-2 p-1" data-bs-toggle="modal" data-bs-target="#fase3-tancar-revisio-modal" aria-label="Tancar la sol·licitud de revisió">
+                  <i class="bi bi-x-lg" aria-hidden="true"></i>
+              </button>
+          <?php endif; ?>
+          <p class="text-uppercase small fw-semibold bloc-zona-titol">Intervenció del tutor</p>
           <p class="mb-2">Revisió sol·licitada el <?= htmlspecialchars(fase3DocumentFuncionalData((string) $estat['solicitud_oberta']['solicitado_en']), ENT_QUOTES, 'UTF-8') ?>.</p>
-          <div class="d-flex flex-wrap gap-2">
-              <button type="button" class="btn btn-fase btn-atencio-solid" id="fase3-validar">Validar document funcional</button>
-          </div>
-          <p class="small text-muted mb-0 mt-2" id="fase3-tutor-missatge">&nbsp;</p>
+          <?php if ($tutorInterventionVisible): ?>
+              <div class="d-flex flex-wrap gap-2">
+                  <button type="button" class="btn btn-fase btn-atencio-solid" id="fase3-validar">Validar document funcional</button>
+              </div>
+              <p class="small text-muted mb-0 mt-2" id="fase3-tutor-missatge">&nbsp;</p>
+          <?php endif; ?>
       </div>
   <?php endif; ?>
  </div>
 </section>
-<section class="bloc <?= $pas2Bloc ?>"><div class="bloc-contingut"><div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2"><div><div class="bloc-tipus">Pas 2</div><h2>PDF definitiu</h2></div><span class="badge rounded-pill px-3 py-2 <?= $estat['completada'] ? 'text-bg-success' : ($estat['validat'] ? 'text-bg-warning' : 'text-bg-secondary') ?>"><?= $estat['completada'] ? 'Completat' : ($estat['validat'] ? 'Pendent' : 'Bloquejat') ?></span></div>
-<?php if (!$estat['validat']): ?><p class="mb-0"><i class="bi bi-lock-fill me-1"></i> El tutor o tutora ha de validar abans el document.</p><?php elseif ($estat['pdf'] !== ''): ?><a href="<?= htmlspecialchars($estat['pdf'], ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener noreferrer" class="tasca-recurs-link tasca-recurs-resultat--completat"><i class="bi bi-file-earmark-pdf"></i> Document funcional definitiu</a><?php elseif ($esAlumnat): ?><div class="input-group"><input type="file" class="form-control" id="fase3-pdf" accept="application/pdf,.pdf"><button class="btn btn-fase btn-atencio-solid" type="button" id="fase3-pujar-pdf">Pujar PDF</button></div><p class="small text-muted mb-0 mt-2" id="fase3-pdf-missatge">&nbsp;</p><?php else: ?><p class="mb-0">Pendent que l’alumnat pugi el PDF definitiu.</p><?php endif; ?></div></section>
+<section class="bloc <?= $pas2Bloc ?>"><div class="bloc-contingut"><div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2"><div><div class="bloc-tipus">Pas 2</div><h2>PDF definitiu</h2></div><span class="badge rounded-pill px-3 py-2 <?= $estat['completada'] ? 'text-bg-success' : ($estat['validat'] ? 'badge-activitat' : 'text-bg-secondary') ?>"><?= $estat['completada'] ? 'Completat' : ($estat['validat'] ? 'Pendent' : 'Bloquejat') ?></span></div>
+<?php if (!$estat['validat']): ?><p class="mb-0"><i class="bi bi-lock-fill me-1"></i> El tutor o tutora ha de validar abans el document.</p><?php elseif ($estat['pdf'] !== ''): ?><a href="<?= htmlspecialchars($estat['pdf'], ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener noreferrer" class="tasca-recurs-link tasca-recurs-resultat--completat"><i class="bi bi-file-earmark-pdf"></i> Document funcional definitiu</a><?php elseif ($esAlumnat): ?><div class="input-group"><input type="file" class="form-control" id="fase3-pdf" accept="application/pdf,.pdf"><button class="btn btn-fase btn-puig-solid" type="button" id="fase3-pujar-pdf">Pujar PDF</button></div><p class="small text-muted mb-0 mt-2" id="fase3-pdf-missatge">&nbsp;</p><?php else: ?><p class="mb-0">Pendent que l’alumnat pugi el PDF definitiu.</p><?php endif; ?></div></section>
 </div>
 
 <?php if (!$esAlumnat && $potValidarFuncional && $estat['solicitud_oberta'] && !$estat['validat']): ?>

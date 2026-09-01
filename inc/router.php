@@ -388,6 +388,10 @@ $rutasMigradas = [
         'archivo' => __DIR__ . '/paginas/profesores/tutor/resum-tutor.php',
         'area' => 'profesor',
     ],
+    'resum-tutor_assignar-tutor' => [
+        'archivo' => __DIR__ . '/paginas/profesores/tutor/resum-tutor_assignar-tutor.php',
+        'area' => 'profesor',
+    ],
     // Navegació contextual genèrica del professorat pel recorregut de fases
     // d'un projecte (proyecto_id + fase per GET). Substitueix l'antic
     // 'fase-2-tutor', específic d'una sola fase.

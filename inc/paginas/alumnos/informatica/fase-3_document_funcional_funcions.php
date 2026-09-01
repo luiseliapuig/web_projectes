@@ -20,7 +20,10 @@ function fase3DocumentFuncionalObtenirEstat(PDO $pdo, int $idProjecte): array
     }
     $completada = $validat && $pdf !== '';
     $pendentPdf = $validat && !$completada;
-    $atencion = $pendentPdf || $solicitudOberta !== null;
+    // Groc només mentre la intervenció correspon al tutor. Un cop validat,
+    // si falta el PDF definitiu, el llenguatge és actiu/granate perquè ha
+    // d'actuar l'alumnat.
+    $atencion = $solicitudOberta !== null;
     return [
         'url' => $url, 'pdf' => $pdf, 'validat' => $validat,
         'completada' => $completada, 'atencion' => $atencion,

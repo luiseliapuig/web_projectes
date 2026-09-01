@@ -79,6 +79,10 @@ Tutor y tribunal son funciones de un profesor, no valores nuevos de `auth_tipo`:
 - La función se determina por la relación con el proyecto.
 - No crees sesiones `tutor` o `tribunal`.
 - No dupliques la identidad del profesor en tablas o sesiones específicas para cada función.
+- La pertenencia al grupo habilita la visibilidad; el rol `tutor` de
+  `rel_proyectos_profesores` habilita las intervenciones reservadas al tutor
+  formal. Cada proyecto puede tener como máximo un tutor formal; al reasignarlo,
+  el tutor anterior conserva la relación como `cotutor`.
 
 ## Menú de área (profesorado)
 

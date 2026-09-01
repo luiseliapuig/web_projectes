@@ -68,8 +68,8 @@ $pas3Completat = $estat['completada'];
 $pas3Actiu = $propostaValidada && !$pas3Completat;
 // El PDF definitiu, un cop existeix, es mostra sempre dins del Pas 3 (mai al
 // Pas 2): és l'artefacte que el completa. Mentre el pas és actiu (validat,
-// encara sense PDF) el color és groc d'atenció, mai el granate genèric.
-$pas3ClasseOutline = $pas3Completat ? 'btn-outline-success' : 'btn-atencio';
+// encara sense PDF) el color és granate perquè correspon actuar a l'alumnat.
+$pas3ClasseOutline = $pas3Completat ? 'btn-outline-success' : 'btn-puig';
 ?>
 
 <!-- Subtítol de la tasca + estat global: mai un segon H1 (el propi
@@ -208,12 +208,7 @@ $pas3ClasseOutline = $pas3Completat ? 'btn-outline-success' : 'btn-atencio';
 
                     <?php if ($propostaValidada): ?>
                         <p class="small text-success mb-0"><i class="bi bi-check-circle-fill me-1" aria-hidden="true"></i> La proposta ha estat validada. Continua al Pas 3 per pujar-ne la versió definitiva en PDF.</p>
-                    <?php elseif ($solicitudOberta !== null): ?>
-                        <p class="small text-muted mb-0">
-                            Revisió sol·licitada el <?= htmlspecialchars(fase2PropostaData((string) $solicitudOberta['solicitado_en']), ENT_QUOTES, 'UTF-8') ?>.
-                            Pots continuar editant l’enllaç mentre esperes.
-                        </p>
-                    <?php else: ?>
+                    <?php elseif ($solicitudOberta === null): ?>
                         <button type="button" class="btn btn-fase btn-puig-solid" id="fase2-solicitar-btn" <?= $propostaUrl === '' ? 'disabled' : '' ?>>Sol·licitar revisió</button>
                         <p class="small text-muted mb-0 mt-2" id="fase2-solicitar-missatge">&nbsp;</p>
                     <?php endif; ?>
@@ -225,30 +220,33 @@ $pas3ClasseOutline = $pas3Completat ? 'btn-outline-success' : 'btn-atencio';
             // La intervenció del tutor pertany semànticament al Pas 2 (és
             // precisament la revisió d'aquest document): es renderitza com a
             // secció interna del mateix bloc, mai com un bloc germà que es
-            // pugui confondre amb un quart pas. Mateixa condició d'autorització
-            // i de sol·licitud d'abans, només reubicada aquí (no duplicada
-            // enlloc més): exclusiva del tutor formal del projecte
-            // (esTutorFormalDelProyecte, no un cotutor) i només mentre hi ha
-            // una sol·licitud oberta encara no atesa. Un cop validada, la
-            // intervenció desapareix — el propi Pas 2 ja mostra "Completat" i
-            // el Pas 3 ja queda disponible; no calia repetir-ho aquí. No es
+            // pugui confondre amb un quart pas. L'estat és visible per a tots
+            // els rols autoritzats, però els controls continuen sent exclusius
+            // del tutor formal del projecte. Un cop validada, la intervenció
+            // desapareix — el propi Pas 2 ja mostra "Completat" i el Pas 3 ja
+            // queda disponible; no calia repetir-ho aquí. No es
             // modela la devolució/correcció: si el document necessita canvis,
             // tutor i alumnat ho parlen fora de la plataforma. El tutor pot
             // tancar discretament la sol·licitud sense validar perquè
             // l'alumnat en pugui presentar una altra més endavant.
-            $tutorInterventionVisible = $potValidarProposta && $solicitudOberta !== null && !$propostaValidada;
+            $intervencioTutorVisible = $solicitudOberta !== null && !$propostaValidada;
+            $tutorInterventionVisible = $potValidarProposta && $intervencioTutorVisible;
         ?>
-        <?php if (!$esAlumnat && $tutorInterventionVisible): ?>
+        <?php if ($intervencioTutorVisible): ?>
             <div class="bloc-zona bloc-zona-atencio fase2-tutor-intervencio position-relative" data-proyecto-id="<?= $idProjecte ?>">
-                <button type="button" class="btn btn-link bloc-zona-tancar position-absolute top-0 end-0 mt-2 me-2 p-1" data-bs-toggle="modal" data-bs-target="#fase2-tancar-revisio-modal" aria-label="Tancar la sol·licitud de revisió">
-                    <i class="bi bi-x-lg" aria-hidden="true"></i>
-                </button>
-                <p class="text-uppercase small fw-semibold bloc-zona-titol">La teva intervenció com a tutor</p>
+                <?php if ($tutorInterventionVisible): ?>
+                    <button type="button" class="btn btn-link bloc-zona-tancar position-absolute top-0 end-0 mt-2 me-2 p-1" data-bs-toggle="modal" data-bs-target="#fase2-tancar-revisio-modal" aria-label="Tancar la sol·licitud de revisió">
+                        <i class="bi bi-x-lg" aria-hidden="true"></i>
+                    </button>
+                <?php endif; ?>
+                <p class="text-uppercase small fw-semibold bloc-zona-titol">Intervenció del tutor</p>
                 <p class="mb-2">Revisió sol·licitada el <?= htmlspecialchars(fase2PropostaData((string) $solicitudOberta['solicitado_en']), ENT_QUOTES, 'UTF-8') ?>.</p>
-                <div class="d-flex flex-wrap gap-2">
-                    <button type="button" class="btn btn-fase <?= $pas2ClasseCta ?>" id="fase2-validar-btn">Validar proposta</button>
-                </div>
-                <p class="small text-muted mb-0 mt-2" id="fase2-tutor-missatge">&nbsp;</p>
+                <?php if ($tutorInterventionVisible): ?>
+                    <div class="d-flex flex-wrap gap-2">
+                        <button type="button" class="btn btn-fase <?= $pas2ClasseCta ?>" id="fase2-validar-btn">Validar proposta</button>
+                    </div>
+                    <p class="small text-muted mb-0 mt-2" id="fase2-tutor-missatge">&nbsp;</p>
+                <?php endif; ?>
             </div>
         <?php endif; ?>
     </div>
@@ -275,7 +273,7 @@ $pas3ClasseOutline = $pas3Completat ? 'btn-outline-success' : 'btn-atencio';
 <!-- ═══════════════════════════════════════════════════════════════════════
      PAS 3 · Puja la proposta aprovada en PDF
      ═══════════════════════════════════════════════════════════════════════ -->
-<section class="bloc <?= $pas3Bloquejat ? 'bloc-bloquejat' : ($pas3Completat ? 'bloc-completat' : 'bloc-atencio') ?> mb-4">
+<section class="bloc <?= $pas3Bloquejat ? 'bloc-bloquejat' : ($pas3Completat ? 'bloc-completat' : 'bloc-activitat') ?> mb-4">
     <div class="bloc-contingut">
         <div class="bloc-tipus">PAS 3 · <?= $pas3Bloquejat ? 'Bloquejat' : ($pas3Completat ? 'Completat' : 'Atenció') ?></div>
         <h2 class="h5 mb-2">Puja la proposta aprovada en PDF</h2>

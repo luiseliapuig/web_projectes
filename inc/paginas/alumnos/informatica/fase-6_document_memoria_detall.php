@@ -7,6 +7,7 @@ $rolVisualitzacio = $rolVisualitzacio ?? 'alumne';
 $esAlumnat = $rolVisualitzacio === 'alumne';
 $projecteId = (int) ($proyectoAlumno['id_proyecto'] ?? 0);
 $estatMemoria = fase6MemoriaObtenirEstat($pdo, $projecteId);
+$enlaceRevisioMemoria = '/memoria';
 ?>
 <section class="bloc <?= $estatMemoria['completada'] ? 'bloc-completat' : 'bloc-activitat' ?>">
     <div class="bloc-contingut">
@@ -33,7 +34,7 @@ $estatMemoria = fase6MemoriaObtenirEstat($pdo, $projecteId);
                 <label class="form-label small fw-semibold" for="fase6-memoria-url">Enllaç al document de la memòria</label>
                 <div class="input-group input-group-sm mb-1" style="max-width: 560px;">
                     <input type="url" class="form-control" id="fase6-memoria-url" maxlength="2048" value="<?= htmlspecialchars($estatMemoria['url'], ENT_QUOTES, 'UTF-8') ?>" placeholder="https://docs.google.com/…">
-                    <button class="btn btn-puig px-3" type="button" id="fase6-memoria-desar">Desar</button>
+                    <button class="btn <?= $estatMemoria['completada'] ? 'btn-success' : 'btn-puig' ?> px-3" type="button" id="fase6-memoria-desar">Desar</button>
                 </div>
                 <p class="small text-muted mb-0 mt-2 d-none" id="fase6-memoria-missatge"></p>
             </div>
@@ -43,6 +44,14 @@ $estatMemoria = fase6MemoriaObtenirEstat($pdo, $projecteId);
             </a>
         <?php else: ?>
             <p class="text-muted fst-italic mb-0">L’alumnat encara no ha desat cap enllaç.</p>
+        <?php endif; ?>
+
+        <?php if ($esAlumnat && $estatMemoria['completada']): ?>
+            <div class="bloc-zona bg-success-subtle border-success-subtle py-4">
+                <p class="text-uppercase small fw-semibold bloc-zona-titol text-success-emphasis mb-2">Revisió de la memòria</p>
+                <p class="mb-2">Ara ja pots utilitzar l’eina de revisió de la memòria per demanar al tutor o tutora la revisió dels diferents apartats.</p>
+                <a href="<?= htmlspecialchars($enlaceRevisioMemoria, ENT_QUOTES, 'UTF-8') ?>" class="btn btn-fase btn-success mt-1">Anar a la revisió de la memòria</a>
+            </div>
         <?php endif; ?>
     </div>
 </section>

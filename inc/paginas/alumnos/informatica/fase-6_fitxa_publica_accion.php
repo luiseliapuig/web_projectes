@@ -26,9 +26,8 @@ if (!$projecte || !proyectoPerteneceArquitecturaFases(['fases_clave' => $project
 $nombre = is_string($_POST['nombre'] ?? null) ? trim($_POST['nombre']) : '';
 $resumen = is_string($_POST['resumen'] ?? null) ? trim($_POST['resumen']) : '';
 $descripcion = is_string($_POST['descripcion'] ?? null) ? trim($_POST['descripcion']) : '';
-if ($nombre === '') fase6FitxaResposta(422, 'Indiqueu el nom del projecte.');
-if ($resumen === '' || mb_strlen($resumen) > FASE6_FITXA_RESUM_MAX) fase6FitxaResposta(422, 'El resum és obligatori i no pot superar els 220 caràcters.');
-if (mb_strlen($descripcion) < FASE6_FITXA_DESCRIPCIO_MIN) fase6FitxaResposta(422, 'La descripció ha de tenir com a mínim 800 caràcters.');
+if ($resumen !== '' && mb_strlen($resumen) > FASE6_FITXA_RESUM_MAX) fase6FitxaResposta(422, 'El resum no pot superar els 220 caràcters.');
+if ($descripcion !== '' && mb_strlen($descripcion) < FASE6_FITXA_DESCRIPCIO_MIN) fase6FitxaResposta(422, 'La descripció ha de tenir com a mínim 800 caràcters.');
 
 $novaImatge = isset($_FILES['imagen']) && (int) ($_FILES['imagen']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE;
 $rutaNova = null;
@@ -51,7 +50,6 @@ if ($novaImatge) {
     $rutaNova = '/uploads/' . $curs . '/' . $cicle . '/' . $projecteId . '/' . $nomFitxer;
 }
 
-if (!$novaImatge && trim((string) ($projecte['ruta_imagen'] ?? '')) === '') fase6FitxaResposta(422, 'Seleccioneu una imatge del projecte.');
 try {
     $sql = 'UPDATE app.proyectos SET nombre = :nombre, resumen = :resumen, descripcion = :descripcion';
     $params = [':nombre' => $nombre, ':resumen' => $resumen, ':descripcion' => $descripcion, ':id' => $projecteId];

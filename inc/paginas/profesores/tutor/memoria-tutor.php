@@ -103,7 +103,7 @@ $grupoId = resoldreGrupActiuTutor($grupos, $grupoIdSolicitat, $grupoIdDesdeProye
 $proyectos = [];
 if ($grupoId > 0) {
     $stmt = $pdo->prepare("
-        SELECT p.id_proyecto, p.nombre, p.categoria_proyecto_id,
+        SELECT p.id_proyecto, p.nombre, p.categoria_proyecto_id, p.memoria_url,
                EXISTS (
                    SELECT 1
                    FROM app.rel_proyectos_profesores rpp
@@ -188,16 +188,19 @@ if ($proyectos !== []) {
 $proyectoIdSolicitat = $proyectoIdSolicitado > 0 ? $proyectoIdSolicitado : (isset($_GET['proyecto_id']) ? (int) $_GET['proyecto_id'] : 0);
 $proyectoId = 0;
 $categoriaId = 0;
+$memoriaUrl = '';
 foreach ($proyectos as $proyecto) {
     if ((int) $proyecto['id_proyecto'] === $proyectoIdSolicitat) {
         $proyectoId = $proyectoIdSolicitat;
         $categoriaId = $proyecto['categoria_proyecto_id'] !== null ? (int) $proyecto['categoria_proyecto_id'] : 0;
+        $memoriaUrl = trim((string) ($proyecto['memoria_url'] ?? ''));
         break;
     }
 }
 if ($proyectoId === 0 && $proyectos !== []) {
     $proyectoId = (int) $proyectos[0]['id_proyecto'];
     $categoriaId = $proyectos[0]['categoria_proyecto_id'] !== null ? (int) $proyectos[0]['categoria_proyecto_id'] : 0;
+    $memoriaUrl = trim((string) ($proyectos[0]['memoria_url'] ?? ''));
 }
 
 // El professor només pot escriure si és el tutor formal del projecte concret.
@@ -336,6 +339,27 @@ if ($proyectoId > 0 && $categoriaId > 0) {
         <!-- ── Apartats de memòria del projecte seleccionat ── -->
         <?php if ($proyectoId > 0): ?>
             <div class="card memoria-tutor-panell shadow-sm border-0 rounded-4 p-4 p-lg-5">
+                <div class="d-flex flex-wrap align-items-center gap-3 border rounded-4 bg-white shadow-sm px-3 py-3 mb-3">
+                    <div class="d-flex align-items-center gap-3 flex-grow-1">
+                        <i class="bi bi-file-earmark-text fs-4 text-secondary" aria-hidden="true"></i>
+                        <div>
+                            <h2 class="h6 mb-1">Memòria compartida</h2>
+                            <p class="small text-muted mb-0">
+                                <?= $memoriaUrl !== ''
+                                    ? 'Obre el document viu del projecte per consultar-lo mentre revises els apartats.'
+                                    : 'L’alumnat encara no ha compartit l’enllaç de la memòria.' ?>
+                            </p>
+                        </div>
+                    </div>
+                    <?php if ($memoriaUrl !== ''): ?>
+                        <a href="<?= htmlspecialchars($memoriaUrl, ENT_QUOTES, 'UTF-8') ?>"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           class="btn btn-puig btn-sm text-nowrap">
+                            Obrir la memòria <i class="bi bi-box-arrow-up-right ms-1" aria-hidden="true"></i>
+                        </a>
+                    <?php endif; ?>
+                </div>
                 <?php if ($categoriaId <= 0): ?>
                     <section class="bloc bloc-informacio">
                         <div class="bloc-contingut">

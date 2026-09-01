@@ -155,6 +155,55 @@ usort($proyectos, static function (array $a, array $b) use ($miembrosPorProyecto
     return $comparacio !== 0 ? $comparacio : ((int) $a['id_proyecto'] <=> (int) $b['id_proyecto']);
 });
 
+// Dades de la gestió ràpida de tutors. La pertinença al grup és la
+// mateixa font de candidats que Administrar projectes; la JOIN amb rpp evita
+// oferir una relació que aquesta acció, deliberadament, no ha de crear.
+$tutorsPerProjecte = [];
+$candidatsTutorPerProjecte = [];
+if ($proyectos !== []) {
+    $proyectoIds = array_map(static fn (array $p): int => (int) $p['id_proyecto'], $proyectos);
+    $marcadores = implode(',', array_fill(0, count($proyectoIds), '?'));
+    $stmt = $pdo->prepare("
+        SELECT DISTINCT p.id_proyecto, pr.id_profesor, pr.nombre, pr.apellidos, rpp.rol
+        FROM app.proyectos p
+        INNER JOIN app.rel_profesores_grupos rpg
+            ON rpg.grupo_id = p.grupo_id
+           AND rpg.curso_academico = p.curso_academico
+        INNER JOIN app.profesores pr
+            ON pr.id_profesor = rpg.profesor_id
+           AND pr.activo = true
+        INNER JOIN app.rel_proyectos_profesores rpp
+            ON rpp.proyecto_id = p.id_proyecto
+           AND rpp.profesor_id = pr.id_profesor
+           AND rpp.rol IN ('tutor', 'cotutor')
+        WHERE p.id_proyecto IN ($marcadores)
+        ORDER BY pr.apellidos, pr.nombre, pr.id_profesor
+    ");
+    $stmt->execute($proyectoIds);
+    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $fila) {
+        $idProjecteFila = (int) $fila['id_proyecto'];
+        $candidat = [
+            'id_profesor' => (int) $fila['id_profesor'],
+            'nombre' => trim((string) $fila['nombre'] . ' ' . (string) $fila['apellidos']),
+        ];
+        $candidatsTutorPerProjecte[$idProjecteFila][] = $candidat;
+        if ((string) $fila['rol'] === 'tutor') {
+            $tutorsPerProjecte[$idProjecteFila][] = $candidat;
+        }
+    }
+}
+
+$projectesSenseTutor = array_values(array_filter(
+    $proyectos,
+    static fn (array $p): bool => ($tutorsPerProjecte[(int) $p['id_proyecto']] ?? []) === []
+));
+$modeTutorsManual = isset($_GET['tutors']) && (string) $_GET['tutors'] === '1';
+$projectesGestioTutors = $modeTutorsManual ? $proyectos : $projectesSenseTutor;
+$mostrarGestioTutors = $modeTutorsManual || $projectesSenseTutor !== [];
+$feedbackTutorActualitzat = isset($_GET['tutor_actualitzat']) && (string) $_GET['tutor_actualitzat'] === '1';
+$errorGestioTutors = isset($_SESSION['resum_tutors_error']) ? (string) $_SESSION['resum_tutors_error'] : '';
+unset($_SESSION['resum_tutors_error']);
+
 // -----------------------------------------------------------------------------
 // 5. Autoseguiments pendents del grup seleccionat: mateixa definició exacta
 // que ja fa servir Autoseguiment (setmana tancada, valoracion_tutor NULL, 0
@@ -549,6 +598,39 @@ if ($idsGruposAutorizados !== []) {
     color: #35506b;
     text-decoration: underline;
 }
+.resum-tutors-component { overflow: hidden; }
+.resum-tutors-cap { padding: .65rem 1rem; }
+.resum-tutors-cap--pendent {
+    background: var(--bs-warning-bg-subtle, #fff3cd);
+    color: var(--bs-warning-text-emphasis, #664d03);
+}
+.resum-tutors-cap--manual {
+    background: #f8f9fa;
+    color: #495057;
+}
+.resum-tutors-fila {
+    display: grid;
+    grid-template-columns: minmax(12rem, .8fr) minmax(16rem, 1.2fr);
+    align-items: stretch;
+}
+.resum-tutors-fila:nth-child(even) { background: #f8f9fa; }
+.resum-tutors-identitat,
+.resum-tutors-opcions {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    padding: .7rem 1rem;
+}
+.resum-tutors-opcions { border-left: 1px solid #dee2e6; }
+@media (max-width: 767.98px) {
+    .resum-tutors-fila { grid-template-columns: 1fr; }
+    .resum-tutors-identitat { padding-bottom: .35rem; }
+    .resum-tutors-opcions {
+        border-top: 1px solid #dee2e6;
+        border-left: 0;
+        padding-top: .55rem;
+    }
+}
 </style>
 <div class="container-fluid py-4">
     <div class="mb-4">
@@ -696,6 +778,21 @@ if ($idsGruposAutorizados !== []) {
                         </div>
                     <?php endif; ?>
                 </div>
+                <?php if ($proyectos !== []): ?>
+                    <div class="text-end mt-2">
+                        <a href="/resum?grupo_id=<?= $grupoId ?><?= $modeTutorsManual ? '' : '&amp;tutors=1' ?>" class="small resum-link-secundari">
+                            <?= $modeTutorsManual ? 'Tancar tutors' : 'Tutors' ?>
+                        </a>
+                    </div>
+                    <?php if (!$mostrarGestioTutors && $feedbackTutorActualitzat): ?>
+                        <p class="small text-success fw-semibold text-end mt-2 mb-0" role="status">Tutor actualitzat</p>
+                    <?php elseif (!$mostrarGestioTutors && $errorGestioTutors !== ''): ?>
+                        <p class="small text-danger fw-semibold text-end mt-2 mb-0" role="alert"><?= htmlspecialchars($errorGestioTutors, ENT_QUOTES, 'UTF-8') ?></p>
+                    <?php endif; ?>
+                    <?php if ($mostrarGestioTutors): ?>
+                        <?php require __DIR__ . '/resum-tutor_tutors.php'; ?>
+                    <?php endif; ?>
+                <?php endif; ?>
             </div>
 
             <!-- ══════════════════════════════════════════════════════════

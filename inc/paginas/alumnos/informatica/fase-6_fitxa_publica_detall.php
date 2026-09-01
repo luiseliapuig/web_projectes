@@ -18,18 +18,18 @@ $fitxa = fase6FitxaPublicaObtenirEstat($pdo, $projecteId);
                 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(tokenCsrf(), ENT_QUOTES, 'UTF-8') ?>">
                 <div class="mb-4">
                     <label class="form-label fw-semibold" for="fase6-fitxa-nom">Nom del projecte</label>
-                    <input type="text" class="form-control" id="fase6-fitxa-nom" name="nombre" value="<?= htmlspecialchars($fitxa['nombre'], ENT_QUOTES, 'UTF-8') ?>" placeholder="Nom del projecte" required>
+                    <input type="text" class="form-control" id="fase6-fitxa-nom" name="nombre" value="<?= htmlspecialchars($fitxa['nombre'], ENT_QUOTES, 'UTF-8') ?>" placeholder="Nom del projecte">
                     <div class="form-text">El nom propi del projecte o, si no en té, un nom breu i clar.</div>
                 </div>
                 <div class="mb-4">
                     <label class="form-label fw-semibold" for="fase6-fitxa-resum">Resum</label>
-                    <textarea class="form-control js-fase6-fitxa-autogrow" id="fase6-fitxa-resum" name="resumen" rows="2" maxlength="<?= FASE6_FITXA_RESUM_MAX ?>" placeholder="Una frase clara que expliqui què és el projecte i què fa" required><?= htmlspecialchars($fitxa['resumen'], ENT_QUOTES, 'UTF-8') ?></textarea>
+                    <textarea class="form-control js-fase6-fitxa-autogrow" id="fase6-fitxa-resum" name="resumen" rows="2" maxlength="<?= FASE6_FITXA_RESUM_MAX ?>" placeholder="Una frase clara que expliqui què és el projecte i què fa"><?= htmlspecialchars($fitxa['resumen'], ENT_QUOTES, 'UTF-8') ?></textarea>
                     <div class="form-text">Una presentació breu i clara del projecte.</div>
                     <div class="char-counter" id="fase6-fitxa-resum-comptador">0 / <?= FASE6_FITXA_RESUM_MAX ?></div>
                 </div>
                 <div class="mb-4">
                     <label class="form-label fw-semibold" for="fase6-fitxa-descripcio">Descripció</label>
-                    <textarea class="form-control js-fase6-fitxa-autogrow" id="fase6-fitxa-descripcio" name="descripcion" rows="8" minlength="<?= FASE6_FITXA_DESCRIPCIO_MIN ?>" placeholder="Expliqueu què fa el projecte, com funciona i què aporta" required><?= htmlspecialchars($fitxa['descripcion'], ENT_QUOTES, 'UTF-8') ?></textarea>
+                    <textarea class="form-control js-fase6-fitxa-autogrow" id="fase6-fitxa-descripcio" name="descripcion" rows="8" minlength="<?= FASE6_FITXA_DESCRIPCIO_MIN ?>" placeholder="Expliqueu què fa el projecte, com funciona i què aporta"><?= htmlspecialchars($fitxa['descripcion'], ENT_QUOTES, 'UTF-8') ?></textarea>
                     <div class="form-text">Expliqueu el projecte en dos o tres paràgrafs clars i ben estructurats.</div>
                     <div class="char-counter" id="fase6-fitxa-descripcio-comptador">0 caràcters (mínim <?= FASE6_FITXA_DESCRIPCIO_MIN ?>)</div>
                 </div>
@@ -38,7 +38,7 @@ $fitxa = fase6FitxaPublicaObtenirEstat($pdo, $projecteId);
                     <?php if ($fitxa['imatge_url'] !== ''): ?>
                         <img src="<?= htmlspecialchars($fitxa['imatge_url'], ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($fitxa['nombre'] !== '' ? $fitxa['nombre'] : 'Imatge del projecte', ENT_QUOTES, 'UTF-8') ?>" class="fase6-fitxa-imatge img-fluid rounded mb-3">
                     <?php endif; ?>
-                    <input type="file" class="form-control" id="fase6-fitxa-imatge" name="imagen" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" <?= $fitxa['ruta_imagen'] === '' ? 'required' : '' ?>>
+                    <input type="file" class="form-control" id="fase6-fitxa-imatge" name="imagen" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
                     <div class="form-text">Pugeu una imatge clara del projecte en format JPG, JPEG, PNG o WEBP (màxim 20 MB). Si ja n’hi ha una, podeu substituir-la.</div>
                 </div>
                 <div class="d-flex align-items-center gap-2 flex-wrap">
@@ -72,7 +72,7 @@ $fitxa = fase6FitxaPublicaObtenirEstat($pdo, $projecteId);
         resumComptador.textContent = resum.value.length + ' / ' + resum.maxLength;
         resumComptador.classList.toggle('limit', resum.value.length > resum.maxLength * .9);
         descripcioComptador.textContent = descripcio.value.length + ' caràcters (mínim ' + minim + ')';
-        descripcioComptador.classList.toggle('limit', descripcio.value.length < minim);
+        descripcioComptador.classList.toggle('limit', descripcio.value.length > 0 && descripcio.value.length < minim);
         descripcioComptador.classList.toggle('ok', descripcio.value.length >= minim);
         document.querySelectorAll('.js-fase6-fitxa-autogrow').forEach((camp) => { camp.style.height = 'auto'; camp.style.height = camp.scrollHeight + 'px'; });
     };

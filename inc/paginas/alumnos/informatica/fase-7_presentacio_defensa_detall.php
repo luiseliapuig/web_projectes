@@ -13,7 +13,7 @@ $estatPresentacio = fase7PresentacioDefensaObtenirEstat($pdo, $projecteId);
         <h2>Presentació de la defensa</h2>
         <p class="mb-4">Pugeu en format PDF la presentació que utilitzareu durant la defensa del projecte.</p>
 
-        <div class="lliurament-final-entrega lliurament-final-edicio">
+        <div class="lliurament-final-entrega lliurament-final-edicio<?= $estatPresentacio['completada'] ? ' lliurament-final--completat bg-transparent' : '' ?>">
             <div class="lliurament-final-subtitol">Presentació en PDF</div>
             <p class="mb-3">Pugeu en format PDF la presentació que utilitzareu durant la defensa del projecte.</p>
             <?php if ($esAlumnat): ?>
@@ -30,7 +30,6 @@ $estatPresentacio = fase7PresentacioDefensaObtenirEstat($pdo, $projecteId);
 
         <?php if ($estatPresentacio['completada']): ?>
             <div class="lliurament-final-entrega">
-                <div class="lliurament-final-subtitol">Presentació entregada</div>
                 <?php $presentacioPdfCta = $estatPresentacio['pdf_url']; ?>
                 <?php include __DIR__ . '/fase-7_presentacio_cta.php'; ?>
             </div>
