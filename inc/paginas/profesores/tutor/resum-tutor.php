@@ -803,8 +803,9 @@ if ($idsGruposAutorizados !== []) {
                     <h2 class="h6 text-uppercase resum-caixa-titol mb-3">Autoseguiments pendents</h2>
                     <?php if ($autoseguimentPendents > 0): ?>
                         <a href="/seguiment-setmanal/grup/<?= $grupoId ?>" class="resum-solicitud-item text-decoration-none">
-                            <span class="h3 mb-0 text-body"><?= $autoseguimentPendents ?></span>
-                            <span class="text-muted"> pendents de revisar</span>
+                            <span class="badge rounded-pill bg-warning-subtle text-warning-emphasis border border-warning-subtle px-3 py-2 fw-semibold">
+                                <?= $autoseguimentPendents ?> pendents de revisar
+                            </span>
                         </a>
                     <?php else: ?>
                         <p class="py-2 mb-0">
