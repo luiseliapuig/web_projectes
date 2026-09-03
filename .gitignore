@@ -18,6 +18,5 @@ uploads/
 *.rar
 *.zip
 
-# editor
-*.sublime-workspace
-*.sublime-project
+# Acceso local al servidor
+/ssh-projectes.ps1

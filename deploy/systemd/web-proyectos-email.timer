@@ -1,0 +1,12 @@
+[Unit]
+Description=Ejecución cada minuto de la cola de correo de Web Projectes
+
+[Timer]
+OnBootSec=15s
+OnUnitActiveSec=1min
+AccuracySec=5s
+Persistent=true
+Unit=web-proyectos-email.service
+
+[Install]
+WantedBy=timers.target

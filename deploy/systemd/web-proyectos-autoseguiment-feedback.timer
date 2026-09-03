@@ -1,0 +1,11 @@
+[Unit]
+Description=Ejecución diaria del feedback de Autoseguiment de Web Projectes
+
+[Timer]
+OnCalendar=*-*-* 07:00:00 Europe/Madrid
+AccuracySec=1min
+Persistent=true
+Unit=web-proyectos-autoseguiment-feedback.service
+
+[Install]
+WantedBy=timers.target

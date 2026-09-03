@@ -616,12 +616,16 @@ color: #fff;
 /* Historial d'Autoseguiment: la franja conserva la mateixa escala cromàtica
  * suau que la valoració del tutor, sense alterar la resta del bloc. */
 .bloc.autoseguiment-valoracio-sense::before,
+.autoseguiment-valoracio-sense .autoseguiment-valoracio-dot,
 .bloc.bloc-memoria-corregir::before { background: #f5c6cb; }
 .bloc.autoseguiment-valoracio-poc::before,
+.autoseguiment-valoracio-poc .autoseguiment-valoracio-dot,
 .bloc.bloc-memoria-revisio::before { background: #ffd08a; }
 .bloc.autoseguiment-valoracio-adequat::before,
+.autoseguiment-valoracio-adequat .autoseguiment-valoracio-dot,
 .bloc.bloc-memoria-complet::before { background: #c8e6c9; }
-.bloc.autoseguiment-valoracio-destacat::before { background: #9dd0a2; }
+.bloc.autoseguiment-valoracio-destacat::before,
+.autoseguiment-valoracio-destacat .autoseguiment-valoracio-dot { background: #9dd0a2; }
 .pill-neutral.autoseguiment-valoracio-sense,
 .memoria-estat-badge.memoria-estat-corregir { background: #fdecea; color: #c62828; border-color: #f5c6cb; }
 .pill-neutral.autoseguiment-valoracio-poc,
@@ -629,6 +633,8 @@ color: #fff;
 .pill-neutral.autoseguiment-valoracio-adequat,
 .memoria-estat-badge.memoria-estat-complet { background: #e8f5e9; color: #08751c; border-color: #c8e6c9; }
 .pill-neutral.autoseguiment-valoracio-destacat { background: #c8e6c9; color: #0b5d17; border-color: #9dd0a2; }
+.autoseguiment-valoracio-linia { display: inline-flex; align-items: center; gap: 0.4rem; }
+.autoseguiment-valoracio-dot { width: 11px; height: 11px; flex: 0 0 11px; border-radius: 50%; }
 .memoria-estat-badge.memoria-estat-pendent { background: #f1f3f5; color: #7a838d; border-color: #dee2e6; }
 .memoria-estat-badge { border: 1px solid; }
 .memoria-comentaris-cap {

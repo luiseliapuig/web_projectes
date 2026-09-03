@@ -34,6 +34,26 @@ La idempotència funcional continua protegida per PostgreSQL amb
 `SELECT` previ que substitueixi aquesta garantia. Un conflicte incrementa
 `ya_existentes`, no `errores`.
 
+## Notificació consolidada del feedback
+
+La valoració i el comentari del tutor s'editen independentment i no generen cap
+email immediat. Un procés CLI diari independent,
+`inc/seguimiento/feedback_worker.php`, selecciona els seguiments nous habilitats
+que ja tenen `valoracion_tutor` i encara no tenen
+`feedback_email_encolado_en`. El missatge incorpora els valors existents en el
+moment de l'execució, inclòs el comentari només quan n'hi ha.
+
+Cada `id_seguimiento` genera com a màxim un email. El generador bloqueja la fila
+amb `FOR UPDATE` i confirma en una sola transacció l'alta a `email_outbox` i la
+marca d'encolat. La clau `autoseguiment_feedback:{id_seguimiento}` protegeix
+també reexecucions i concurrència. Les modificacions posteriors continuen
+visibles a la web, però no generen notificacions noves.
+
+La migració d'activació separa explícitament les cohorts: els seguiments
+històrics queden amb `feedback_email_habilitado = false` i els creats després
+utilitzen el valor per defecte `true`. No es dedueix l'activació a partir de cap
+data arbitrària ni es marquen històrics com si haguessin estat notificats.
+
 ## Errors i observabilitat
 
 Una execució correcta queda registrada encara que creï zero files. Si falla la

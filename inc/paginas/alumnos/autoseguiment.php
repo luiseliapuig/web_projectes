@@ -391,7 +391,7 @@ unset($_SESSION['alumne_autoseguiment_mensaje'], $_SESSION['alumne_autoseguiment
                             <?php if ($valoracioText !== ''): ?>
                                 <div class="mt-3 pt-3 border-top">
                                     <p class="mb-0"><strong class="autoseguiment-apartat-titol">Valoració del tutor:</strong><br>
-                                        <?= htmlspecialchars($valoracioText, ENT_QUOTES, 'UTF-8') ?>.
+                                        <span class="autoseguiment-valoracio-linia"><span class="autoseguiment-valoracio-dot" aria-hidden="true"></span><?= htmlspecialchars($valoracioText, ENT_QUOTES, 'UTF-8') ?>.</span>
                                     </p>
                                     <?php if ($comentariTutor !== ''): ?>
                                         <p class="mb-0 mt-2"><?= nl2br(htmlspecialchars($comentariTutor, ENT_QUOTES, 'UTF-8'), false) ?></p>

@@ -90,6 +90,14 @@ declaració de l'alumnat sobre els objectius (`Sí / Parcialment / No`) és una
 dada informativa independent i no utilitza aquesta semàntica cromàtica. No hi
 ha encara cap fórmula definida per agregar longitudinalment aquestes dades.
 
+`app.seguimiento_alumnos.feedback_email_encolado_en` registra el moment en què
+el feedback d'aquell seguiment es va generar correctament a `app.email_outbox`.
+No acredita enviament, lliurament ni lectura. La columna auxiliar
+`feedback_email_habilitado` delimita la cohort: les files existents en activar
+la funcionalitat queden excloses i els seguiments creats posteriorment hi entren
+per defecte, evitant notificacions històriques massives sense falsejar-les com a
+enviades.
+
 La valoración del tutor está actualmente en `proyectos`:
 
 - `nota_tutor_funcional`
