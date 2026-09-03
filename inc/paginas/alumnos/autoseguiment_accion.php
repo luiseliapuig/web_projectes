@@ -21,10 +21,10 @@ if (
 }
 
 try {
-    // El registre ha de ser de l'alumnat autenticat i del seu propi projecte;
+    // El registre ha de ser de l'alumnat autenticat i del seu curs vigent;
     // el formulari mai crea seguiments nous, només actualitza un d'existent.
     $stmt = $pdo->prepare("
-        SELECT proyecto_id, fecha_inicio, fecha_fin
+        SELECT curso_academico, fecha_inicio, fecha_fin
         FROM app.seguimiento_alumnos
         WHERE id_seguimiento = :id AND alumno_id = :alumno_id
         LIMIT 1
@@ -32,9 +32,21 @@ try {
     $stmt->execute([':id' => $idSeguimiento, ':alumno_id' => $alumnoId]);
     $seguimiento = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if (!$seguimiento || !esSuProyectoAlumno((int) $seguimiento['proyecto_id'])) {
+    $cursoAcademico = cursoAcademicoActual();
+    if (!$seguimiento || (string) $seguimiento['curso_academico'] !== $cursoAcademico) {
         throw new DomainException('no_autoritzat');
     }
+    $stmt = $pdo->prepare("
+        SELECT 1
+        FROM app.rel_alumnos_grupos rag
+        INNER JOIN app.alumnos a ON a.id_alumno = rag.alumno_id
+        WHERE rag.alumno_id = :alumno_id
+          AND rag.curso_academico = :curso_academico
+          AND a.activo = true
+        LIMIT 1
+    ");
+    $stmt->execute([':alumno_id' => $alumnoId, ':curso_academico' => $cursoAcademico]);
+    if (!$stmt->fetchColumn()) throw new DomainException('no_autoritzat');
 
     // Només es pot guardar mentre avui cau dins la setmana d'aquest registre;
     // la mateixa condició es repeteix a l'UPDATE perquè la BD sigui l'última autoritat.
@@ -49,15 +61,15 @@ try {
     $stmt = $pdo->prepare("
         SELECT objetivo_siguiente
         FROM app.seguimiento_alumnos
-        WHERE proyecto_id = :proyecto_id
-          AND alumno_id = :alumno_id
+        WHERE alumno_id = :alumno_id
+          AND curso_academico = :curso_academico
           AND fecha_fin < :fecha_inicio_actual
         ORDER BY fecha_fin DESC
         LIMIT 1
     ");
     $stmt->execute([
-        ':proyecto_id' => (int) $seguimiento['proyecto_id'],
         ':alumno_id' => $alumnoId,
+        ':curso_academico' => $cursoAcademico,
         ':fecha_inicio_actual' => $seguimiento['fecha_inicio'],
     ]);
     $hayObjetivoAnterior = trim((string) ($stmt->fetchColumn() ?: '')) !== '';

@@ -3,7 +3,8 @@ declare(strict_types=1);
 
 soloSuperadmin();
 require_once dirname(__DIR__, 2) . '/seguimiento/funciones.php';
-$estado = seguimientoEstadoActual($pdo);
+$estadoActual = seguimientoEstadoActual($pdo, 'actual');
+$estadoSiguiente = seguimientoEstadoActual($pdo, 'siguiente');
 $historial = $pdo->query("SELECT ejecutado_en, origen, fecha_inicio, fecha_fin, numero_ejecucion,
     candidatos, creados, ya_existentes, errores, detalle_error FROM app.seguimiento_ejecuciones
     ORDER BY ejecutado_en DESC LIMIT 50")->fetchAll(PDO::FETCH_ASSOC);
@@ -24,14 +25,27 @@ $fechaHora = static fn(string $v): string => (new DateTimeImmutable($v))->setTim
  <?php if (is_array($resultado)): ?><div class="alert <?= (int)$resultado['errores'] > 0 ? 'alert-warning' : 'alert-success' ?>">Comprovació completada: <?= (int)$resultado['candidatos'] ?> candidats, <?= (int)$resultado['creados'] ?> creats, <?= (int)$resultado['ya_existentes'] ?> ja existents i <?= (int)$resultado['errores'] ?> errors.</div>
  <?php elseif (is_string($error) && $error !== ''): ?><div class="alert alert-danger"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></div><?php endif; ?>
  <div class="card border-0 shadow-sm rounded-4 mb-4"><div class="card-body p-4">
-  <div class="d-flex justify-content-between gap-3 mb-3"><div><h2 class="h5 mb-1">Estat actual</h2><p class="text-muted mb-0">Període a preparar: <?= htmlspecialchars($fecha($estado['fecha_inicio']).' – '.$fecha($estado['fecha_fin']), ENT_QUOTES, 'UTF-8') ?></p></div>
-  <?php if ($estado['disponible']): ?><span class="badge <?= $estado['pendientes'] === 0 ? 'text-bg-success' : 'text-bg-warning' ?> rounded-pill align-self-start px-3 py-2"><?= $estado['pendientes'] === 0 ? 'Tot correcte' : 'Atenció' ?></span><?php endif; ?></div>
-  <?php if (!$estado['disponible']): ?><div class="alert alert-warning"><?= htmlspecialchars((string)$estado['detalle_error'], ENT_QUOTES, 'UTF-8') ?></div>
-  <?php else: ?><div class="row g-3 mb-4">
-   <?php foreach (['Candidats'=>count($estado['candidatos']),'Existents'=>$estado['existentes'],'Pendents'=>$estado['pendientes'],'Execucions'=>$estado['ejecuciones']] as $etiqueta=>$valor): ?>
-   <div class="col-6 col-lg"><div class="border rounded-3 p-3 h-100"><div class="text-muted small"><?= $etiqueta ?></div><div class="h4 mb-0"><?= (int)$valor ?></div></div></div><?php endforeach; ?>
-  </div><?php endif; ?>
-  <form method="post" action="/index.php?main=autoseguiment-control_accion"><input type="hidden" name="csrf_token" value="<?= htmlspecialchars(tokenCsrf(), ENT_QUOTES, 'UTF-8') ?>"><button class="btn btn-puig-solid" <?= !$estado['disponible'] ? 'disabled' : '' ?>>Comprovar i crear seguiments pendents</button></form>
+  <h2 class="h5 mb-4">Estat actual</h2>
+  <section>
+   <div class="d-flex justify-content-between gap-3 mb-3"><div><h3 class="h6 mb-1">Setmana actual</h3><p class="text-muted mb-0"><?= htmlspecialchars($fecha($estadoActual['fecha_inicio']).' – '.$fecha($estadoActual['fecha_fin']), ENT_QUOTES, 'UTF-8') ?></p></div>
+   <?php if ($estadoActual['disponible']): ?><span class="badge <?= $estadoActual['pendientes'] === 0 ? 'text-bg-success' : 'text-bg-warning' ?> rounded-pill align-self-start px-3 py-2"><?= $estadoActual['pendientes'] === 0 ? 'Tot correcte' : 'Atenció' ?></span><?php endif; ?></div>
+   <?php if (!$estadoActual['disponible']): ?><div class="alert alert-warning"><?= htmlspecialchars((string)$estadoActual['detalle_error'], ENT_QUOTES, 'UTF-8') ?></div>
+   <?php else: ?><div class="row g-3 mb-4">
+    <?php foreach (['Candidats'=>count($estadoActual['candidatos']),'Existents'=>$estadoActual['existentes'],'Pendents'=>$estadoActual['pendientes']] as $etiqueta=>$valor): ?>
+    <div class="col-6 col-lg"><div class="border rounded-3 p-3 h-100"><div class="text-muted small"><?= $etiqueta ?></div><div class="h4 mb-0"><?= (int)$valor ?></div></div></div><?php endforeach; ?>
+   </div><?php endif; ?>
+   <form method="post" action="/index.php?main=autoseguiment-control_accion"><input type="hidden" name="csrf_token" value="<?= htmlspecialchars(tokenCsrf(), ENT_QUOTES, 'UTF-8') ?>"><input type="hidden" name="periodo" value="actual"><button class="btn btn-puig-solid" <?= !$estadoActual['disponible'] ? 'disabled' : '' ?>>Comprovar i crear seguiments de la setmana actual</button></form>
+  </section>
+  <section class="border-top mt-4 pt-4">
+   <div class="d-flex justify-content-between gap-3 mb-3"><div><h3 class="h6 mb-1">Període a preparar</h3><p class="text-muted mb-0"><?= htmlspecialchars($fecha($estadoSiguiente['fecha_inicio']).' – '.$fecha($estadoSiguiente['fecha_fin']), ENT_QUOTES, 'UTF-8') ?></p></div>
+   <?php if ($estadoSiguiente['disponible']): ?><span class="badge <?= $estadoSiguiente['pendientes'] === 0 ? 'text-bg-success' : 'text-bg-warning' ?> rounded-pill align-self-start px-3 py-2"><?= $estadoSiguiente['pendientes'] === 0 ? 'Tot correcte' : 'Atenció' ?></span><?php endif; ?></div>
+   <?php if (!$estadoSiguiente['disponible']): ?><div class="alert alert-warning"><?= htmlspecialchars((string)$estadoSiguiente['detalle_error'], ENT_QUOTES, 'UTF-8') ?></div>
+   <?php else: ?><div class="row g-3 mb-4">
+    <?php foreach (['Candidats'=>count($estadoSiguiente['candidatos']),'Existents'=>$estadoSiguiente['existentes'],'Pendents'=>$estadoSiguiente['pendientes'],'Execucions'=>$estadoSiguiente['ejecuciones']] as $etiqueta=>$valor): ?>
+    <div class="col-6 col-lg"><div class="border rounded-3 p-3 h-100"><div class="text-muted small"><?= $etiqueta ?></div><div class="h4 mb-0"><?= (int)$valor ?></div></div></div><?php endforeach; ?>
+   </div><?php endif; ?>
+   <form method="post" action="/index.php?main=autoseguiment-control_accion"><input type="hidden" name="csrf_token" value="<?= htmlspecialchars(tokenCsrf(), ENT_QUOTES, 'UTF-8') ?>"><input type="hidden" name="periodo" value="siguiente"><button class="btn btn-puig-solid" <?= !$estadoSiguiente['disponible'] ? 'disabled' : '' ?>>Comprovar i crear seguiments pendents</button></form>
+  </section>
   <p class="text-muted small mt-3 mb-0">La integritat dels seguiments i el nombre d’execucions són indicadors independents.</p>
  </div></div>
  <div class="card border-0 shadow-sm rounded-4 overflow-hidden"><div class="card-body p-4 border-bottom"><h2 class="h5 mb-1">Historial d’execucions</h2><p class="text-muted mb-0">Últimes 50 execucions registrades.</p></div><div class="table-responsive"><table class="table table-hover align-middle text-center mb-0 autoseguiment-history-table">

@@ -1,14 +1,16 @@
 <?php
 declare(strict_types=1);
 
-// El autoseguiment exigeix un projecte actiu: sense projecte no hi ha cap
-// setmana a mostrar. Es reutilitza el context habitual de l'àrea d'alumnat.
+// L'Autoseguiment és de l'alumne i del curs; el context acadèmic també es
+// resol quan encara no existeix cap projecte.
+$permitirSinProyecto = true;
+$contextoCursoActual = true;
 if (!(require __DIR__ . '/projecte_context.php')) {
     return;
 }
 
 $alumnoId = (int) $_SESSION['alumno_id'];
-$proyectoId = (int) $proyectoAlumno['id_proyecto'];
+$cursoAcademico = cursoAcademicoActual();
 
 // ── Etiquetes dels valors numèrics (definides pel model de dades) ─────────
 function autoseguimentEtiquetaCompliment(?int $valor): string
@@ -84,10 +86,10 @@ $stmt = $pdo->prepare("
            cumplimiento_objetivo_anterior, trabajo_realizado, incidencias,
            objetivo_siguiente, valoracion_tutor, comentario_tutor
     FROM app.seguimiento_alumnos
-    WHERE proyecto_id = :proyecto_id AND alumno_id = :alumno_id
+    WHERE alumno_id = :alumno_id AND curso_academico = :curso_academico
     ORDER BY fecha_inicio DESC
 ");
-$stmt->execute([':proyecto_id' => $proyectoId, ':alumno_id' => $alumnoId]);
+$stmt->execute([':alumno_id' => $alumnoId, ':curso_academico' => $cursoAcademico]);
 $totsSeguiments = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $avui = (new DateTimeImmutable('now', new DateTimeZone('Europe/Madrid')))->format('Y-m-d');

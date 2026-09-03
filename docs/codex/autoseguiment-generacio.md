@@ -2,23 +2,24 @@
 
 ## Operació reutilitzable
 
-`inc/seguimiento/funciones.php` és la capacitat canònica compartida. Primer
-determina el dilluns de la setmana natural que conté la data d’execució i hi
-suma set dies; aquest és el dilluns objectiu, i el diumenge objectiu és sis dies
-després. Per tant, el procés es pot executar qualsevol dia i totes les
-execucions d’una mateixa setmana natural apunten exactament a la setmana
-natural immediatament posterior. Després calcula el número de setmana des de la
-data inicial configurada i selecciona alumnat actiu del curs acadèmic vigent
-vinculat a projectes actius del mateix curs. El worker CLI i l’acció manual de
-superadministració invoquen `seguimientoReconciliarPeriodoActual()` amb origen
-`cron` o `manual`; diversos cron i execucions manuals dins la mateixa setmana no
-alteren el període objectiu.
+`inc/seguimiento/funciones.php` és la capacitat canònica compartida. Parteix
+sempre del dilluns de la setmana natural que conté la data d'execució. La
+generació ordinària hi suma set dies i prepara així la setmana natural següent;
+la recuperació administrativa conserva aquell dilluns i reconcilia la setmana
+actual. En tots dos casos, el diumenge és sis dies després. Després calcula el número de setmana des de la
+data inicial configurada i selecciona alumnat actiu amb matrícula vigent a un
+grup del curs acadèmic actual. No cal que existeixi projecte; si n'hi ha un
+d'actiu, el seu identificador es conserva només com a context opcional. El worker CLI i l’acció manual de
+superadministració invoquen la mateixa reconciliació canònica amb origen `cron`
+o `manual`; diversos cron i execucions manuals sobre el mateix període no creen
+duplicats.
 
 La pàgina de control reutilitza `seguimientoContextoCanonico()` i calcula en viu
 els seguiments existents segons la mateixa clau que protegeix la idempotència.
 No reconstrueix candidats amb una consulta paral·lela ni dedueix l’estat del
-log. El botó manual només reconcilia el període canònic i no accepta dates,
-projectes ni alumnes.
+log. El control permet recuperar idempotentment la setmana actual o preparar la
+següent. El POST només accepta aquestes dues intencions tancades i resol les
+dates en servidor; no accepta dates, projectes ni alumnes del navegador.
 
 ## Transacció, idempotència i concurrència
 
@@ -30,9 +31,20 @@ la carrera que tindria aquest càlcul aïllat. La restricció
 garantia del log.
 
 La idempotència funcional continua protegida per PostgreSQL amb
-`ON CONFLICT (proyecto_id, alumno_id, semana) DO NOTHING`; no hi ha cap
+`ON CONFLICT (alumno_id, curso_academico, fecha_inicio, fecha_fin) DO NOTHING`;
+no hi ha cap
 `SELECT` previ que substitueixi aquesta garantia. Un conflicte incrementa
 `ya_existentes`, no `errores`.
+
+L'historial es consulta per alumne i curs. Les setmanes creades abans del
+projecte romanen amb `proyecto_id = NULL`, no es reassignen quan el projecte
+apareix i enllacen els objectius amb les setmanes posteriors sense discontinuïtat.
+Eliminar el projecte tampoc elimina l'historial: la FK aplica `ON DELETE SET NULL`.
+
+Sense projecte actiu amb tutor formal, el professorat autoritzat del grup pot
+valorar i comentar. Des que existeix tutor formal, només aquest pot escriure i
+pot fer-ho sobre tot l'historial del curs. No es registra autoria individual de
+la valoració ni del comentari.
 
 ## Notificació consolidada del feedback
 

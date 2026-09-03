@@ -98,7 +98,7 @@ foreach ($idsCandidatos as $idSeguimiento) {
             'cuerpo_html' => $body['html'],
             'cuerpo_texto' => $body['text'],
             'tipo' => 'autoseguiment_feedback',
-            'proyecto_id' => (int) $seguimiento['proyecto_id'],
+            'proyecto_id' => $seguimiento['proyecto_id'] !== null ? (int) $seguimiento['proyecto_id'] : null,
             'clave_idempotencia' => 'autoseguiment_feedback:' . $idSeguimiento,
         ]);
 

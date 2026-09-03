@@ -215,23 +215,28 @@ if ($grupoId > 0) {
     $stmt = $pdo->prepare("
         SELECT COUNT(*)
         FROM app.seguimiento_alumnos sa
-        INNER JOIN app.proyectos p ON p.id_proyecto = sa.proyecto_id
         INNER JOIN app.rel_alumnos_grupos rag
-            ON rag.alumno_id = sa.alumno_id AND rag.curso_academico = p.curso_academico
+            ON rag.alumno_id = sa.alumno_id AND rag.curso_academico = sa.curso_academico
         INNER JOIN app.alumnos a ON a.id_alumno = rag.alumno_id
         WHERE rag.grupo_id = :grupo_id
           AND rag.curso_academico = :curso_academico
           AND a.activo = true
-          AND p.curso_academico = :curso_academico
-          AND p.estado = 'activo'
           AND sa.fecha_fin < CURRENT_DATE
           AND sa.valoracion_tutor IS NULL
-          AND EXISTS (
-              SELECT 1
-              FROM app.rel_proyectos_profesores rpp
-              WHERE rpp.proyecto_id = sa.proyecto_id
-                AND rpp.profesor_id = :profesor_id_tutor
-                AND rpp.rol = 'tutor'
+          AND (
+              NOT EXISTS (
+                  SELECT 1 FROM app.rel_proyectos_alumnos rpa
+                  INNER JOIN app.proyectos p ON p.id_proyecto = rpa.proyecto_id
+                  INNER JOIN app.rel_proyectos_profesores rpp ON rpp.proyecto_id = p.id_proyecto AND rpp.rol = 'tutor'
+                  WHERE rpa.alumno_id = sa.alumno_id AND p.curso_academico = sa.curso_academico AND p.estado = 'activo'
+              )
+              OR EXISTS (
+                  SELECT 1 FROM app.rel_proyectos_alumnos rpa
+                  INNER JOIN app.proyectos p ON p.id_proyecto = rpa.proyecto_id
+                  INNER JOIN app.rel_proyectos_profesores rpp ON rpp.proyecto_id = p.id_proyecto AND rpp.rol = 'tutor'
+                  WHERE rpa.alumno_id = sa.alumno_id AND p.curso_academico = sa.curso_academico
+                    AND p.estado = 'activo' AND rpp.profesor_id = :profesor_id_tutor
+              )
           )
     ");
     $stmt->execute([
@@ -362,21 +367,27 @@ if ($idsGruposAutorizados !== []) {
             ON rpg.grupo_id = rag.grupo_id
            AND rpg.curso_academico = rag.curso_academico
            AND rpg.profesor_id = :profesor_id
-        INNER JOIN app.seguimiento_alumnos sa ON sa.alumno_id = rag.alumno_id
-        INNER JOIN app.proyectos p
-            ON p.id_proyecto = sa.proyecto_id
-           AND p.curso_academico = rag.curso_academico
-           AND p.estado = 'activo'
+        INNER JOIN app.seguimiento_alumnos sa
+            ON sa.alumno_id = rag.alumno_id
+           AND sa.curso_academico = rag.curso_academico
         WHERE rag.curso_academico = :curso_academico
           AND a.activo = true
           AND sa.fecha_fin < CURRENT_DATE
           AND sa.valoracion_tutor IS NULL
-          AND EXISTS (
-              SELECT 1
-              FROM app.rel_proyectos_profesores rpp
-              WHERE rpp.proyecto_id = sa.proyecto_id
-                AND rpp.profesor_id = :profesor_id_tutor
-                AND rpp.rol = 'tutor'
+          AND (
+              NOT EXISTS (
+                  SELECT 1 FROM app.rel_proyectos_alumnos rpa
+                  INNER JOIN app.proyectos p ON p.id_proyecto = rpa.proyecto_id
+                  INNER JOIN app.rel_proyectos_profesores rpp ON rpp.proyecto_id = p.id_proyecto AND rpp.rol = 'tutor'
+                  WHERE rpa.alumno_id = sa.alumno_id AND p.curso_academico = sa.curso_academico AND p.estado = 'activo'
+              )
+              OR EXISTS (
+                  SELECT 1 FROM app.rel_proyectos_alumnos rpa
+                  INNER JOIN app.proyectos p ON p.id_proyecto = rpa.proyecto_id
+                  INNER JOIN app.rel_proyectos_profesores rpp ON rpp.proyecto_id = p.id_proyecto AND rpp.rol = 'tutor'
+                  WHERE rpa.alumno_id = sa.alumno_id AND p.curso_academico = sa.curso_academico
+                    AND p.estado = 'activo' AND rpp.profesor_id = :profesor_id_tutor
+              )
           )
         GROUP BY rag.grupo_id
     ");

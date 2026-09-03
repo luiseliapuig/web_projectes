@@ -7,6 +7,7 @@ if (!esTutor()) {
 }
 
 require_once __DIR__ . '/grup-actiu_funcions.php';
+require_once dirname(__DIR__, 3) . '/seguimiento/funciones.php';
 
 $profesorId = (int) $_SESSION['professor_id'];
 $cursoAcademico = cursoAcademicoActual();
@@ -192,7 +193,7 @@ function autoseguimentTutorFitxa(array $fila, string $classeBloc, string $object
                 <div class="mt-3 pt-3 border-top">
                     <?php if ($valoracioText !== ''): ?>
                         <p class="mb-0"><strong class="autoseguiment-apartat-titol">Valoració del tutor:</strong><br>
-                            <?= htmlspecialchars($valoracioText, ENT_QUOTES, 'UTF-8') ?>.
+                            <span class="autoseguiment-valoracio-linia"><span class="autoseguiment-valoracio-dot" aria-hidden="true"></span><?= htmlspecialchars($valoracioText, ENT_QUOTES, 'UTF-8') ?>.</span>
                         </p>
                     <?php endif; ?>
                     <?php if ($comentariTutor !== ''): ?>
@@ -237,21 +238,35 @@ $stmt = $pdo->prepare("
         ON rpg.grupo_id = rag.grupo_id
        AND rpg.curso_academico = rag.curso_academico
        AND rpg.profesor_id = :profesor_id
-    INNER JOIN app.seguimiento_alumnos sa ON sa.alumno_id = rag.alumno_id
-    INNER JOIN app.proyectos p
-        ON p.id_proyecto = sa.proyecto_id
-       AND p.curso_academico = rag.curso_academico
-       AND p.estado = 'activo'
+    INNER JOIN app.seguimiento_alumnos sa
+        ON sa.alumno_id = rag.alumno_id
+       AND sa.curso_academico = rag.curso_academico
     WHERE rag.curso_academico = :curso_academico
       AND a.activo = true
       AND sa.fecha_fin < CURRENT_DATE
       AND sa.valoracion_tutor IS NULL
-      AND EXISTS (
-          SELECT 1
-          FROM app.rel_proyectos_profesores rpp
-          WHERE rpp.proyecto_id = sa.proyecto_id
-            AND rpp.profesor_id = :profesor_id_tutor
-            AND rpp.rol = 'tutor'
+      AND (
+          NOT EXISTS (
+              SELECT 1
+              FROM app.rel_proyectos_alumnos rpa
+              INNER JOIN app.proyectos p ON p.id_proyecto = rpa.proyecto_id
+              INNER JOIN app.rel_proyectos_profesores rpp
+                  ON rpp.proyecto_id = p.id_proyecto AND rpp.rol = 'tutor'
+              WHERE rpa.alumno_id = sa.alumno_id
+                AND p.curso_academico = sa.curso_academico
+                AND p.estado = 'activo'
+          )
+          OR EXISTS (
+              SELECT 1
+              FROM app.rel_proyectos_alumnos rpa
+              INNER JOIN app.proyectos p ON p.id_proyecto = rpa.proyecto_id
+              INNER JOIN app.rel_proyectos_profesores rpp
+                  ON rpp.proyecto_id = p.id_proyecto AND rpp.rol = 'tutor'
+              WHERE rpa.alumno_id = sa.alumno_id
+                AND p.curso_academico = sa.curso_academico
+                AND p.estado = 'activo'
+                AND rpp.profesor_id = :profesor_id_tutor
+          )
       )
     GROUP BY rag.grupo_id
 ");
@@ -319,7 +334,7 @@ if ($alumnoId === 0 && $alumnos !== []) {
 // -----------------------------------------------------------------------------
 
 $proyectoPorAlumno = [];
-$tutorizaPorAlumno = [];
+$tutorizaPorAlumno = array_fill_keys(array_map(static fn (array $a): int => (int) $a['id_alumno'], $alumnos), true);
 $pendientesPorAlumno = [];
 if ($alumnos !== []) {
     $alumnoIds = array_map(static fn (array $a): int => (int) $a['id_alumno'], $alumnos);
@@ -329,24 +344,25 @@ if ($alumnos !== []) {
     // punt 3): serveix únicament per agrupar visualment, no per navegar-hi.
     $stmt = $pdo->prepare("
         SELECT rpa.alumno_id, rpa.proyecto_id,
-               EXISTS (
-                   SELECT 1
+               (
+                   SELECT rpp.profesor_id
                    FROM app.rel_proyectos_profesores rpp
                    WHERE rpp.proyecto_id = rpa.proyecto_id
-                     AND rpp.profesor_id = ?
                      AND rpp.rol = 'tutor'
-               ) AS pot_editar
+                   LIMIT 1
+               ) AS tutor_formal_id
         FROM app.rel_proyectos_alumnos rpa
         INNER JOIN app.proyectos p ON p.id_proyecto = rpa.proyecto_id
         WHERE rpa.alumno_id IN ($marcadores)
           AND p.curso_academico = ?
           AND p.estado = 'activo'
     ");
-    $stmt->execute([$profesorId, ...$alumnoIds, $cursoAcademico]);
+    $stmt->execute([...$alumnoIds, $cursoAcademico]);
     foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $fila) {
         $idAlumnoFila = (int) $fila['alumno_id'];
         $proyectoPorAlumno[$idAlumnoFila] = (int) $fila['proyecto_id'];
-        $tutorizaPorAlumno[$idAlumnoFila] = in_array($fila['pot_editar'], [true, 1, '1', 't', 'true'], true);
+        $tutorizaPorAlumno[$idAlumnoFila] = $fila['tutor_formal_id'] === null
+            || (int) $fila['tutor_formal_id'] === $profesorId;
     }
 
     // Setmanes tancades sense valorar (fecha_fin < avui i valoracion_tutor
@@ -355,18 +371,32 @@ if ($alumnos !== []) {
     $stmt = $pdo->prepare("
         SELECT sa.alumno_id, COUNT(*) AS pendientes
         FROM app.seguimiento_alumnos sa
-        INNER JOIN app.proyectos p ON p.id_proyecto = sa.proyecto_id
         WHERE sa.alumno_id IN ($marcadores)
-          AND p.curso_academico = ?
-          AND p.estado = 'activo'
+          AND sa.curso_academico = ?
           AND sa.fecha_fin < CURRENT_DATE
           AND sa.valoracion_tutor IS NULL
-          AND EXISTS (
-              SELECT 1
-              FROM app.rel_proyectos_profesores rpp
-              WHERE rpp.proyecto_id = sa.proyecto_id
-                AND rpp.profesor_id = ?
-                AND rpp.rol = 'tutor'
+          AND (
+              NOT EXISTS (
+                  SELECT 1
+                  FROM app.rel_proyectos_alumnos rpa
+                  INNER JOIN app.proyectos p ON p.id_proyecto = rpa.proyecto_id
+                  INNER JOIN app.rel_proyectos_profesores rpp
+                      ON rpp.proyecto_id = p.id_proyecto AND rpp.rol = 'tutor'
+                  WHERE rpa.alumno_id = sa.alumno_id
+                    AND p.curso_academico = sa.curso_academico
+                    AND p.estado = 'activo'
+              )
+              OR EXISTS (
+                  SELECT 1
+                  FROM app.rel_proyectos_alumnos rpa
+                  INNER JOIN app.proyectos p ON p.id_proyecto = rpa.proyecto_id
+                  INNER JOIN app.rel_proyectos_profesores rpp
+                      ON rpp.proyecto_id = p.id_proyecto AND rpp.rol = 'tutor'
+                  WHERE rpa.alumno_id = sa.alumno_id
+                    AND p.curso_academico = sa.curso_academico
+                    AND p.estado = 'activo'
+                    AND rpp.profesor_id = ?
+              )
           )
         GROUP BY sa.alumno_id
     ");
@@ -446,18 +476,18 @@ $potEditarValoracio = $tutorizaPorAlumno[$alumnoId] ?? false;
 
 $setmanasTancades = [];
 $objectiuAnteriorPerSeguiment = [];
-if ($proyectoId > 0) {
+if ($alumnoId > 0) {
     $stmt = $pdo->prepare("
         SELECT id_seguimiento, semana, fecha_inicio, fecha_fin,
                cumplimiento_objetivo_anterior, trabajo_realizado, incidencias,
                objetivo_siguiente, valoracion_tutor, comentario_tutor
         FROM app.seguimiento_alumnos
-        WHERE proyecto_id = :proyecto_id
-          AND alumno_id = :alumno_id
+        WHERE alumno_id = :alumno_id
+          AND curso_academico = :curso_academico
           AND fecha_fin < CURRENT_DATE
         ORDER BY fecha_inicio DESC
     ");
-    $stmt->execute([':proyecto_id' => $proyectoId, ':alumno_id' => $alumnoId]);
+    $stmt->execute([':alumno_id' => $alumnoId, ':curso_academico' => $cursoAcademico]);
     $setmanasTancades = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     $setmanasCronologiques = array_values($setmanasTancades);
@@ -708,15 +738,7 @@ if ($proyectoId > 0) {
         <!-- ── Seguiment de l'alumne seleccionat ── -->
         <?php if ($alumnoId > 0): ?>
             <div class="card autoseguiment-panell shadow-sm border-0 rounded-4 p-4 p-lg-5">
-                <?php if ($proyectoId === 0): ?>
-                    <section class="bloc bloc-informacio">
-                        <div class="bloc-contingut">
-                            <div class="bloc-tipus">Sense projecte</div>
-                            <h2>Aquest alumne encara no té un projecte actiu</h2>
-                            <p class="mb-0">No hi ha cap seguiment per mostrar mentre no formi part d’un projecte.</p>
-                        </div>
-                    </section>
-                <?php elseif ($setmanasTancades === []): ?>
+                <?php if ($setmanasTancades === []): ?>
                     <section class="bloc bloc-informacio">
                         <div class="bloc-contingut">
                             <div class="bloc-tipus">Historial</div>

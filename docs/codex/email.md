@@ -94,6 +94,12 @@ persona, la edición del feedback puede desacoplarse de su notificación. En
 Autoseguiment, el feedback semanal se consolida y se notifica posteriormente
 como máximo una vez.
 
+El recordatori d'Autoseguiment es basa en la fila vigent, l'alumne actiu i la
+seva matrícula del curs. No exigeix projecte i manté la mateixa clau idempotent
+per `id_seguimiento`; quan no hi ha projecte, `email_outbox.proyecto_id` queda
+`NULL`. El feedback consolidat també admet aquest context nul si un professor
+autoritzat del grup ha valorat el seguiment abans de crear-se el projecte.
+
 ## Automatización en producción con systemd
 
 Los generadores funcionales deciden qué mensajes deben existir y los insertan

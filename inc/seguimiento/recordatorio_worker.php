@@ -81,10 +81,8 @@ echo 'Setmana actual: ' . $dillunsSetmanaActual->format('d/m/Y') . ' - ' . $dium
 // -----------------------------------------------------------------------------
 // 2. Destinataris: seguiments de la setmana actual (fecha_inicio <= avui <=
 // fecha_fin, el mateix criteri de "setmana actual" que ja fan servir la vista
-// de l'alumne i el tutor), restringits al curs acadèmic actual, a projectes
-// actius i alumnat actiu, i confirmant que la relació alumne/projecte encara
-// és real (rel_proyectos_alumnos) — els mateixos criteris que ja aplica
-// inc/seguimiento/worker.php a l'hora de generar les files.
+// de l'alumne i el tutor), restringits al curs acadèmic actual, alumnat actiu
+// i matrícula vigent. El projecte és només context opcional.
 // -----------------------------------------------------------------------------
 
 $cursoActual = cursoAcademicoActual();
@@ -92,14 +90,13 @@ $cursoActual = cursoAcademicoActual();
 $stmt = $pdo->prepare("
     SELECT sa.id_seguimiento, sa.proyecto_id, sa.fecha_fin, a.nombre, a.apellidos, a.email
     FROM app.seguimiento_alumnos sa
-    INNER JOIN app.proyectos p ON p.id_proyecto = sa.proyecto_id
     INNER JOIN app.alumnos a ON a.id_alumno = sa.alumno_id
-    INNER JOIN app.rel_proyectos_alumnos rpa ON rpa.proyecto_id = sa.proyecto_id AND rpa.alumno_id = sa.alumno_id
+    INNER JOIN app.rel_alumnos_grupos rag
+        ON rag.alumno_id = sa.alumno_id
+       AND rag.curso_academico = sa.curso_academico
     WHERE sa.fecha_inicio <= CURRENT_DATE AND sa.fecha_fin >= CURRENT_DATE
-      AND p.estado = 'activo'
-      AND p.curso_academico = :curso_academico
+      AND sa.curso_academico = :curso_academico
       AND a.activo = true
-      AND a.curso_academico = :curso_academico
     ORDER BY a.apellidos, a.nombre
 ");
 $stmt->execute([':curso_academico' => $cursoActual]);
@@ -158,7 +155,7 @@ foreach ($destinatarios as $fila) {
             'cuerpo_html' => $body['html'],
             'cuerpo_texto' => $body['text'],
             'tipo' => 'autoseguiment_recordatori',
-            'proyecto_id' => (int) $fila['proyecto_id'],
+            'proyecto_id' => $fila['proyecto_id'] !== null ? (int) $fila['proyecto_id'] : null,
             'clave_idempotencia' => 'autoseguiment_recordatori:' . (int) $fila['id_seguimiento'],
         ]);
         if ($id > 0) {

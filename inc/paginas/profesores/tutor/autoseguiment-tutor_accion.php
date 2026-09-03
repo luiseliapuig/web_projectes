@@ -5,6 +5,7 @@ declare(strict_types=1);
 // Guarda la valoració o el comentari del tutor sobre una setmana ja tancada
 // d'Autoseguiment. Mai crea ni toca el contingut escrit per l'alumnat.
 header('Content-Type: application/json; charset=utf-8');
+require_once dirname(__DIR__, 3) . '/seguimiento/funciones.php';
 
 if (!esProfesor()) {
     http_response_code(403);
@@ -32,19 +33,23 @@ if ($idSeguimiento <= 0 || !in_array($accion, ['valoracion', 'comentario'], true
 
 // El seguiment ha de correspondre a una setmana ja tancada (fecha_fin < avui,
 // el mateix criteri que decideix què es mostra a la vista) i el professor
-// autenticat ha de ser el tutor formal d'aquest projecte concret
-// (rel_proyectos_profesores.rol = 'tutor', mitjançant la funció existent).
-// Formar part del grup o constar com a cotutor no és suficient per escriure.
+// autenticat ha de complir la regla docent dinàmica: professor del grup quan
+// no hi ha tutor formal, o tutor formal quan el projecte ja en té un.
 $stmt = $pdo->prepare("
-    SELECT proyecto_id
+    SELECT alumno_id, curso_academico
     FROM app.seguimiento_alumnos
     WHERE id_seguimiento = :id AND fecha_fin < CURRENT_DATE
     LIMIT 1
 ");
 $stmt->execute([':id' => $idSeguimiento]);
-$proyectoId = $stmt->fetchColumn();
+$seguimiento = $stmt->fetch(PDO::FETCH_ASSOC);
 
-if ($proyectoId === false || !esTutorFormalDelProyecto((int) $proyectoId)) {
+if (!$seguimiento || !seguimientoPuedeValorarProfesor(
+    $pdo,
+    (int) $seguimiento['alumno_id'],
+    (int) $_SESSION['professor_id'],
+    (string) $seguimiento['curso_academico']
+)) {
     http_response_code(403);
     echo json_encode(['ok' => false, 'missatge' => 'No tens autorització per modificar aquest seguiment.']);
     exit;

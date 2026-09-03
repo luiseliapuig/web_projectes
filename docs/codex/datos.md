@@ -53,10 +53,17 @@ Motor: PostgreSQL. Base: `web_proyectos`. Esquema: `app`.
 
 ### Autoseguiment setmanal
 
-La generació setmanal és idempotent: la restricció única de
-`app.seguimiento_alumnos` sobre `(proyecto_id, alumno_id, semana)` i
+L'Autoseguiment pertany a l'alumne durant el curs acadèmic i existeix encara
+que no tingui projecte. La seva identitat és
+`(alumno_id, curso_academico, fecha_inicio, fecha_fin)`; `semana` conserva el
+valor funcional i de presentació. `proyecto_id` és només el context opcional
+existent en crear la fila, no forma part de la identitat, i l'eliminació del
+projecte el posa a `NULL` sense esborrar l'historial.
+
+La generació setmanal és idempotent: la restricció única anterior i
 `INSERT ... ON CONFLICT DO NOTHING` impedeixen duplicats i preserven els
-seguiments existents. El cron i la reconciliació manual de superadministració
+seguiments existents. Els candidats són alumnes actius amb matrícula vigent a
+`rel_alumnos_grupos`, no parelles alumne/projecte. El cron i la reconciliació manual de superadministració
 criden la mateixa operació canònica; el diagnòstic administratiu reutilitza la
 mateixa definició de període, setmana i candidats.
 
@@ -70,7 +77,7 @@ veritat. L’estat funcional es calcula en viu comparant els candidats canònics
 amb `app.seguimiento_alumnos`. Per això la integritat (esperats/existents) i el
 nombre d’execucions de l’automatisme són senyals independents.
 
-En cada execució, `candidatos` és el nombre de parelles alumne/projecte
+En cada execució, `candidatos` és el nombre d'alumnes
 elegibles; `creados`, les files inserides; `ya_existentes`, els conflictes
 idempotents; i `errores`, els candidats que no s’han pogut processar.
 `numero_ejecucion` és el comptador consecutiu que comença en 1 per cada parella
@@ -97,6 +104,12 @@ No acredita enviament, lliurament ni lectura. La columna auxiliar
 la funcionalitat queden excloses i els seguiments creats posteriorment hi entren
 per defecte, evitant notificacions històriques massives sense falsejar-les com a
 enviades.
+
+La capacitat docent es resol dinàmicament i no es desa autoria individual. Si
+l'alumne encara no té projecte actiu amb tutor formal, qualsevol professor
+vinculat al seu grup i curs pot valorar o comentar. Quan existeix tutor formal,
+només aquest pot escriure; la resta manté la consulta que li permet el seu grup.
+El tutor formal veu tot l'historial del curs, també l'anterior al projecte.
 
 La valoración del tutor está actualmente en `proyectos`:
 
