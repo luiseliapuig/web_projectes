@@ -77,7 +77,7 @@ $mostrarResumTutor = $esProfesorMenu && esTutor();
             </li>
 
             <li class="nav-item">
-              <a class="nav-link" href="/projectes/SMX">Projectes</a>
+              <a class="nav-link" href="/projectes">Projectes</a>
             </li>
 
             <li class="nav-item">

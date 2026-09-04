@@ -11,6 +11,10 @@ $rutasMigradas = [
         'archivo' => __DIR__ . '/paginas/public/main.php',
         'area' => 'public',
     ],
+    'projectes' => [
+        'archivo' => __DIR__ . '/paginas/public/projectes.php',
+        'area' => 'public',
+    ],
     'llistat-projectes' => [
         'archivo' => __DIR__ . '/paginas/public/llistat-projectes.php',
         'area' => 'public',

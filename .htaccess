@@ -10,6 +10,7 @@ RewriteCond %{REQUEST_FILENAME} !-d
 
 # LISTADO DE PROYECTOS POR CICLO
 RewriteRule ^inici$ /index.php?main=main [L,QSA]
+RewriteRule ^projectes/?$ /index.php?main=projectes [L,QSA]
 RewriteRule ^projectes/([A-Za-z0-9_-]+)$ /index.php?main=llistat-projectes&cicle=$1 [L,QSA]
 RewriteRule ^projectes/categoria/([0-9]+)$ /index.php?main=llistat-classificacio&classificacio=categoria&id=$1 [L,QSA]
 RewriteRule ^projectes/tipus/([0-9]+)$ /index.php?main=llistat-classificacio&classificacio=tipus&id=$1 [L,QSA]
