@@ -1,6 +1,7 @@
 <?php
 // Ficha pública del proyecto. Las evaluaciones se reconstruirán en sus áreas
 // autorizadas y no forman parte de esta vista durante la migración.
+require_once __DIR__ . '/projectes-publics_funcions.php';
 
 $idProyecto = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 
@@ -39,7 +40,10 @@ try {
         SELECT
             p.*,
             c.abr AS ciclo,
+            c.familia_ciclo_id AS proyecto_familia_ciclo_id,
             g.grupo AS grupo,
+            cp.nombre AS categoria_proyecto_nombre,
+            tp.nombre AS tipo_proyecto_nombre,
             COALESCE((
                 SELECT TRIM(pr.nombre || ' ' || pr.apellidos)
                 FROM app.rel_proyectos_profesores rpp
@@ -56,6 +60,11 @@ try {
         FROM app.proyectos p
         INNER JOIN app.grupos g ON g.id_grupo = p.grupo_id
         INNER JOIN app.ciclos c ON c.id_ciclo = g.id_ciclo
+        LEFT JOIN app.proyecto_categorias cp
+            ON cp.id_categoria_proyecto = p.categoria_proyecto_id
+        LEFT JOIN app.proyecto_tipos tp
+            ON tp.id_tipo_proyecto = p.tipo_proyecto_id
+           AND tp.categoria_proyecto_id = cp.id_categoria_proyecto
         WHERE p.id_proyecto = :id_proyecto
         LIMIT 1
     ");
@@ -91,9 +100,53 @@ try {
 $nombreTutor = trim((string) ($proyecto['tutor_nom'] ?? ''));
 $nombreCotutor = trim((string) ($proyecto['cotutors_nom'] ?? ''));
 
-$tags = [];
-if (!empty($proyecto['stack'])) {
-    $tags = array_filter(array_map('trim', explode(',', (string)$proyecto['stack'])));
+$tecnologies = [];
+try {
+    $stmtTecnologies = $pdo->prepare("
+        SELECT t.id, t.nombre
+        FROM app.rel_proyectos_tecnologias rpt
+        INNER JOIN app.tecnologias t ON t.id = rpt.tecnologia_id
+        WHERE rpt.proyecto_id = :proyecto_id
+          AND t.activo = true
+          AND t.propuesto_en IS NULL
+        ORDER BY t.nombre, t.id
+    ");
+    $stmtTecnologies->execute([':proyecto_id' => $idProyecto]);
+    $tecnologies = $stmtTecnologies->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $tecnologies = [];
+}
+
+// Herramienta temporal de clasificación histórica para superadmin.
+$edicionClasificacionSuperadmin = esSuperadmin();
+$categoriasClasificacion = [];
+$tiposClasificacionPorCategoria = [];
+
+if ($edicionClasificacionSuperadmin) {
+    try {
+        $stmtCategorias = $pdo->prepare("\n            SELECT id_categoria_proyecto, nombre\n            FROM app.proyecto_categorias\n            WHERE familia_ciclo_id = :familia_id\n              AND (activo = true OR id_categoria_proyecto = :categoria_actual)\n            ORDER BY orden, nombre, id_categoria_proyecto\n        ");
+        $stmtCategorias->execute([
+            ':familia_id' => (int) $proyecto['proyecto_familia_ciclo_id'],
+            ':categoria_actual' => (int) ($proyecto['categoria_proyecto_id'] ?? 0),
+        ]);
+        $categoriasClasificacion = $stmtCategorias->fetchAll(PDO::FETCH_ASSOC);
+
+        $stmtTipos = $pdo->prepare("\n            SELECT pt.id_tipo_proyecto, pt.nombre, pt.categoria_proyecto_id\n            FROM app.proyecto_tipos pt\n            INNER JOIN app.proyecto_categorias pc\n                ON pc.id_categoria_proyecto = pt.categoria_proyecto_id\n            WHERE pc.familia_ciclo_id = :familia_id\n              AND (pt.activo = true OR pt.id_tipo_proyecto = :tipo_actual)\n            ORDER BY pt.categoria_proyecto_id, pt.orden, pt.nombre, pt.id_tipo_proyecto\n        ");
+        $stmtTipos->execute([
+            ':familia_id' => (int) $proyecto['proyecto_familia_ciclo_id'],
+            ':tipo_actual' => (int) ($proyecto['tipo_proyecto_id'] ?? 0),
+        ]);
+        foreach ($stmtTipos->fetchAll(PDO::FETCH_ASSOC) as $tipoClasificacion) {
+            $categoriaTipoId = (int) $tipoClasificacion['categoria_proyecto_id'];
+            $tiposClasificacionPorCategoria[$categoriaTipoId][] = [
+                'id' => (int) $tipoClasificacion['id_tipo_proyecto'],
+                'nombre' => (string) $tipoClasificacion['nombre'],
+            ];
+        }
+    } catch (PDOException $e) {
+        $categoriasClasificacion = [];
+        $tiposClasificacionPorCategoria = [];
+    }
 }
 
 $rutaImagen = absolutizePath($proyecto['ruta_imagen'] ?? '');
@@ -117,6 +170,113 @@ $adjuntsArxiu        = array_filter($adjuntos, fn($a) => $a['tipo'] === 'arxiu')
 $adjuntsEnllac       = array_filter($adjuntos, fn($a) => $a['tipo'] === 'enllac');
 $adjuntsPlanificacio = array_filter($adjuntos, fn($a) => $a['tipo'] === 'planificacio');
 $adjuntsGestio       = array_filter($adjuntos, fn($a) => $a['tipo'] === 'gestio');
+
+$projectesRelacionats = [];
+try {
+    $sqlRelacionats = "
+        WITH candidats AS (
+            SELECT
+                candidat.id_proyecto,
+                (
+                    COALESCE(candidat.tipo_proyecto_id = :tipo_actual, false)
+                    OR EXISTS (
+                        SELECT 1
+                        FROM app.rel_proyectos_tecnologias tecnologia_actual
+                        INNER JOIN app.rel_proyectos_tecnologias tecnologia_candidat
+                            ON tecnologia_candidat.tecnologia_id = tecnologia_actual.tecnologia_id
+                           AND tecnologia_candidat.proyecto_id = candidat.id_proyecto
+                        INNER JOIN app.tecnologias tecnologia
+                            ON tecnologia.id = tecnologia_actual.tecnologia_id
+                           AND tecnologia.activo = true
+                           AND tecnologia.propuesto_en IS NULL
+                        WHERE tecnologia_actual.proyecto_id = :proyecto_tecnologias
+                    )
+                ) AS relacionat,
+                random() AS ordre_aleatori
+            FROM app.proyectos candidat
+            INNER JOIN app.grupos grup_candidat
+                ON grup_candidat.id_grupo = candidat.grupo_id
+            INNER JOIN app.ciclos cicle_candidat
+                ON cicle_candidat.id_ciclo = grup_candidat.id_ciclo
+            WHERE candidat.id_proyecto <> :proyecto_excluido
+              AND " . projectesPublicsCondicioSql('candidat') . "
+            ORDER BY relacionat DESC, ordre_aleatori
+            LIMIT 3
+        )
+        SELECT
+            p.id_proyecto,
+            p.uuid,
+            p.nombre,
+            p.resumen,
+            p.ruta_imagen,
+            p.curso_academico,
+            c.abr AS ciclo,
+            g.grupo,
+            string_agg(
+                a.nombre || ' ' || a.apellidos,
+                '||' ORDER BY a.apellidos, a.nombre
+            ) AS alumnos,
+            candidats.relacionat,
+            candidats.ordre_aleatori
+        FROM candidats
+        INNER JOIN app.proyectos p
+            ON p.id_proyecto = candidats.id_proyecto
+        INNER JOIN app.grupos g
+            ON g.id_grupo = p.grupo_id
+        INNER JOIN app.ciclos c
+            ON c.id_ciclo = g.id_ciclo
+        LEFT JOIN app.rel_proyectos_alumnos rpa
+            ON rpa.proyecto_id = p.id_proyecto
+        LEFT JOIN app.alumnos a
+            ON a.id_alumno = rpa.alumno_id
+        GROUP BY
+            p.id_proyecto,
+            p.uuid,
+            p.nombre,
+            p.resumen,
+            p.ruta_imagen,
+            p.curso_academico,
+            c.abr,
+            g.grupo,
+            candidats.relacionat,
+            candidats.ordre_aleatori
+        ORDER BY candidats.relacionat DESC, candidats.ordre_aleatori
+    ";
+    $stmtRelacionats = $pdo->prepare($sqlRelacionats);
+    $stmtRelacionats->execute(array_merge(
+        [
+            ':tipo_actual' => $proyecto['tipo_proyecto_id'] !== null
+                ? (int) $proyecto['tipo_proyecto_id']
+                : null,
+            ':proyecto_tecnologias' => (int) $proyecto['id_proyecto'],
+            ':proyecto_excluido' => (int) $proyecto['id_proyecto'],
+        ],
+        projectesPublicsParametres()
+    ));
+    $projectesRelacionats = $stmtRelacionats->fetchAll(PDO::FETCH_ASSOC);
+
+    foreach ($projectesRelacionats as &$projecteRelacionat) {
+        $projecteRelacionat['alumnos_array'] = !empty($projecteRelacionat['alumnos'])
+            ? explode('||', (string) $projecteRelacionat['alumnos'])
+            : [];
+
+        $rutaImatgeRelacionada = trim((string) ($projecteRelacionat['ruta_imagen'] ?? ''));
+        if ($rutaImatgeRelacionada === '') {
+            $projecteRelacionat['ruta_imagen_absoluta'] = '';
+        } elseif (
+            str_starts_with($rutaImatgeRelacionada, '/')
+            || str_starts_with($rutaImatgeRelacionada, 'http://')
+            || str_starts_with($rutaImatgeRelacionada, 'https://')
+        ) {
+            $projecteRelacionat['ruta_imagen_absoluta'] = $rutaImatgeRelacionada;
+        } else {
+            $projecteRelacionat['ruta_imagen_absoluta'] = '/' . ltrim($rutaImatgeRelacionada, '/');
+        }
+    }
+    unset($projecteRelacionat);
+} catch (PDOException $e) {
+    $projectesRelacionats = [];
+}
 ?>
 
 <script>
@@ -390,24 +550,115 @@ window.PAGE_TITLE = '<?= h($proyecto['nombre'] ?? '') ?> | <?= h($proyecto['cicl
                             </div>
                         </div>
 
+                        <?php if (!empty($proyecto['categoria_proyecto_nombre']) || $edicionClasificacionSuperadmin): ?>
+                        <div class="mb-50">
+                            <h3 class="h3fichas">Tipus de projecte</h3>
+                            <?php if (!empty($proyecto['categoria_proyecto_nombre'])): ?>
+                            <div class="inner-ficha fitxa-publica-classificacio<?= $edicionClasificacionSuperadmin ? ' mb-3' : '' ?>">
+                                <a href="/projectes/categoria/<?= (int) $proyecto['categoria_proyecto_id'] ?>">
+                                    <?= h($proyecto['categoria_proyecto_nombre']) ?>
+                                </a>
+                                <?php if (!empty($proyecto['tipo_proyecto_nombre'])): ?>
+                                    <span class="fitxa-publica-classificacio-separador" aria-hidden="true">›</span>
+                                    <a href="/projectes/tipus/<?= (int) $proyecto['tipo_proyecto_id'] ?>">
+                                        <?= h($proyecto['tipo_proyecto_nombre']) ?>
+                                    </a>
+                                <?php endif; ?>
+                            </div>
+                            <?php endif; ?>
+
+                            <?php if ($edicionClasificacionSuperadmin && $categoriasClasificacion !== []): ?>
+                            <form
+                                id="classificacio-historica-form"
+                                method="post"
+                                action="/index.php?main=ficha-clasificacion-accion"
+                                class="small text-muted"
+                            >
+                                <input type="hidden" name="csrf_token" value="<?= h(tokenCsrf()) ?>">
+                                <input type="hidden" name="id_proyecto" value="<?= (int) $proyecto['id_proyecto'] ?>">
+                                <div class="mb-2">Edició ràpida · superadmin</div>
+                                <div class="row g-2 align-items-end">
+                                    <div class="col-sm-6">
+                                        <label for="classificacio-categoria" class="form-label mb-1">Categoria</label>
+                                        <select
+                                            id="classificacio-categoria"
+                                            name="categoria_proyecto_id"
+                                            class="form-select form-select-sm"
+                                            required
+                                        >
+                                            <?php foreach ($categoriasClasificacion as $categoriaClasificacion): ?>
+                                                <option
+                                                    value="<?= (int) $categoriaClasificacion['id_categoria_proyecto'] ?>"
+                                                    <?= (int) ($proyecto['categoria_proyecto_id'] ?? 0) === (int) $categoriaClasificacion['id_categoria_proyecto'] ? 'selected' : '' ?>
+                                                ><?= h($categoriaClasificacion['nombre']) ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <label for="classificacio-tipus" class="form-label mb-1">Tipus</label>
+                                        <select
+                                            id="classificacio-tipus"
+                                            name="tipo_proyecto_id"
+                                            class="form-select form-select-sm"
+                                        ></select>
+                                    </div>
+                                </div>
+                            </form>
+                            <script>
+                            (() => {
+                                const form = document.getElementById('classificacio-historica-form');
+                                const categoria = document.getElementById('classificacio-categoria');
+                                const tipus = document.getElementById('classificacio-tipus');
+                                const tipusPerCategoria = <?= json_encode($tiposClasificacionPorCategoria, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+                                const tipusActual = <?= (int) ($proyecto['tipo_proyecto_id'] ?? 0) ?>;
+
+                                const carregarTipus = (seleccionarActual) => {
+                                    const opcions = tipusPerCategoria[categoria.value] || [];
+                                    tipus.replaceChildren();
+
+                                    if (opcions.length === 0) {
+                                        tipus.disabled = true;
+                                        return false;
+                                    }
+
+                                    tipus.disabled = false;
+                                    tipus.add(new Option('Selecciona un tipus', ''));
+                                    opcions.forEach((opcio) => {
+                                        const option = new Option(opcio.nombre, String(opcio.id));
+                                        option.selected = seleccionarActual && opcio.id === tipusActual;
+                                        tipus.add(option);
+                                    });
+                                    return true;
+                                };
+
+                                carregarTipus(true);
+
+                                categoria.addEventListener('change', () => {
+                                    if (!carregarTipus(false)) {
+                                        form.requestSubmit();
+                                    }
+                                });
+
+                                tipus.addEventListener('change', () => {
+                                    if (tipus.value !== '') {
+                                        form.requestSubmit();
+                                    }
+                                });
+                            })();
+                            </script>
+                            <?php endif; ?>
+                        </div>
+                        <?php endif; ?>
+
                         <div class="mb-50">
                             <h3 class="h3fichas">Tecnologies</h3>
                             <div class="inner-ficha">
                                 <div class="d-flex flex-wrap gap-2">
-                                    <?php foreach ($tags as $tag): ?>
-                                        <span
-                                            style="
-                                            display:inline-block;
-                                            padding: 0.45rem 0.8rem;
-                                            border-radius: 999px;
-                                            background: #e9e9e9;
-                                            color: #555;
-                                            font-size: .92rem;
-                                            font-weight: 500;
-                                            "
-                                        >
-                                            <?= h($tag) ?>
-                                        </span>
+                                    <?php foreach ($tecnologies as $tecnologia): ?>
+                                        <a
+                                            href="/tecnologies/<?= (int) $tecnologia['id'] ?>"
+                                            class="fitxa-publica-tecnologia-pill"
+                                        ><?= h($tecnologia['nombre']) ?></a>
                                     <?php endforeach; ?>
                                 </div>
                             </div>
@@ -604,6 +855,19 @@ window.PAGE_TITLE = '<?= h($proyecto['nombre'] ?? '') ?> | <?= h($proyecto['cicl
 
             </div>
         </div>
+
+        <?php if ($projectesRelacionats !== []): ?>
+        <section class="projectes-grup-section mt-5 mb-5" aria-labelledby="projectes-relacionats-titol">
+            <div class="projectes-grup-header mb-3">
+                <h2 id="projectes-relacionats-titol" class="projectes-grup-title mb-0">Projectes relacionats</h2>
+            </div>
+            <div class="row g-5">
+                <?php foreach ($projectesRelacionats as $projecte): ?>
+                    <?php require __DIR__ . '/_projecte-card.php'; ?>
+                <?php endforeach; ?>
+            </div>
+        </section>
+        <?php endif; ?>
 
 
 

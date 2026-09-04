@@ -11,6 +11,10 @@ RewriteCond %{REQUEST_FILENAME} !-d
 # LISTADO DE PROYECTOS POR CICLO
 RewriteRule ^inici$ /index.php?main=main [L,QSA]
 RewriteRule ^projectes/([A-Za-z0-9_-]+)$ /index.php?main=llistat-projectes&cicle=$1 [L,QSA]
+RewriteRule ^projectes/categoria/([0-9]+)$ /index.php?main=llistat-classificacio&classificacio=categoria&id=$1 [L,QSA]
+RewriteRule ^projectes/tipus/([0-9]+)$ /index.php?main=llistat-classificacio&classificacio=tipus&id=$1 [L,QSA]
+RewriteRule ^tecnologies/?$ /index.php?main=llistat-tecnologies [L,QSA]
+RewriteRule ^tecnologies/([0-9]+)$ /index.php?main=llistat-tecnologies&tecnologia_id=$1 [L,QSA]
 
 # NOTES FINALS DEL PROFESSORAT
 RewriteRule ^notes-finals$ /index.php?main=notes-finals [L,QSA]

@@ -1,5 +1,6 @@
 <?php
 // Catálogo público de proyectos del ciclo solicitado.
+require_once __DIR__ . '/projectes-publics_funcions.php';
 
 $cicles_valids = ['SMX', 'DAM', 'DAW', 'ASIX', 'DEV'];
 
@@ -28,6 +29,7 @@ $sql = "
     LEFT JOIN app.alumnos a
         ON a.id_alumno = rpa.alumno_id
     WHERE c.abr = :ciclo
+      AND " . projectesPublicsCondicioSql('p') . "
     GROUP BY
         p.id_proyecto,
         p.uuid,
@@ -43,9 +45,10 @@ $sql = "
 ";
 
 $stmt = $pdo->prepare($sql);
-$stmt->execute([
-    ':ciclo' => $cicle
-]);
+$stmt->execute(array_merge(
+    [':ciclo' => $cicle],
+    projectesPublicsParametres()
+));
 
 $projectes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -128,71 +131,7 @@ window.PAGE_TITLE = '<?= htmlspecialchars($cicle) ?>';
 
                 <div class="row g-5">
                     <?php foreach ($projectes_grup as $projecte): ?>
-
-                        <div class="col-12 col-md-6 col-xl-4">
-
-                            <a
-                                href="/projecte/<?= (int)$projecte['id_proyecto'] ?>"
-                                class="project-card-link"
-                            >
-
-                                <article class="project-card">
-
-                                    <?php if (!empty($projecte['ruta_imagen_absoluta'])): ?>
-                                        <img
-                                            src="<?= htmlspecialchars((string)$projecte['ruta_imagen_absoluta']) ?>"
-                                            alt="<?= htmlspecialchars((string)$projecte['nombre']) ?>"
-                                            class="project-card-image"
-                                        >
-                                    <?php else: ?>
-                                        <div class="project-card-image project-card-image-placeholder">
-                                            Sense imatge
-                                        </div>
-                                    <?php endif; ?>
-
-                                    <div class="project-card-body">
-
-                                        <div class="project-card-meta mb-2">
-                                            <span><?= htmlspecialchars((string)$projecte['ciclo']) ?></span>
-                                            <span class="project-meta-separator">·</span>
-                                            <span><?= htmlspecialchars((string)$projecte['grupo']) ?></span>
-                                            <span class="project-meta-separator">·</span>
-                                            <span><?= htmlspecialchars((string)$projecte['curso_academico']) ?></span>
-                                        </div>
-
-                                        <h2 class="project-card-title">
-                                            <?= htmlspecialchars((string)$projecte['nombre']) ?>
-                                        </h2>
-
-                                        <?php if (!empty($projecte['resumen'])): ?>
-                                            <p class="project-card-summary">
-                                                <?= htmlspecialchars((string)$projecte['resumen']) ?>
-                                            </p>
-                                        <?php endif; ?>
-
-                                        <div class="project-card-alumnes">
-
-                                            <?php if (!empty($projecte['alumnos_array'])): ?>
-                                                <div class="project-card-students">
-                                                    <?php foreach ($projecte['alumnos_array'] as $alumne): ?>
-                                                        <span class="project-student-badge">
-                                                            <?= htmlspecialchars(trim((string)$alumne)) ?>
-                                                        </span>
-                                                    <?php endforeach; ?>
-                                                </div>
-                                            <?php else: ?>
-                                                <div class="text-muted small">Sense alumnat assignat</div>
-                                            <?php endif; ?>
-                                        </div>
-
-                                    </div>
-
-                                </article>
-
-                            </a>
-
-                        </div>
-
+                        <?php require __DIR__ . '/_projecte-card.php'; ?>
                     <?php endforeach; ?>
                 </div>
 

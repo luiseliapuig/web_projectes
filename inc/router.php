@@ -15,8 +15,22 @@ $rutasMigradas = [
         'archivo' => __DIR__ . '/paginas/public/llistat-projectes.php',
         'area' => 'public',
     ],
+    'llistat-tecnologies' => [
+        'archivo' => __DIR__ . '/paginas/public/llistat-tecnologies.php',
+        'area' => 'public',
+    ],
+    'llistat-classificacio' => [
+        'archivo' => __DIR__ . '/paginas/public/llistat-classificacio.php',
+        'area' => 'public',
+    ],
     'ficha' => [
         'archivo' => __DIR__ . '/paginas/public/ficha.php',
+        'area' => 'public',
+    ],
+    // Herramienta temporal de clasificación histórica: la acción aplica
+    // soloSuperadmin() antes de procesar cualquier dato.
+    'ficha-clasificacion-accion' => [
+        'archivo' => __DIR__ . '/paginas/admin/ficha-clasificacion_accion.php',
         'area' => 'public',
     ],
     // Autenticación: pantallas y acciones públicas agrupadas bajo un único flujo.
