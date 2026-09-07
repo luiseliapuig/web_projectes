@@ -5,38 +5,7 @@ require_once __DIR__ . '/projectes-publics_funcions.php';
 
 $sql = "
     WITH unitats AS (
-        SELECT
-            'tipus'::text AS nivell,
-            tp.id_tipo_proyecto AS unitat_id,
-            tp.nombre AS unitat_nom,
-            cp.id_categoria_proyecto AS categoria_id,
-            0 AS bloc_ordre,
-            cp.orden AS categoria_ordre,
-            tp.orden AS unitat_ordre
-        FROM app.proyecto_tipos tp
-        INNER JOIN app.proyecto_categorias cp
-            ON cp.id_categoria_proyecto = tp.categoria_proyecto_id
-        WHERE cp.activo = true
-          AND tp.activo = true
-
-        UNION ALL
-
-        SELECT
-            'categoria'::text AS nivell,
-            cp.id_categoria_proyecto AS unitat_id,
-            cp.nombre AS unitat_nom,
-            cp.id_categoria_proyecto AS categoria_id,
-            1 AS bloc_ordre,
-            cp.orden AS categoria_ordre,
-            cp.orden AS unitat_ordre
-        FROM app.proyecto_categorias cp
-        WHERE cp.activo = true
-          AND NOT EXISTS (
-              SELECT 1
-              FROM app.proyecto_tipos tp
-              WHERE tp.categoria_proyecto_id = cp.id_categoria_proyecto
-                AND tp.activo = true
-          )
+        " . projectesPublicsUnitatsSql() . "
     ),
     projectes_base AS (
         SELECT
@@ -48,6 +17,8 @@ $sql = "
             p.curso_academico,
             p.categoria_proyecto_id,
             p.tipo_proyecto_id,
+            cp.nombre AS categoria_proyecto_nombre,
+            tp.nombre AS tipo_proyecto_nombre,
             p.nota_final,
             c.abr AS ciclo,
             g.grupo,
@@ -58,6 +29,11 @@ $sql = "
         FROM app.proyectos p
         INNER JOIN app.grupos g ON g.id_grupo = p.grupo_id
         INNER JOIN app.ciclos c ON c.id_ciclo = g.id_ciclo
+        LEFT JOIN app.proyecto_categorias cp
+            ON cp.id_categoria_proyecto = p.categoria_proyecto_id
+        LEFT JOIN app.proyecto_tipos tp
+            ON tp.id_tipo_proyecto = p.tipo_proyecto_id
+           AND tp.categoria_proyecto_id = p.categoria_proyecto_id
         LEFT JOIN app.rel_proyectos_alumnos rpa
             ON rpa.proyecto_id = p.id_proyecto
         LEFT JOIN app.alumnos a
@@ -72,6 +48,8 @@ $sql = "
             p.curso_academico,
             p.categoria_proyecto_id,
             p.tipo_proyecto_id,
+            cp.nombre,
+            tp.nombre,
             p.nota_final,
             c.abr,
             g.grupo

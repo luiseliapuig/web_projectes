@@ -1,4 +1,4 @@
-<!-- Presentación principal de la zona pública -->
+<!-- Presentació principal de la zona pública -->
 <div class="col-12">
 <section class="home-hero mt-40 mb-40">
 
@@ -7,7 +7,7 @@
         <p class="home-hero__eyebrow">Mòdul de projecte</p>
 
         <h1 class="home-hero__title">
-            Projectes del curs 2025–2026
+            Projectes del curs <?= htmlspecialchars($promocionTitulo, ENT_QUOTES, 'UTF-8') ?>
         </h1>
 
         <p class="home-hero__subtitle">
@@ -15,12 +15,33 @@
         </p>
 
         <p class="home-hero__text">
-            Consulta les fitxes dels projectes, la documentació associada i els enllaços
-            als repositoris, així com la informació clau del seu desenvolupament i defensa.
+            Explora els projectes publicats i accedeix-hi per cicle.
         </p>
 
-        <div class="home-hero__cicles">
-            SMX · DAM · DAW · ASIX · DEV
+        <div class="home-hero__stats">
+            <div class="home-hero__stat home-hero__stat--total">
+                <span class="home-hero__stat-label">Total</span>
+                <strong class="home-hero__stat-value"><?= (int) $total_projectes ?></strong>
+                <span class="home-hero__stat-caption">
+                    <?= (int) $total_projectes === 1 ? 'projecte' : 'projectes' ?>
+                </span>
+            </div>
+
+            <?php foreach ($cicles as $cicle): ?>
+                <a
+                    class="home-hero__stat home-hero__stat--link"
+                    href="/projectes/<?= rawurlencode((string) $cicle['ciclo']) ?>"
+                >
+                    <span class="home-hero__stat-label">
+                        <?= htmlspecialchars((string) $cicle['ciclo'], ENT_QUOTES, 'UTF-8') ?>
+                    </span>
+                    <strong class="home-hero__stat-value"><?= (int) $cicle['total'] ?></strong>
+                    <span class="home-hero__stat-caption">
+                        <?= (int) $cicle['total'] === 1 ? 'projecte' : 'projectes' ?>
+                    </span>
+                    <span class="home-hero__stat-arrow" aria-hidden="true">→</span>
+                </a>
+            <?php endforeach; ?>
         </div>
 
     </div>

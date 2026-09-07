@@ -15,6 +15,11 @@ $sql = "
         p.resumen,
         p.ruta_imagen,
         p.curso_academico,
+        p.categoria_proyecto_id,
+        p.tipo_proyecto_id,
+        cp.nombre AS categoria_proyecto_nombre,
+        tp.nombre AS tipo_proyecto_nombre,
+        p.nota_final,
         c.abr AS ciclo,
         g.grupo,
         string_agg(
@@ -24,6 +29,11 @@ $sql = "
     FROM app.proyectos p
     INNER JOIN app.grupos g ON g.id_grupo = p.grupo_id
     INNER JOIN app.ciclos c ON c.id_ciclo = g.id_ciclo
+    LEFT JOIN app.proyecto_categorias cp
+        ON cp.id_categoria_proyecto = p.categoria_proyecto_id
+    LEFT JOIN app.proyecto_tipos tp
+        ON tp.id_tipo_proyecto = p.tipo_proyecto_id
+       AND tp.categoria_proyecto_id = p.categoria_proyecto_id
     LEFT JOIN app.rel_proyectos_alumnos rpa
         ON rpa.proyecto_id = p.id_proyecto
     LEFT JOIN app.alumnos a
@@ -37,11 +47,18 @@ $sql = "
         p.resumen,
         p.ruta_imagen,
         p.curso_academico,
+        p.categoria_proyecto_id,
+        p.tipo_proyecto_id,
+        cp.nombre,
+        tp.nombre,
+        p.nota_final,
         c.abr,
         g.grupo
     ORDER BY
+        p.nota_final DESC NULLS LAST,
         g.grupo ASC,
-        p.nombre ASC
+        p.nombre ASC,
+        p.id_proyecto ASC
 ";
 
 $stmt = $pdo->prepare($sql);

@@ -1,12 +1,23 @@
 <?php
 // Targeta compartida pels catàlegs públics de projectes.
+$classificacioNom = trim((string) ($projecte['tipo_proyecto_nombre'] ?? ''));
+$classificacioUrl = null;
+
+if ($classificacioNom !== '' && !empty($projecte['tipo_proyecto_id'])) {
+    $classificacioUrl = '/projectes/tipus/' . (int) $projecte['tipo_proyecto_id'];
+} else {
+    $classificacioNom = trim((string) ($projecte['categoria_proyecto_nombre'] ?? ''));
+    if ($classificacioNom !== '' && !empty($projecte['categoria_proyecto_id'])) {
+        $classificacioUrl = '/projectes/categoria/' . (int) $projecte['categoria_proyecto_id'];
+    }
+}
 ?>
 <div class="col-12 col-md-6 col-xl-4">
+    <article class="project-card<?= $classificacioUrl !== null ? ' project-card--classified' : '' ?>">
     <a
         href="/projecte/<?= (int) $projecte['id_proyecto'] ?>"
         class="project-card-link"
     >
-        <article class="project-card">
             <?php if (!empty($projecte['ruta_imagen_absoluta'])): ?>
                 <img
                     src="<?= htmlspecialchars((string) $projecte['ruta_imagen_absoluta'], ENT_QUOTES, 'UTF-8') ?>"
@@ -38,20 +49,16 @@
                     </p>
                 <?php endif; ?>
 
-                <div class="project-card-alumnes">
-                    <?php if (!empty($projecte['alumnos_array'])): ?>
-                        <div class="project-card-students">
-                            <?php foreach ($projecte['alumnos_array'] as $alumne): ?>
-                                <span class="project-student-badge">
-                                    <?= htmlspecialchars(trim((string) $alumne), ENT_QUOTES, 'UTF-8') ?>
-                                </span>
-                            <?php endforeach; ?>
-                        </div>
-                    <?php else: ?>
-                        <div class="text-muted small">Sense alumnat assignat</div>
-                    <?php endif; ?>
-                </div>
             </div>
-        </article>
     </a>
+
+    <?php if ($classificacioUrl !== null): ?>
+        <div class="project-card-classification">
+            <a class="project-classification-pill"
+               href="<?= htmlspecialchars($classificacioUrl, ENT_QUOTES, 'UTF-8') ?>">
+                <?= htmlspecialchars($classificacioNom, ENT_QUOTES, 'UTF-8') ?>
+            </a>
+        </div>
+    <?php endif; ?>
+    </article>
 </div>

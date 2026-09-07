@@ -2,51 +2,10 @@
 // Catàleg públic de projectes filtrat pel model normalitzat de tecnologies.
 require_once __DIR__ . '/projectes-publics_funcions.php';
 
-$condicioProjectePublic = projectesPublicsCondicioSql('p');
 $parametresProjectesPublics = projectesPublicsParametres();
-
-$stmt = $pdo->prepare(
-    'SELECT
-         t.id,
-         t.nombre,
-         t.descripcion,
-         COUNT(DISTINCT CASE
-             WHEN g.id_grupo IS NOT NULL
-              AND c.id_ciclo IS NOT NULL
-              AND ' . $condicioProjectePublic . '
-             THEN p.id_proyecto
-         END) AS projectes_publics
-     FROM app.tecnologias t
-     LEFT JOIN app.rel_proyectos_tecnologias rpt
-         ON rpt.tecnologia_id = t.id
-     LEFT JOIN app.proyectos p
-         ON p.id_proyecto = rpt.proyecto_id
-     LEFT JOIN app.grupos g
-         ON g.id_grupo = p.grupo_id
-     LEFT JOIN app.ciclos c
-         ON c.id_ciclo = g.id_ciclo
-     WHERE t.activo = true
-       AND t.propuesto_en IS NULL
-     GROUP BY t.id, t.nombre, t.descripcion
-     ORDER BY t.nombre, t.id'
-);
-$stmt->execute($parametresProjectesPublics);
-$tecnologies = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-$tecnologiesDestacades = $tecnologies;
-usort(
-    $tecnologiesDestacades,
-    static function (array $a, array $b): int {
-        $perProjectes = (int) $b['projectes_publics'] <=> (int) $a['projectes_publics'];
-        if ($perProjectes !== 0) {
-            return $perProjectes;
-        }
-
-        $perNom = strnatcasecmp((string) $a['nombre'], (string) $b['nombre']);
-        return $perNom !== 0 ? $perNom : (int) $a['id'] <=> (int) $b['id'];
-    }
-);
-$tecnologiesDestacades = array_slice($tecnologiesDestacades, 0, 10);
+$condicioProjectePublic = projectesPublicsCondicioSql('p');
+$tecnologies = projectesPublicsTecnologies($pdo);
+$tecnologiesDestacades = projectesPublicsTecnologiesDestacades($tecnologies);
 
 $tecnologiaIdDemanada = filter_input(INPUT_GET, 'tecnologia_id', FILTER_VALIDATE_INT);
 $tecnologiaActiva = null;
@@ -79,6 +38,11 @@ if ($tecnologiaActiva !== null) {
             p.resumen,
             p.ruta_imagen,
             p.curso_academico,
+            p.categoria_proyecto_id,
+            p.tipo_proyecto_id,
+            cp.nombre AS categoria_proyecto_nombre,
+            tp.nombre AS tipo_proyecto_nombre,
+            p.nota_final,
             c.abr AS ciclo,
             g.grupo,
             string_agg(
@@ -90,6 +54,11 @@ if ($tecnologiaActiva !== null) {
             ON rpt.proyecto_id = p.id_proyecto
         INNER JOIN app.grupos g ON g.id_grupo = p.grupo_id
         INNER JOIN app.ciclos c ON c.id_ciclo = g.id_ciclo
+        LEFT JOIN app.proyecto_categorias cp
+            ON cp.id_categoria_proyecto = p.categoria_proyecto_id
+        LEFT JOIN app.proyecto_tipos tp
+            ON tp.id_tipo_proyecto = p.tipo_proyecto_id
+           AND tp.categoria_proyecto_id = p.categoria_proyecto_id
         LEFT JOIN app.rel_proyectos_alumnos rpa
             ON rpa.proyecto_id = p.id_proyecto
         LEFT JOIN app.alumnos a
@@ -103,9 +72,17 @@ if ($tecnologiaActiva !== null) {
             p.resumen,
             p.ruta_imagen,
             p.curso_academico,
+            p.categoria_proyecto_id,
+            p.tipo_proyecto_id,
+            cp.nombre,
+            tp.nombre,
+            p.nota_final,
             c.abr,
             g.grupo
-        ORDER BY p.nombre ASC
+        ORDER BY
+            p.nota_final DESC NULLS LAST,
+            p.nombre ASC,
+            p.id_proyecto ASC
     ';
 
     $stmt = $pdo->prepare($sql);
