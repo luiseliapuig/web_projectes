@@ -2,7 +2,7 @@
 // Catálogo público de proyectos del ciclo solicitado.
 require_once __DIR__ . '/projectes-publics_funcions.php';
 
-$cicles_valids = ['SMX', 'DAM', 'DAW', 'ASIX', 'DEV'];
+$cicles_valids = projectesPublicsCicles();
 
 $cicle = $_GET['cicle'] ?? 'DAM';
 $cicle = in_array($cicle, $cicles_valids, true) ? $cicle : 'DAM';
@@ -124,18 +124,8 @@ window.PAGE_TITLE = '<?= htmlspecialchars($cicle) ?>';
         </p>
     </div>
 
-    <div class="projectes-filter mb-4">
-        <div class="d-flex flex-wrap gap-2">
-            <?php foreach ($cicles_valids as $item_cicle): ?>
-                <a
-                    href="/projectes/<?= urlencode($item_cicle) ?>"
-                    class="projectes-filter-pill <?= $item_cicle === $cicle ? 'active' : '' ?>"
-                >
-                    <?= htmlspecialchars($item_cicle) ?>
-                </a>
-            <?php endforeach; ?>
-        </div>
-    </div>
+    <?php $cicleActiu = $cicle; ?>
+    <?php require __DIR__ . '/_projectes-cicles.php'; ?>
 
     <?php if (!empty($projectes_per_grup)): ?>
 

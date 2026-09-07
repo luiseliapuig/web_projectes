@@ -31,12 +31,6 @@ $rutasMigradas = [
         'archivo' => __DIR__ . '/paginas/public/ficha.php',
         'area' => 'public',
     ],
-    // Herramienta temporal de clasificación histórica: la acción aplica
-    // soloSuperadmin() antes de procesar cualquier dato.
-    'ficha-clasificacion-accion' => [
-        'archivo' => __DIR__ . '/paginas/admin/ficha-clasificacion_accion.php',
-        'area' => 'public',
-    ],
     // Autenticación: pantallas y acciones públicas agrupadas bajo un único flujo.
     'login' => [
         'archivo' => __DIR__ . '/paginas/public/login/login.php',

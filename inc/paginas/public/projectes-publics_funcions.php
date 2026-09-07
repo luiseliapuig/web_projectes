@@ -1,6 +1,11 @@
 <?php
 declare(strict_types=1);
 
+function projectesPublicsCicles(): array
+{
+    return ['SMX', 'DAM', 'DAW', 'ASIX', 'DEV'];
+}
+
 /**
  * Condició SQL canònica dels llistats públics de projectes.
  *

@@ -134,6 +134,9 @@ window.PAGE_TITLE = 'Projectes';
         </p>
     </div>
 
+    <?php $cicleActiu = null; ?>
+    <?php require __DIR__ . '/_projectes-cicles.php'; ?>
+
     <?php foreach ($seccions as $seccio): ?>
         <section class="projectes-grup-section mb-5">
             <div class="projectes-grup-header d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">

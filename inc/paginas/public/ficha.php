@@ -40,7 +40,6 @@ try {
         SELECT
             p.*,
             c.abr AS ciclo,
-            c.familia_ciclo_id AS proyecto_familia_ciclo_id,
             g.grupo AS grupo,
             cp.nombre AS categoria_proyecto_nombre,
             tp.nombre AS tipo_proyecto_nombre,
@@ -115,38 +114,6 @@ try {
     $tecnologies = $stmtTecnologies->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     $tecnologies = [];
-}
-
-// Herramienta temporal de clasificación histórica para superadmin.
-$edicionClasificacionSuperadmin = esSuperadmin();
-$categoriasClasificacion = [];
-$tiposClasificacionPorCategoria = [];
-
-if ($edicionClasificacionSuperadmin) {
-    try {
-        $stmtCategorias = $pdo->prepare("\n            SELECT id_categoria_proyecto, nombre\n            FROM app.proyecto_categorias\n            WHERE familia_ciclo_id = :familia_id\n              AND (activo = true OR id_categoria_proyecto = :categoria_actual)\n            ORDER BY orden, nombre, id_categoria_proyecto\n        ");
-        $stmtCategorias->execute([
-            ':familia_id' => (int) $proyecto['proyecto_familia_ciclo_id'],
-            ':categoria_actual' => (int) ($proyecto['categoria_proyecto_id'] ?? 0),
-        ]);
-        $categoriasClasificacion = $stmtCategorias->fetchAll(PDO::FETCH_ASSOC);
-
-        $stmtTipos = $pdo->prepare("\n            SELECT pt.id_tipo_proyecto, pt.nombre, pt.categoria_proyecto_id\n            FROM app.proyecto_tipos pt\n            INNER JOIN app.proyecto_categorias pc\n                ON pc.id_categoria_proyecto = pt.categoria_proyecto_id\n            WHERE pc.familia_ciclo_id = :familia_id\n              AND (pt.activo = true OR pt.id_tipo_proyecto = :tipo_actual)\n            ORDER BY pt.categoria_proyecto_id, pt.orden, pt.nombre, pt.id_tipo_proyecto\n        ");
-        $stmtTipos->execute([
-            ':familia_id' => (int) $proyecto['proyecto_familia_ciclo_id'],
-            ':tipo_actual' => (int) ($proyecto['tipo_proyecto_id'] ?? 0),
-        ]);
-        foreach ($stmtTipos->fetchAll(PDO::FETCH_ASSOC) as $tipoClasificacion) {
-            $categoriaTipoId = (int) $tipoClasificacion['categoria_proyecto_id'];
-            $tiposClasificacionPorCategoria[$categoriaTipoId][] = [
-                'id' => (int) $tipoClasificacion['id_tipo_proyecto'],
-                'nombre' => (string) $tipoClasificacion['nombre'],
-            ];
-        }
-    } catch (PDOException $e) {
-        $categoriasClasificacion = [];
-        $tiposClasificacionPorCategoria = [];
-    }
 }
 
 $rutaImagen = absolutizePath($proyecto['ruta_imagen'] ?? '');
@@ -563,11 +530,10 @@ window.PAGE_TITLE = '<?= h($proyecto['nombre'] ?? '') ?> | <?= h($proyecto['cicl
                             </div>
                         </div>
 
-                        <?php if (!empty($proyecto['categoria_proyecto_nombre']) || $edicionClasificacionSuperadmin): ?>
+                        <?php if (!empty($proyecto['categoria_proyecto_nombre'])): ?>
                         <div class="mb-50">
                             <h3 class="h3fichas">Tipus de projecte</h3>
-                            <?php if (!empty($proyecto['categoria_proyecto_nombre'])): ?>
-                            <div class="inner-ficha fitxa-publica-classificacio<?= $edicionClasificacionSuperadmin ? ' mb-3' : '' ?>">
+                            <div class="inner-ficha fitxa-publica-classificacio">
                                 <a href="/projectes/categoria/<?= (int) $proyecto['categoria_proyecto_id'] ?>">
                                     <?= h($proyecto['categoria_proyecto_nombre']) ?>
                                 </a>
@@ -578,88 +544,6 @@ window.PAGE_TITLE = '<?= h($proyecto['nombre'] ?? '') ?> | <?= h($proyecto['cicl
                                     </a>
                                 <?php endif; ?>
                             </div>
-                            <?php endif; ?>
-
-                            <?php if ($edicionClasificacionSuperadmin && $categoriasClasificacion !== []): ?>
-                            <form
-                                id="classificacio-historica-form"
-                                method="post"
-                                action="/index.php?main=ficha-clasificacion-accion"
-                                class="small text-muted"
-                            >
-                                <input type="hidden" name="csrf_token" value="<?= h(tokenCsrf()) ?>">
-                                <input type="hidden" name="id_proyecto" value="<?= (int) $proyecto['id_proyecto'] ?>">
-                                <div class="mb-2">Edició ràpida · superadmin</div>
-                                <div class="row g-2 align-items-end">
-                                    <div class="col-sm-6">
-                                        <label for="classificacio-categoria" class="form-label mb-1">Categoria</label>
-                                        <select
-                                            id="classificacio-categoria"
-                                            name="categoria_proyecto_id"
-                                            class="form-select form-select-sm"
-                                            required
-                                        >
-                                            <?php foreach ($categoriasClasificacion as $categoriaClasificacion): ?>
-                                                <option
-                                                    value="<?= (int) $categoriaClasificacion['id_categoria_proyecto'] ?>"
-                                                    <?= (int) ($proyecto['categoria_proyecto_id'] ?? 0) === (int) $categoriaClasificacion['id_categoria_proyecto'] ? 'selected' : '' ?>
-                                                ><?= h($categoriaClasificacion['nombre']) ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                    </div>
-                                    <div class="col-sm-6">
-                                        <label for="classificacio-tipus" class="form-label mb-1">Tipus</label>
-                                        <select
-                                            id="classificacio-tipus"
-                                            name="tipo_proyecto_id"
-                                            class="form-select form-select-sm"
-                                        ></select>
-                                    </div>
-                                </div>
-                            </form>
-                            <script>
-                            (() => {
-                                const form = document.getElementById('classificacio-historica-form');
-                                const categoria = document.getElementById('classificacio-categoria');
-                                const tipus = document.getElementById('classificacio-tipus');
-                                const tipusPerCategoria = <?= json_encode($tiposClasificacionPorCategoria, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
-                                const tipusActual = <?= (int) ($proyecto['tipo_proyecto_id'] ?? 0) ?>;
-
-                                const carregarTipus = (seleccionarActual) => {
-                                    const opcions = tipusPerCategoria[categoria.value] || [];
-                                    tipus.replaceChildren();
-
-                                    if (opcions.length === 0) {
-                                        tipus.disabled = true;
-                                        return false;
-                                    }
-
-                                    tipus.disabled = false;
-                                    tipus.add(new Option('Selecciona un tipus', ''));
-                                    opcions.forEach((opcio) => {
-                                        const option = new Option(opcio.nombre, String(opcio.id));
-                                        option.selected = seleccionarActual && opcio.id === tipusActual;
-                                        tipus.add(option);
-                                    });
-                                    return true;
-                                };
-
-                                carregarTipus(true);
-
-                                categoria.addEventListener('change', () => {
-                                    if (!carregarTipus(false)) {
-                                        form.requestSubmit();
-                                    }
-                                });
-
-                                tipus.addEventListener('change', () => {
-                                    if (tipus.value !== '') {
-                                        form.requestSubmit();
-                                    }
-                                });
-                            })();
-                            </script>
-                            <?php endif; ?>
                         </div>
                         <?php endif; ?>
 
