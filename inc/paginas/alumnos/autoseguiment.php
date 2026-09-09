@@ -303,7 +303,7 @@ unset($_SESSION['alumne_autoseguiment_mensaje'], $_SESSION['alumne_autoseguiment
 
                         <?php if ($objectiuAnterior !== ''): ?>
                             <div class="mb-4">
-                                <p class="form-label fw-semibold mb-2 autoseguiment-apartat-titol">Els has complert?</p>
+                                <p class="form-label fw-semibold mb-2 autoseguiment-apartat-titol">Has assolit els objectius que t’havies proposat per aquesta setmana?</p>
                                 <div class="d-flex flex-wrap gap-2" role="radiogroup" aria-label="Compliment dels objectius de la setmana anterior">
                                     <input type="radio" class="btn-check" name="cumplimiento_objetivo_anterior" id="compliment-si" value="2" <?= (int) ($seguimentActual['cumplimiento_objetivo_anterior'] ?? -1) === 2 ? 'checked' : '' ?>>
                                     <label class="autoseguiment-pill-opcio" for="compliment-si">Sí</label>
