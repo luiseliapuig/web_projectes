@@ -288,6 +288,21 @@ unset($_SESSION['alumne_autoseguiment_mensaje'], $_SESSION['alumne_autoseguiment
                             <div class="mb-4">
                                 <p class="fw-semibold mb-1 autoseguiment-apartat-titol">Objectius de la setmana</p>
                                 <p class="mb-3"><?= nl2br(htmlspecialchars($objectiuAnterior, ENT_QUOTES, 'UTF-8'), false) ?></p>
+                            </div>
+                        <?php endif; ?>
+
+                        <div class="mb-3">
+                            <label for="trabajo_realizado" class="form-label fw-semibold autoseguiment-apartat-titol">Treball realitzat aquesta setmana</label>
+                            <textarea id="trabajo_realizado" name="trabajo_realizado" class="form-control textarea-neutral auto-grow" rows="4" maxlength="4000"><?= htmlspecialchars((string) ($seguimentActual['trabajo_realizado'] ?? ''), ENT_QUOTES, 'UTF-8') ?></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="incidencias" class="form-label fw-semibold autoseguiment-apartat-titol">Incidències</label>
+                            <textarea id="incidencias" name="incidencias" class="form-control textarea-neutral auto-grow" rows="3" maxlength="4000"><?= htmlspecialchars((string) ($seguimentActual['incidencias'] ?? ''), ENT_QUOTES, 'UTF-8') ?></textarea>
+                        </div>
+
+                        <?php if ($objectiuAnterior !== ''): ?>
+                            <div class="mb-4">
                                 <p class="form-label fw-semibold mb-2 autoseguiment-apartat-titol">Els has complert?</p>
                                 <div class="d-flex flex-wrap gap-2" role="radiogroup" aria-label="Compliment dels objectius de la setmana anterior">
                                     <input type="radio" class="btn-check" name="cumplimiento_objetivo_anterior" id="compliment-si" value="2" <?= (int) ($seguimentActual['cumplimiento_objetivo_anterior'] ?? -1) === 2 ? 'checked' : '' ?>>
@@ -301,16 +316,6 @@ unset($_SESSION['alumne_autoseguiment_mensaje'], $_SESSION['alumne_autoseguiment
                                 </div>
                             </div>
                         <?php endif; ?>
-
-                        <div class="mb-3">
-                            <label for="trabajo_realizado" class="form-label fw-semibold autoseguiment-apartat-titol">Treball realitzat aquesta setmana</label>
-                            <textarea id="trabajo_realizado" name="trabajo_realizado" class="form-control textarea-neutral auto-grow" rows="4" maxlength="4000"><?= htmlspecialchars((string) ($seguimentActual['trabajo_realizado'] ?? ''), ENT_QUOTES, 'UTF-8') ?></textarea>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="incidencias" class="form-label fw-semibold autoseguiment-apartat-titol">Incidències</label>
-                            <textarea id="incidencias" name="incidencias" class="form-control textarea-neutral auto-grow" rows="3" maxlength="4000"><?= htmlspecialchars((string) ($seguimentActual['incidencias'] ?? ''), ENT_QUOTES, 'UTF-8') ?></textarea>
-                        </div>
 
                         <div class="mb-4">
                             <label for="objetivo_siguiente" class="form-label fw-semibold autoseguiment-apartat-titol">Objectius per a la setmana següent</label>
