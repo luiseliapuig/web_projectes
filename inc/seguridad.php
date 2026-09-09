@@ -83,6 +83,37 @@ function esSuProyectoAlumno(int $idProjecte): bool
     return $cache[$key];
 }
 
+function esProyectoOperativoAlumno(int $idProjecte): bool
+{
+    if ($idProjecte <= 0 || !esAlumno()) {
+        return false;
+    }
+
+    global $pdo;
+    if (!$pdo instanceof PDO) {
+        return false;
+    }
+
+    $alumnoId = (int) $_SESSION['alumno_id'];
+    $stmt = $pdo->prepare(
+        "SELECT 1
+         FROM app.rel_proyectos_alumnos rpa
+         INNER JOIN app.proyectos p ON p.id_proyecto = rpa.proyecto_id
+         WHERE rpa.alumno_id = :alumno_id
+           AND rpa.proyecto_id = :proyecto_id
+           AND p.estado = 'activo'
+           AND p.curso_academico = :curso_academico
+         LIMIT 1"
+    );
+    $stmt->execute([
+        ':alumno_id' => $alumnoId,
+        ':proyecto_id' => $idProjecte,
+        ':curso_academico' => cursoAcademicoActual(),
+    ]);
+
+    return (bool) $stmt->fetchColumn();
+}
+
 function esTutorDelProyecto(int $idProjecte): bool
 {
     if ($idProjecte <= 0 || !esProfesor()) {

@@ -68,7 +68,21 @@ $sql = "
            rag.curso_academico, g.id_grupo, g.grupo, c.id_ciclo,
            c.abr AS ciclo, c.color, c.orden,
            CASE WHEN a.activo=true AND (a.password_hash IS NULL OR a.password_hash='') THEN 1 ELSE 0 END AS pendiente_invitacion,
-           (SELECT COUNT(*) FROM app.rel_proyectos_alumnos rpa WHERE rpa.alumno_id=a.id_alumno) AS proyectos
+           (SELECT COUNT(*) FROM app.rel_proyectos_alumnos rpa WHERE rpa.alumno_id=a.id_alumno) AS proyectos,
+           (SELECT NULLIF(BTRIM(p.nombre), '')
+              FROM app.rel_proyectos_alumnos rpa
+              INNER JOIN app.proyectos p ON p.id_proyecto=rpa.proyecto_id
+             WHERE rpa.alumno_id=a.id_alumno
+             ORDER BY p.curso_academico DESC, p.id_proyecto DESC
+             LIMIT 1) AS proyecto_nombre,
+           (SELECT COUNT(*) FROM app.rel_alumnos_grupos rag_total WHERE rag_total.alumno_id=a.id_alumno) AS matriculas,
+           (SELECT STRING_AGG(rag_otro.curso_academico, ', ' ORDER BY rag_otro.curso_academico)
+              FROM app.rel_alumnos_grupos rag_otro
+             WHERE rag_otro.alumno_id=a.id_alumno AND rag_otro.curso_academico<>:curso_otras) AS otros_cursos,
+           (SELECT COUNT(*) FROM app.seguimiento_alumnos sa WHERE sa.alumno_id=a.id_alumno) AS seguimientos,
+           (SELECT COUNT(*) FROM app.seguimiento_alumnos sa WHERE sa.alumno_id=a.id_alumno AND sa.valoracion_tutor IS NOT NULL) AS valoraciones,
+           (SELECT COUNT(*) FROM app.seguimiento_alumnos sa WHERE sa.alumno_id=a.id_alumno AND NULLIF(BTRIM(sa.comentario_tutor), '') IS NOT NULL) AS comentarios,
+           (SELECT COUNT(*) FROM app.ajustes_nota_individual ani WHERE ani.alumno_id=a.id_alumno) AS ajustes
     FROM app.rel_alumnos_grupos rag
     INNER JOIN app.alumnos a ON a.id_alumno=rag.alumno_id
     INNER JOIN app.grupos g ON g.id_grupo=rag.grupo_id
@@ -79,7 +93,7 @@ $sql = "
        AND rpg.profesor_id=:profesor_id
     WHERE rag.curso_academico=:curso
 ";
-$params = [':profesor_id' => $profesorId, ':curso' => $curso];
+$params = [':profesor_id' => $profesorId, ':curso' => $curso, ':curso_otras' => $curso];
 if ($cicloId > 0) {
     $sql .= ' AND c.id_ciclo=:ciclo_id';
     $params[':ciclo_id'] = $cicloId;
@@ -129,7 +143,7 @@ $mensaje = isset($_GET['msg']) && is_string($_GET['msg']) ? $_GET['msg'] : '';
     <?php if (is_string($warning) && $warning !== ''): ?><div class="alert alert-warning" role="alert"><?= htmlspecialchars($warning, ENT_QUOTES, 'UTF-8') ?></div><?php endif; ?>
     <?php if (is_string($notice) && $notice !== ''): ?><div class="alert alert-success" role="alert"><?= htmlspecialchars($notice, ENT_QUOTES, 'UTF-8') ?></div><?php endif; ?>
     <?php if ($mensaje === 'guardat'): ?><div class="alert alert-success" role="alert">Alumne guardat correctament.</div>
-    <?php elseif ($mensaje === 'creat-invitat'): ?><div class="alert alert-success" role="alert">Alumne creat i invitació enviada.</div>
+    <?php elseif ($mensaje === 'desactivat'): ?><div class="alert alert-success" role="alert">Alumne desactivat correctament.</div>
     <?php elseif ($mensaje === 'eliminat'): ?><div class="alert alert-success" role="alert">Alumne eliminat correctament.</div><?php endif; ?>
 
     <form method="get" class="row g-2 align-items-end mb-3" id="alumnat-tutor-filtres">
@@ -168,7 +182,21 @@ $mensaje = isset($_GET['msg']) && is_string($_GET['msg']) ? $_GET['msg'] : '';
                     <td class="text-end pe-4 text-nowrap"><form method="post" action="/index.php?main=alumnat-tutor_accion" class="btn-group btn-group-sm">
                         <a href="/index.php?main=alumnat-tutor_form&amp;id=<?= (int) $alumno['id_alumno'] ?>&amp;curso=<?= rawurlencode($curso) ?>" class="btn btn-outline-primary">Editar</a>
                         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(tokenCsrf(), ENT_QUOTES, 'UTF-8') ?>"><input type="hidden" name="id_alumno" value="<?= (int) $alumno['id_alumno'] ?>"><input type="hidden" name="return_curso" value="<?= htmlspecialchars($curso, ENT_QUOTES, 'UTF-8') ?>">
-                        <button type="submit" name="accio" value="eliminar" class="btn btn-outline-danger" onclick="return confirm('Segur que vols eliminar aquest alumne?')">Borrar</button>
+                        <button
+                            type="button"
+                            class="btn btn-outline-danger obrir-eliminar-alumne"
+                            data-bs-toggle="modal"
+                            data-bs-target="#eliminar-alumne-modal"
+                            data-alumne-id="<?= (int) $alumno['id_alumno'] ?>"
+                            data-alumne-nom="<?= htmlspecialchars(trim($alumno['nombre'] . ' ' . $alumno['apellidos']), ENT_QUOTES, 'UTF-8') ?>"
+                            data-projectes="<?= (int) $alumno['proyectos'] ?>"
+                            data-projecte-nom="<?= htmlspecialchars((string) ($alumno['proyecto_nombre'] ?? ''), ENT_QUOTES, 'UTF-8') ?>"
+                            data-altres-cursos="<?= htmlspecialchars((string) ($alumno['otros_cursos'] ?? ''), ENT_QUOTES, 'UTF-8') ?>"
+                            data-seguiments="<?= (int) $alumno['seguimientos'] ?>"
+                            data-valoracions="<?= (int) $alumno['valoraciones'] ?>"
+                            data-comentaris="<?= (int) $alumno['comentarios'] ?>"
+                            data-ajustos="<?= (int) $alumno['ajustes'] ?>"
+                        >Borrar</button>
                     </form></td>
                 </tr>
             <?php endforeach; endif; ?>
@@ -191,13 +219,13 @@ $mensaje = isset($_GET['msg']) && is_string($_GET['msg']) ? $_GET['msg'] : '';
 
         <div class="modal fade" id="confirmar-invitacions-grup" tabindex="-1" aria-labelledby="confirmar-invitacions-grup-titol" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content border-0 rounded-4 shadow">
-                    <div class="modal-header border-0 px-4 pt-4 pb-2">
+                <div class="modal-content modal-puig">
+                    <div class="modal-header">
                         <div>
-                            <h5 class="modal-title" id="confirmar-invitacions-grup-titol">Enviar invitacions al grup</h5>
+                            <h2 class="modal-title fs-5" id="confirmar-invitacions-grup-titol">Enviar invitacions al grup</h2>
                             <p class="text-muted mb-0 mt-1 small">Confirma l’enviament abans de continuar.</p>
                         </div>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tancar"></button>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Tancar"></button>
                     </div>
                     <div class="modal-body px-4 py-3">
                         <div class="d-flex gap-3 align-items-start">
@@ -207,14 +235,44 @@ $mensaje = isset($_GET['msg']) && is_string($_GET['msg']) ? $_GET['msg'] : '';
                             <p class="mb-0">S’enviarà una invitació a tot l’alumnat actiu del grup que encara no tingui contrasenya.</p>
                         </div>
                     </div>
-                    <div class="modal-footer border-0 px-4 pt-2 pb-4">
-                        <button type="button" class="btn btn-puig px-4" data-bs-dismiss="modal">Cancel·lar</button>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Cancel·lar</button>
                         <button type="submit" form="invitacions-grup-form" class="btn btn-puig-solid px-4">Enviar invitacions</button>
                     </div>
                 </div>
             </div>
         </div>
     <?php endif; ?>
+
+    <div class="modal fade" id="eliminar-alumne-modal" tabindex="-1" aria-labelledby="eliminar-alumne-titol" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content modal-puig">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="eliminar-alumne-titol">Eliminar alumne</h2>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Tancar"></button>
+                </div>
+                <div class="modal-body px-4 py-3">
+                    <p id="eliminar-alumne-intro" class="mb-3"></p>
+                    <div id="eliminar-alumne-contingut"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal" id="eliminar-alumne-cancelar">Cancel·lar</button>
+                    <form method="post" action="/index.php?main=alumnat-tutor_accion" id="desactivar-alumne-form" class="d-none">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(tokenCsrf(), ENT_QUOTES, 'UTF-8') ?>">
+                        <input type="hidden" name="return_curso" value="<?= htmlspecialchars($curso, ENT_QUOTES, 'UTF-8') ?>">
+                        <input type="hidden" name="id_alumno" value="">
+                        <button type="submit" name="accio" value="desactivar" class="btn btn-puig px-4">Desactivar alumne</button>
+                    </form>
+                    <form method="post" action="/index.php?main=alumnat-tutor_accion" id="eliminar-alumne-form" class="d-none">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(tokenCsrf(), ENT_QUOTES, 'UTF-8') ?>">
+                        <input type="hidden" name="return_curso" value="<?= htmlspecialchars($curso, ENT_QUOTES, 'UTF-8') ?>">
+                        <input type="hidden" name="id_alumno" value="">
+                        <button type="submit" name="accio" value="eliminar" class="btn btn-puig-solid px-4">Eliminar definitivament</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 <script>
 (() => {
@@ -224,5 +282,84 @@ $mensaje = isset($_GET['msg']) && is_string($_GET['msg']) ? $_GET['msg'] : '';
     actualizarGrupos();
     ciclo.addEventListener('change',()=>{ grupo.value='0'; actualizarGrupos(); form.submit(); });
     grupo.addEventListener('change',()=>form.submit());
+})();
+
+(() => {
+    const modal=document.getElementById('eliminar-alumne-modal');
+    if (!modal) return;
+    const titol=document.getElementById('eliminar-alumne-titol');
+    const intro=document.getElementById('eliminar-alumne-intro');
+    const contingut=document.getElementById('eliminar-alumne-contingut');
+    const cancelar=document.getElementById('eliminar-alumne-cancelar');
+    const formDesactivar=document.getElementById('desactivar-alumne-form');
+    const formEliminar=document.getElementById('eliminar-alumne-form');
+    const nombreElementos=(valor, singular, plural)=>`${valor} ${valor===1?singular:plural}`;
+
+    modal.addEventListener('show.bs.modal', event => {
+        const boto=event.relatedTarget;
+        if (!(boto instanceof HTMLElement)) return;
+        const dades=boto.dataset;
+        const id=dades.alumneId || '';
+        const nom=dades.alumneNom || '';
+        const projectes=Number(dades.projectes || 0);
+        const altresCursos=dades.altresCursos || '';
+        const seguiments=Number(dades.seguiments || 0);
+        const valoracions=Number(dades.valoracions || 0);
+        const comentaris=Number(dades.comentaris || 0);
+        const ajustos=Number(dades.ajustos || 0);
+        const teHistorial=seguiments>0 || valoracions>0 || comentaris>0 || ajustos>0;
+
+        formDesactivar.querySelector('[name="id_alumno"]').value=id;
+        formEliminar.querySelector('[name="id_alumno"]').value=id;
+        titol.textContent='Eliminar alumne';
+        intro.textContent=`Estàs a punt d’eliminar ${nom} definitivament.`;
+        cancelar.textContent='Cancel·lar';
+        formDesactivar.classList.add('d-none');
+        formEliminar.classList.add('d-none');
+
+        if (projectes>0) {
+            titol.textContent='Aquest alumne no es pot eliminar';
+            intro.textContent=projectes===1 && dades.projecteNom
+                ? `${nom} està vinculat al projecte “${dades.projecteNom}”.`
+                : `${nom} està vinculat a ${nombreElementos(projectes,'projecte','projectes')}.`;
+            contingut.innerHTML='<p class="mb-2">El projecte i el seu historial s’han de conservar.</p><p class="mb-0">Si l’alumne ja no participa en Projecte, pots desactivar-lo.</p>';
+            cancelar.textContent='Tancar';
+            formDesactivar.classList.remove('d-none');
+            return;
+        }
+
+        if (altresCursos!=='') {
+            titol.textContent='Aquest alumne no es pot eliminar';
+            intro.textContent=`${nom} té historial de matrícula en altres cursos.`;
+            contingut.innerHTML=`<p class="mb-2">Cursos relacionats: <strong>${altresCursos.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;')}</strong>.</p><p class="mb-0">Per conservar aquest historial, l’alumne no es pot eliminar des d’aquest gestor.</p>`;
+            cancelar.textContent='Tancar';
+            formDesactivar.classList.remove('d-none');
+            return;
+        }
+
+        formEliminar.classList.remove('d-none');
+        if (!teHistorial) {
+            contingut.innerHTML='<p class="mb-2">Aquest alumne no té activitat ni historial associat.</p><p class="text-danger mb-0">Aquesta acció no es pot desfer.</p>';
+            return;
+        }
+
+        const elements=[];
+        if (seguiments>0) elements.push(nombreElementos(seguiments,'seguiment setmanal','seguiments setmanals'));
+        if (valoracions>0) elements.push(nombreElementos(valoracions,'valoració del tutor','valoracions del tutor'));
+        if (comentaris>0) elements.push(nombreElementos(comentaris,'comentari del tutor','comentaris del tutor'));
+        if (ajustos>0) elements.push(nombreElementos(ajustos,'ajust individual de nota','ajustos individuals de nota'));
+        contingut.replaceChildren();
+        const avis=document.createElement('p');
+        avis.className='mb-2';
+        avis.textContent='S’eliminaran també:';
+        const llista=document.createElement('ul');
+        llista.className='mb-3';
+        elements.forEach(text => { const item=document.createElement('li'); item.textContent=text; llista.append(item); });
+        const alternativa=document.createElement('p');
+        alternativa.className='mb-0';
+        alternativa.textContent='Si l’alumne ja no participa en Projecte però vols conservar el seu historial, pots desactivar-lo en lloc d’eliminar-lo.';
+        contingut.append(avis,llista,alternativa);
+        formDesactivar.classList.remove('d-none');
+    });
 })();
 </script>

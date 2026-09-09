@@ -4,7 +4,6 @@ declare(strict_types=1);
 $alumnoId = (int) ($_SESSION['alumno_id'] ?? 0);
 $cursoAcademico = cursoAcademicoActual();
 $proyectoSesionId = (int) ($_SESSION['projecte_id'] ?? 0);
-$soloCursoActual = !empty($contextoCursoActual);
 $stmt = $pdo->prepare("
     SELECT p.id_proyecto, p.nombre, p.estado, p.grupo_id, c.abr AS ciclo, g.grupo, c.fases_clave
     FROM app.proyectos p
@@ -13,11 +12,7 @@ $stmt = $pdo->prepare("
     INNER JOIN app.ciclos c ON c.id_ciclo = g.id_ciclo
     WHERE rpa.alumno_id = :alumno_id
       AND p.estado = 'activo'
-      AND (
-          (:solo_curso_actual = 1 AND p.curso_academico = :curso_academico)
-          OR
-          (:solo_curso_actual = 0 AND (p.id_proyecto = :proyecto_sesion_id OR p.curso_academico = :curso_academico))
-      )
+      AND p.curso_academico = :curso_academico
     ORDER BY CASE WHEN p.id_proyecto = :proyecto_sesion_id THEN 0 ELSE 1 END,
              p.curso_academico DESC, p.id_proyecto DESC
     LIMIT 1
@@ -26,7 +21,6 @@ $stmt->execute([
     ':alumno_id' => $alumnoId,
     ':proyecto_sesion_id' => $proyectoSesionId,
     ':curso_academico' => $cursoAcademico,
-    ':solo_curso_actual' => $soloCursoActual ? 1 : 0,
 ]);
 $proyectoAlumno = $stmt->fetch(PDO::FETCH_ASSOC);
 if ($proyectoAlumno) {

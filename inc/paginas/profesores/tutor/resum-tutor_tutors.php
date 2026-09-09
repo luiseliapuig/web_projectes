@@ -78,11 +78,11 @@ declare(strict_types=1);
 </div>
 
 <div class="modal fade" id="assignarTutorModal" tabindex="-1" aria-labelledby="assignarTutorModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+    <div class="modal-dialog modal-dialog-centered"><div class="modal-content modal-puig">
         <form method="post" action="/index.php?main=resum-tutor_assignar-tutor" id="assignar-tutor-form">
             <div class="modal-header">
                 <h2 class="modal-title fs-5" id="assignarTutorModalLabel">Assignar tutor</h2>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tancar"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Tancar"></button>
             </div>
             <div class="modal-body"><p class="mb-0" id="assignar-tutor-missatge"></p></div>
             <div class="modal-footer">

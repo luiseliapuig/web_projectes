@@ -2752,6 +2752,58 @@ a.text-muted span:first-child {
     color: #fff;
 }
 
+/* Patró visual compartit pels modals principals de tutoria. */
+.modal-puig {
+    overflow: hidden;
+    border: 0;
+    border-radius: 1rem;
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15);
+}
+
+.modal-puig > .modal-header,
+.modal-puig > form > .modal-header {
+    padding: 1rem 1.25rem;
+    border-bottom: 0;
+    background: #970A2C;
+    color: #fff;
+}
+
+.modal-puig .modal-header .modal-title {
+    color: #fff;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.modal-puig .modal-header .text-muted {
+    color: rgba(255, 255, 255, .78) !important;
+}
+
+.modal-puig > .modal-body,
+.modal-puig > form > .modal-body {
+    padding: 1.25rem;
+    background: #fff;
+}
+
+.modal-puig > .modal-footer,
+.modal-puig > form > .modal-footer {
+    gap: .5rem;
+    padding: .75rem 1.25rem 1rem;
+    border-top: 1px solid #dee2e6;
+}
+
+@media (max-width: 575.98px) {
+    .modal-puig > .modal-footer,
+    .modal-puig > form > .modal-footer {
+        align-items: stretch;
+    }
+
+    .modal-puig .modal-footer > button,
+    .modal-puig .modal-footer > form:not(.d-none),
+    .modal-puig .modal-footer > form:not(.d-none) > button {
+        width: 100%;
+    }
+}
+
 /* Variant sòlida per a un CTA sobre l'estat "atenció pendent" (mateix groc
  * que .bloc-atencio / .badge-activitat / text-bg-warning). Es combina amb
  * .btn-fase per a la geometria, mai un botó específic d'una tasca. */

@@ -34,7 +34,8 @@ if (!in_array($grupoRecordado, $grupoIdsPermitidos, true)) {
 $data = ['id_alumno' => 0, 'nombre' => '', 'apellidos' => '', 'email' => '', 'activo' => 1, 'grupo_id' => $grupoRecordado];
 $formError = $_SESSION['alumnat_tutor_form_error'] ?? '';
 $formOld = $_SESSION['alumnat_tutor_form_old'] ?? null;
-unset($_SESSION['alumnat_tutor_form_error'], $_SESSION['alumnat_tutor_form_old']);
+$reincorporacio = $_SESSION['alumnat_tutor_reincorporacio'] ?? null;
+unset($_SESSION['alumnat_tutor_form_error'], $_SESSION['alumnat_tutor_form_old'], $_SESSION['alumnat_tutor_reincorporacio']);
 if ($id <= 0 && is_array($formOld)) {
     $grupoAnterior = (int) ($formOld['grupo_id'] ?? 0);
     $data = [
@@ -95,12 +96,53 @@ $emailVisible = parteLocalCorreoInstitucional((string) $data['email']);
                 <div class="col-md-4"><label for="ciclo_id" class="form-label">Cicle</label><select id="ciclo_id" class="form-select" required><option value="" <?= $cicloSeleccionado === 0 ? 'selected' : '' ?> disabled>Selecciona un cicle</option><?php foreach ($ciclos as $ciclo): ?><option value="<?= $ciclo['id_ciclo'] ?>" <?= $cicloSeleccionado === $ciclo['id_ciclo'] ? 'selected' : '' ?>><?= htmlspecialchars($ciclo['abr'], ENT_QUOTES, 'UTF-8') ?></option><?php endforeach; ?></select></div>
                 <div class="col-md-4"><label for="grupo_id" class="form-label">Grup</label><select name="grupo_id" id="grupo_id" class="form-select" required><option value="" <?= $grupoSeleccionado === 0 ? 'selected' : '' ?>>Selecciona un grup</option><?php foreach ($grupos as $grupo): ?><option value="<?= (int) $grupo['id_grupo'] ?>" data-ciclo="<?= (int) $grupo['id_ciclo'] ?>" <?= $grupoSeleccionado === (int) $grupo['id_grupo'] ? 'selected' : '' ?>><?= htmlspecialchars(trim($grupo['abr'] . ' ' . $grupo['grupo']), ENT_QUOTES, 'UTF-8') ?></option><?php endforeach; ?></select></div>
                 <div class="col-12"><div class="form-check"><input class="form-check-input" type="checkbox" name="activo" id="activo" value="1" <?= (int) $data['activo'] === 1 ? 'checked' : '' ?>><label class="form-check-label" for="activo">Actiu</label></div></div>
-                <?php if (!$esEdicion): ?><div class="col-12"><div class="form-check"><input class="form-check-input" type="checkbox" name="enviar_invitacion" id="enviar_invitacion" value="1"><label class="form-check-label" for="enviar_invitacion">Enviar invitació</label><div class="form-text">L’enllaç per crear la primera contrasenya serà vàlid durant cinc hores.</div></div></div><?php endif; ?>
             </div>
             <div class="d-flex gap-2 mt-4"><button type="submit" class="btn btn-puig-solid px-4">Guardar</button><a href="/index.php?main=alumnat-tutor&amp;curso=<?= rawurlencode($curso) ?>" class="btn btn-puig px-4">Tornar</a></div>
         </form><?php endif; ?>
     </div></div></div>
 </div>
+<?php if (!$esEdicion && is_array($reincorporacio)): ?>
+    <div class="modal fade" id="reincorporar-alumne-modal" tabindex="-1" aria-labelledby="reincorporar-alumne-titol" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content modal-puig">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="reincorporar-alumne-titol">Aquest alumne ja existeix</h2>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Tancar"></button>
+                </div>
+                <div class="modal-body px-4 py-3">
+                    <p>Aquest alumne ja consta al sistema i es pot incorporar al curs actual.</p>
+                    <dl class="row small mb-3">
+                        <dt class="col-sm-4">Alumne</dt>
+                        <dd class="col-sm-8"><?= htmlspecialchars((string) ($reincorporacio['nombre_completo'] ?? ''), ENT_QUOTES, 'UTF-8') ?></dd>
+                        <dt class="col-sm-4">Email</dt>
+                        <dd class="col-sm-8"><?= htmlspecialchars((string) ($reincorporacio['email'] ?? ''), ENT_QUOTES, 'UTF-8') ?></dd>
+                        <?php if (!empty($reincorporacio['matriculas_anteriores']) && is_array($reincorporacio['matriculas_anteriores'])): ?>
+                            <dt class="col-sm-4">Matrícules anteriors</dt>
+                            <dd class="col-sm-8"><?= htmlspecialchars(implode(' · ', $reincorporacio['matriculas_anteriores']), ENT_QUOTES, 'UTF-8') ?></dd>
+                        <?php endif; ?>
+                        <dt class="col-sm-4 mb-0">Nova matrícula</dt>
+                        <dd class="col-sm-8 mb-0"><?= htmlspecialchars((string) ($reincorporacio['nueva_matricula'] ?? ''), ENT_QUOTES, 'UTF-8') ?></dd>
+                    </dl>
+                    <p class="mb-0">Es conservaran les matrícules, projectes i historial dels cursos anteriors.</p>
+                    <?php if (!empty($reincorporacio['estaba_inactivo'])): ?>
+                        <p class="text-muted small mb-0 mt-2">En incorporar-lo, l’alumne tornarà a quedar actiu.</p>
+                    <?php endif; ?>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Cancel·lar</button>
+                    <form method="post" action="/index.php?main=alumnat-tutor_accion">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(tokenCsrf(), ENT_QUOTES, 'UTF-8') ?>">
+                        <input type="hidden" name="accio" value="reincorporar">
+                        <input type="hidden" name="email" value="<?= htmlspecialchars((string) ($reincorporacio['email'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
+                        <input type="hidden" name="curso_academico" value="<?= htmlspecialchars((string) ($reincorporacio['curso_academico'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
+                        <input type="hidden" name="grupo_id" value="<?= (int) ($reincorporacio['grupo_id'] ?? 0) ?>">
+                        <button type="submit" class="btn btn-puig-solid px-4">Incorporar al curs actual</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+<?php endif; ?>
 <script>
 (() => {
     const ciclo=document.getElementById('ciclo_id'), grupo=document.getElementById('grupo_id');
@@ -108,4 +150,10 @@ $emailVisible = parteLocalCorreoInstitucional((string) $data['email']);
     const actualizar=()=>{ Array.from(grupo.options).forEach(opcion=>{ const visible=opcion.value==='' || opcion.dataset.ciclo===ciclo.value; opcion.hidden=!visible; opcion.disabled=!visible; }); if(grupo.selectedOptions[0]?.disabled)grupo.value=''; };
     ciclo.addEventListener('change',actualizar); actualizar();
 })();
+<?php if (!$esEdicion && is_array($reincorporacio)): ?>
+document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('reincorporar-alumne-modal');
+    if (modal && window.bootstrap) bootstrap.Modal.getOrCreateInstance(modal).show();
+});
+<?php endif; ?>
 </script>

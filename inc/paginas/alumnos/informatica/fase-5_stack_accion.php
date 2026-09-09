@@ -18,7 +18,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST' || !validarTokenCsrf($_POST['c
 }
 
 $projecteId = (int) ($_POST['proyecto_id'] ?? 0);
-if ($projecteId <= 0 || !esSuProyectoAlumno($projecteId)) fase5StackResposta(403, 'No tens autorització sobre aquest projecte.');
+if ($projecteId <= 0 || !esProyectoOperativoAlumno($projecteId)) fase5StackResposta(403, 'No tens autorització sobre aquest projecte.');
 $stmt = $pdo->prepare('SELECT c.fases_clave FROM app.proyectos p INNER JOIN app.grupos g ON g.id_grupo = p.grupo_id INNER JOIN app.ciclos c ON c.id_ciclo = g.id_ciclo WHERE p.id_proyecto = :id');
 $stmt->execute([':id' => $projecteId]);
 if (!proyectoPerteneceArquitecturaFases(['fases_clave' => $stmt->fetchColumn() ?: null], 'informatica') || !fase4PlanificacioGestioObtenirEstat($pdo, $projecteId)['completada']) {

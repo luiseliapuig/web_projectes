@@ -32,7 +32,7 @@ $proyectoId = isset($_POST['proyecto_id']) ? (int) $_POST['proyecto_id'] : 0;
 
 // El projecte sempre es torna a verificar contra la sessió de l'alumnat, mai
 // es confia en l'ID rebut per POST.
-if ($proyectoId <= 0 || !esSuProyectoAlumno($proyectoId)) {
+if ($proyectoId <= 0 || !esProyectoOperativoAlumno($proyectoId)) {
     http_response_code(403);
     echo json_encode(['ok' => false, 'missatge' => 'No tens autorització sobre aquest projecte.']);
     exit;

@@ -4,26 +4,37 @@ declare(strict_types=1);
 soloSuperadmin();
 
 $proyectoId = isset($_GET['id']) ? (int) $_GET['id'] : 0;
-if ($proyectoId <= 0) {
-    http_response_code(404);
-    die('Projecte no especificat');
-}
+$proyecto = [
+    'id_proyecto' => 0,
+    'curso_academico' => cursoAcademicoActual(),
+    'grupo_id' => 0,
+    'estado' => 'activo',
+    'tutor_id' => 0,
+];
+$alumnoIdsProyecto = [];
 
-// El proyecto y su tutor se recuperan desde el modelo relacional vigente.
-$stmt = $pdo->prepare("
-    SELECT p.id_proyecto, p.curso_academico, p.grupo_id, p.estado,
-           COALESCE(t.profesor_id, 0) AS tutor_id
-    FROM app.proyectos p
-    LEFT JOIN app.rel_proyectos_profesores t
-        ON t.proyecto_id = p.id_proyecto AND t.rol = 'tutor'
-    WHERE p.id_proyecto = :id
-    LIMIT 1
-");
-$stmt->execute([':id' => $proyectoId]);
-$proyecto = $stmt->fetch(PDO::FETCH_ASSOC);
-if (!$proyecto) {
-    http_response_code(404);
-    die('Projecte no trobat');
+if ($proyectoId > 0) {
+    // El superadmin puede mantener cualquier proyecto, también histórico.
+    $stmt = $pdo->prepare("
+        SELECT p.id_proyecto, p.curso_academico, p.grupo_id, p.estado,
+               COALESCE(t.profesor_id, 0) AS tutor_id
+        FROM app.proyectos p
+        LEFT JOIN app.rel_proyectos_profesores t
+            ON t.proyecto_id = p.id_proyecto AND t.rol = 'tutor'
+        WHERE p.id_proyecto = :id
+        LIMIT 1
+    ");
+    $stmt->execute([':id' => $proyectoId]);
+    $proyectoEncontrado = $stmt->fetch(PDO::FETCH_ASSOC);
+    if (!$proyectoEncontrado) {
+        http_response_code(404);
+        die('Projecte no trobat');
+    }
+    $proyecto = $proyectoEncontrado;
+
+    $stmt = $pdo->prepare('SELECT alumno_id FROM app.rel_proyectos_alumnos WHERE proyecto_id = :id');
+    $stmt->execute([':id' => $proyectoId]);
+    $alumnoIdsProyecto = array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
 }
 
 $cursoActual = cursoAcademicoActual();
@@ -58,15 +69,56 @@ foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $profesor) {
     $profesoresPorGrupo[(int) $profesor['grupo_id']][] = $profesor;
 }
 
+// Las relaciones ya guardadas son históricas y no dependen de que el docente
+// continúe asignado actualmente al grupo. Se incorporan al selector sin
+// duplicar las opciones que siguen presentes en la asignación anual.
+if ($proyectoId > 0) {
+    $stmt = $pdo->prepare("
+        SELECT p.id_profesor, p.nombre, p.apellidos
+        FROM app.rel_proyectos_profesores rpp
+        INNER JOIN app.profesores p ON p.id_profesor = rpp.profesor_id
+        WHERE rpp.proyecto_id = :proyecto_id
+        ORDER BY p.apellidos, p.nombre
+    ");
+    $stmt->execute([':proyecto_id' => $proyectoId]);
+    $grupoProyectoId = (int) $proyecto['grupo_id'];
+    $profesoresExistentes = [];
+    foreach ($profesoresPorGrupo[$grupoProyectoId] ?? [] as $profesor) {
+        $profesoresExistentes[(int) $profesor['id_profesor']] = true;
+    }
+    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $profesorHistorico) {
+        $profesorHistoricoId = (int) $profesorHistorico['id_profesor'];
+        if (!isset($profesoresExistentes[$profesorHistoricoId])) {
+            $profesoresPorGrupo[$grupoProyectoId][] = $profesorHistorico;
+            $profesoresExistentes[$profesorHistoricoId] = true;
+        }
+    }
+}
+
 $stmt = $pdo->prepare("
-    SELECT a.nombre, a.apellidos, a.email
-    FROM app.rel_proyectos_alumnos rpa
-    INNER JOIN app.alumnos a ON a.id_alumno = rpa.alumno_id
-    WHERE rpa.proyecto_id = :id ORDER BY a.apellidos, a.nombre
+    SELECT a.id_alumno, a.nombre, a.apellidos, a.email, rag.grupo_id
+    FROM app.rel_alumnos_grupos rag
+    INNER JOIN app.alumnos a ON a.id_alumno = rag.alumno_id
+    WHERE rag.curso_academico = :curso_matricula
+      AND a.activo = true
+      AND NOT EXISTS (
+          SELECT 1
+          FROM app.rel_proyectos_alumnos rpa_ocupado
+          INNER JOIN app.proyectos p_ocupado
+              ON p_ocupado.id_proyecto = rpa_ocupado.proyecto_id
+          WHERE rpa_ocupado.alumno_id = a.id_alumno
+            AND p_ocupado.curso_academico = :curso_proyecto
+            AND p_ocupado.estado = 'activo'
+            AND p_ocupado.id_proyecto <> :proyecto_id
+      )
+    ORDER BY a.apellidos, a.nombre
 ");
-$stmt->execute([':id' => $proyectoId]);
-$alumnos = $stmt->fetchAll(PDO::FETCH_ASSOC);
-if ($alumnos === []) $alumnos = [['nombre' => '', 'apellidos' => '', 'email' => '']];
+$stmt->execute([
+    ':curso_matricula' => $cursoSeleccionado,
+    ':curso_proyecto' => $cursoSeleccionado,
+    ':proyecto_id' => $proyectoId,
+]);
+$alumnosDisponibles = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $ciclos = [];
 foreach ($grupos as $grupo) {
@@ -74,15 +126,19 @@ foreach ($grupos as $grupo) {
 }
 $cicloSeleccionado = 0;
 foreach ($grupos as $grupo) if ((int) $grupo['id_grupo'] === $grupoSeleccionado) $cicloSeleccionado = (int) $grupo['id_ciclo'];
-$returnCurso = isset($_GET['return_curso']) && is_string($_GET['return_curso']) ? $_GET['return_curso'] : (string) $proyecto['curso_academico'];
+$returnCurso = isset($_GET['return_curso']) && is_string($_GET['return_curso']) ? $_GET['return_curso'] : $cursoSeleccionado;
 $returnCicloId = isset($_GET['return_ciclo_id']) ? (int) $_GET['return_ciclo_id'] : 0;
 ?>
 
-<script>window.PAGE_TITLE = 'Editar projecte';</script>
+<script>window.PAGE_TITLE = '<?= $proyectoId > 0 ? 'Editar projecte' : 'Nou projecte' ?>';</script>
+<style>
+.alumne-opcio { display: flex; }
+.alumne-opcio.d-none { display: none !important; }
+</style>
 
 <div class="container-fluid py-4">
     <div class="card-style mb-30">
-        <div class="mb-4"><h6 class="mb-1">Editar projecte</h6><p class="text-muted mb-0">Administració del grup de projecte, alumnat i professorat vinculat.</p></div>
+        <div class="mb-4"><h6 class="mb-1"><?= $proyectoId > 0 ? 'Editar projecte' : 'Nou projecte' ?></h6><p class="text-muted mb-0">Administració del grup de projecte, alumnat i professorat vinculat.</p></div>
 
         <form method="post" action="/index.php?main=proyectos_accion" id="proyecto-admin-form">
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(tokenCsrf(), ENT_QUOTES, 'UTF-8') ?>">
@@ -99,8 +155,17 @@ $returnCicloId = isset($_GET['return_ciclo_id']) ? (int) $_GET['return_ciclo_id'
             </div>
 
             <div class="border-top pt-4 mb-4">
-                <div class="d-flex justify-content-between align-items-center mb-3"><div><h6 class="mb-1">Alumnat del projecte</h6><p class="text-muted mb-0">La matrícula anual es mantindrà sincronitzada.</p></div><button type="button" class="btn btn-outline-primary btn-sm" id="afegir-alumne"><i class="bi bi-plus-lg"></i> Nou alumne</button></div>
-                <div id="alumnes-container" class="d-grid gap-3"><?php foreach ($alumnos as $i => $alumno): ?><div class="alumne-row border rounded p-3"><div class="row g-3 align-items-end"><div class="col-md-3"><label class="form-label">Nom</label><input class="form-control alumne-nom" name="alumnos[<?= $i ?>][nombre]" maxlength="100" required value="<?= htmlspecialchars((string) $alumno['nombre'], ENT_QUOTES, 'UTF-8') ?>"></div><div class="col-md-4"><label class="form-label">Cognoms</label><input class="form-control alumne-cognoms" name="alumnos[<?= $i ?>][apellidos]" maxlength="150" required value="<?= htmlspecialchars((string) $alumno['apellidos'], ENT_QUOTES, 'UTF-8') ?>"></div><div class="col-md-4"><label class="form-label">Email</label><input type="email" class="form-control alumne-email" name="alumnos[<?= $i ?>][email]" required value="<?= htmlspecialchars((string) $alumno['email'], ENT_QUOTES, 'UTF-8') ?>"></div><div class="col-md-1 text-end"><button type="button" class="btn btn-outline-danger btn-sm eliminar-alumne"><i class="bi bi-trash"></i></button></div></div></div><?php endforeach; ?></div>
+                <div class="mb-3"><h6 class="mb-1">Alumnat del projecte</h6><p class="text-muted mb-0">Selecciona alumnat existent, actiu i matriculat al grup. Només els projectes inactius poden quedar sense alumnat.</p></div>
+                <div id="alumnes-container" class="border rounded overflow-hidden">
+                    <?php foreach ($alumnosDisponibles as $alumno): ?>
+                        <?php $alumnoId = (int) $alumno['id_alumno']; ?>
+                        <label class="alumne-opcio align-items-center gap-3 px-3 py-3 border-bottom <?= (int) $alumno['grupo_id'] === $grupoSeleccionado ? '' : 'd-none' ?>" data-grupo="<?= (int) $alumno['grupo_id'] ?>">
+                            <input class="form-check-input flex-shrink-0 mt-0" type="checkbox" name="alumno_ids[]" value="<?= $alumnoId ?>" <?= in_array($alumnoId, $alumnoIdsProyecto, true) ? 'checked' : '' ?>>
+                            <span><span class="d-block fw-semibold"><?= htmlspecialchars(trim($alumno['nombre'] . ' ' . $alumno['apellidos']), ENT_QUOTES, 'UTF-8') ?></span><small class="text-muted"><?= htmlspecialchars((string) $alumno['email'], ENT_QUOTES, 'UTF-8') ?></small></span>
+                        </label>
+                    <?php endforeach; ?>
+                    <div id="alumnes-buit" class="px-3 py-4 text-muted"><?= $grupoSeleccionado > 0 ? 'No hi ha alumnat disponible en aquest grup.' : 'Selecciona primer un grup.' ?></div>
+                </div>
             </div>
 
             <div class="border-top pt-4 mb-4"><h6 class="mb-1">Tutor principal</h6><p class="text-muted mb-3">La resta del professorat assignat al grup quedarà com a cotutor.</p><div class="form-check mb-2"><input class="form-check-input" type="radio" name="tutor_id" id="tutor_cap" value="" <?= (int) $proyecto['tutor_id'] === 0 ? 'checked' : '' ?>><label for="tutor_cap" class="form-check-label">Sense assignar</label></div><div id="tutors-container"><?php foreach ($profesoresPorGrupo as $grupoId => $profesores): foreach ($profesores as $profesor): $radioId = 'tutor_' . $grupoId . '_' . $profesor['id_profesor']; ?><div class="form-check tutor-opcio" data-grupo="<?= $grupoId ?>"><input class="form-check-input" type="radio" name="tutor_id" id="<?= $radioId ?>" value="<?= (int) $profesor['id_profesor'] ?>" <?= (int) $proyecto['tutor_id'] === (int) $profesor['id_profesor'] ? 'checked' : '' ?>><label class="form-check-label" for="<?= $radioId ?>"><?= htmlspecialchars(trim($profesor['nombre'] . ' ' . $profesor['apellidos']), ENT_QUOTES, 'UTF-8') ?></label></div><?php endforeach; endforeach; ?></div></div>
@@ -110,15 +175,12 @@ $returnCicloId = isset($_GET['return_ciclo_id']) ? (int) $_GET['return_ciclo_id'
     </div>
 </div>
 
-<template id="alumne-template"><div class="alumne-row border rounded p-3"><div class="row g-3 align-items-end"><div class="col-md-3"><label class="form-label">Nom</label><input class="form-control alumne-nom" maxlength="100" required></div><div class="col-md-4"><label class="form-label">Cognoms</label><input class="form-control alumne-cognoms" maxlength="150" required></div><div class="col-md-4"><label class="form-label">Email</label><input type="email" class="form-control alumne-email" required></div><div class="col-md-1 text-end"><button type="button" class="btn btn-outline-danger btn-sm eliminar-alumne"><i class="bi bi-trash"></i></button></div></div></div></template>
-
 <script>
 (() => {
- const curso=document.getElementById('curso_academico'), ciclo=document.getElementById('ciclo_id'), grupo=document.getElementById('grupo_id'), cont=document.getElementById('alumnes-container');
- const nombres=()=>cont.querySelectorAll('.alumne-row').forEach((r,i)=>{r.querySelector('.alumne-nom').name=`alumnos[${i}][nombre]`;r.querySelector('.alumne-cognoms').name=`alumnos[${i}][apellidos]`;r.querySelector('.alumne-email').name=`alumnos[${i}][email]`;});
+ const curso=document.getElementById('curso_academico'), ciclo=document.getElementById('ciclo_id'), grupo=document.getElementById('grupo_id'), cont=document.getElementById('alumnes-container'), vacio=document.getElementById('alumnes-buit');
  const tutors=()=>{document.querySelectorAll('.tutor-opcio').forEach(o=>{const v=o.dataset.grupo===grupo.value;o.hidden=!v;o.querySelector('input').disabled=!v;});const s=document.querySelector('input[name="tutor_id"]:checked');if(s?.disabled)document.getElementById('tutor_cap').checked=true;};
- const grupos=()=>{let primero=null;Array.from(grupo.options).forEach(o=>{const v=o.dataset.ciclo===ciclo.value;o.hidden=!v;o.disabled=!v;if(v&&!primero)primero=o;});if(grupo.selectedOptions[0]?.disabled&&primero)primero.selected=true;tutors();};
- curso.addEventListener('change',()=>location.href=`/index.php?main=proyectos_form&id=<?= $proyectoId ?>&curso=${encodeURIComponent(curso.value)}&grupo_id=${grupo.value}`);ciclo.addEventListener('change',grupos);grupo.addEventListener('change',tutors);
- document.getElementById('afegir-alumne').addEventListener('click',()=>{cont.append(document.getElementById('alumne-template').content.cloneNode(true));nombres();});cont.addEventListener('click',e=>{const b=e.target.closest('.eliminar-alumne');if(!b)return;if(cont.children.length===1)b.closest('.alumne-row').querySelectorAll('input').forEach(i=>i.value='');else b.closest('.alumne-row').remove();nombres();});grupos();nombres();
+ const alumnos=()=>{let visibles=0;cont.querySelectorAll('.alumne-opcio').forEach(o=>{const v=o.dataset.grupo===grupo.value;const i=o.querySelector('input');o.classList.toggle('d-none',!v);i.disabled=!v;if(!v)i.checked=false;if(v)visibles++;});vacio.textContent=grupo.value===''?'Selecciona primer un grup.':'No hi ha alumnat disponible en aquest grup.';vacio.hidden=visibles>0;};
+ const grupos=()=>{let primero=null;Array.from(grupo.options).forEach(o=>{const v=o.dataset.ciclo===ciclo.value;o.hidden=!v;o.disabled=!v;if(v&&!primero)primero=o;});if(grupo.selectedOptions[0]?.disabled&&primero)primero.selected=true;tutors();alumnos();};
+ curso.addEventListener('change',()=>location.href=`/index.php?main=proyectos_form&id=<?= $proyectoId ?>&curso=${encodeURIComponent(curso.value)}&grupo_id=${grupo.value}`);ciclo.addEventListener('change',grupos);grupo.addEventListener('change',()=>{tutors();alumnos();});grupos();
 })();
 </script>

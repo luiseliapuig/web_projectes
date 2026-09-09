@@ -307,15 +307,6 @@ if (!$headerIsLogged) {
         <?php endif; ?>
 
         <?php if ($headerAuthTipo === 'professor'): ?>
-            <!-- La gestió de projectes només apareix amb grups docents assignats. -->
-            <?php if ($mostrarAdministrarProyectos): ?>
-            <li>
-                <a class="dropdown-item" href="/index.php?main=projectes-grup">
-                    <i class="lni lni-folder me-2"></i>Administrar projectes
-                </a>
-            </li>
-            <?php endif; ?>
-
             <?php if ($mostrarAdministrarAlumnado): ?>
             <li>
                 <a class="dropdown-item" href="/index.php?main=alumnat-tutor">

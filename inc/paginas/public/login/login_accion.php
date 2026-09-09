@@ -86,10 +86,15 @@ $stmt = $pdo->prepare("
     SELECT p.id_proyecto, p.nombre
     FROM app.rel_proyectos_alumnos rpa
     INNER JOIN app.proyectos p ON p.id_proyecto = rpa.proyecto_id
-    WHERE rpa.alumno_id = :id AND p.estado = 'activo'
+    WHERE rpa.alumno_id = :id
+      AND p.estado = 'activo'
+      AND p.curso_academico = :curso_academico
     ORDER BY p.curso_academico DESC, p.id_proyecto DESC LIMIT 1
 ");
-$stmt->execute([':id' => (int) $actor['id']]);
+$stmt->execute([
+    ':id' => (int) $actor['id'],
+    ':curso_academico' => cursoAcademicoActual(),
+]);
 $project = $stmt->fetch(PDO::FETCH_ASSOC);
 if ($project) {
     $_SESSION['projecte_id'] = (int) $project['id_proyecto'];

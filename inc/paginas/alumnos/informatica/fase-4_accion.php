@@ -7,7 +7,7 @@ function fase4Resposta(int $codi, string $missatge): never { http_response_code(
 if (!esAlumno()) fase4Resposta(403, 'Accés no permès.');
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST' || !validarTokenCsrf($_POST['csrf_token'] ?? null)) fase4Resposta(400, 'La sol·licitud no és vàlida o ha caducat.');
 $proyectoId = (int) ($_POST['proyecto_id'] ?? 0);
-if ($proyectoId <= 0 || !esSuProyectoAlumno($proyectoId)) fase4Resposta(403, 'No tens autorització sobre aquest projecte.');
+if ($proyectoId <= 0 || !esProyectoOperativoAlumno($proyectoId)) fase4Resposta(403, 'No tens autorització sobre aquest projecte.');
 $stmt = $pdo->prepare('SELECT c.fases_clave FROM app.proyectos p INNER JOIN app.grupos g ON g.id_grupo = p.grupo_id INNER JOIN app.ciclos c ON c.id_ciclo = g.id_ciclo WHERE p.id_proyecto = :id');
 $stmt->execute([':id' => $proyectoId]);
 if (!proyectoPerteneceArquitecturaFases(['fases_clave' => $stmt->fetchColumn() ?: null], 'informatica') || !fase3DocumentFuncionalObtenirEstat($pdo, $proyectoId)['completada']) fase4Resposta(403, 'Accés no permès.');

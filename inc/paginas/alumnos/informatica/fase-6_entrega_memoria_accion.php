@@ -23,7 +23,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && $longitudPeticio > 0 && $_P
 if (!esAlumno()) fase6EntregaMemoriaResposta(403, 'Accés no permès.');
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST' || !validarTokenCsrf($_POST['csrf_token'] ?? null)) fase6EntregaMemoriaResposta(400, 'La sol·licitud no és vàlida o ha caducat.');
 $projecteId = (int) ($_POST['proyecto_id'] ?? 0);
-if ($projecteId <= 0 || !esSuProyectoAlumno($projecteId)) fase6EntregaMemoriaResposta(403, 'No tens autorització sobre aquest projecte.');
+if ($projecteId <= 0 || !esProyectoOperativoAlumno($projecteId)) fase6EntregaMemoriaResposta(403, 'No tens autorització sobre aquest projecte.');
 
 $stmt = $pdo->prepare('SELECT p.memoria_pdf, p.curso_academico, c.abr AS ciclo, c.fases_clave FROM app.proyectos p INNER JOIN app.grupos g ON g.id_grupo = p.grupo_id INNER JOIN app.ciclos c ON c.id_ciclo = g.id_ciclo WHERE p.id_proyecto = :id');
 $stmt->execute([':id' => $projecteId]);

@@ -14,8 +14,7 @@ $mostrarMisDefensas = $esProfesorMenu
     && (configuracion('mostrar_mis_defensas') || $esSuperadminMenu);
 $mostrarNotasFinales = $esProfesorMenu
     && (configuracion('mostrar_notes_finals') || $esSuperadminMenu);
-$mostrarAdministrarProyectos = $esProfesorMenu && esTutor();
-$mostrarAdministrarAlumnado = $mostrarAdministrarProyectos;
+$mostrarAdministrarAlumnado = $esProfesorMenu && esTutor();
 $mostrarProyectosTutorizados = $esProfesorMenu && esTutor();
 $mostrarAutoseguimentTutor = $esProfesorMenu && esTutor();
 $mostrarMemoriaTutor = $esProfesorMenu && esTutor();

@@ -208,8 +208,8 @@ function autoseguimentTutorFitxa(array $fila, string $classeBloc, string $object
 
 // -----------------------------------------------------------------------------
 // 1. Grups que el professor tutoritza aquest curs. Mateix patró que
-// projectes-grup.php i alumnat-tutor.php: rel_profesores_grupos és l'única
-// font d'autorització de grup.
+// alumnat-tutor.php: rel_profesores_grupos és l'única font d'autorització
+// de grup.
 // -----------------------------------------------------------------------------
 
 $stmt = $pdo->prepare("

@@ -39,7 +39,7 @@ $stmt = $pdo->prepare("SELECT proyecto_id FROM app.memoria_seguimiento WHERE id_
 $stmt->execute([':id' => $idSeguimiento]);
 $proyectoId = $stmt->fetchColumn();
 
-if ($proyectoId === false || !esSuProyectoAlumno((int) $proyectoId)) {
+if ($proyectoId === false || !esProyectoOperativoAlumno((int) $proyectoId)) {
     http_response_code(403);
     echo json_encode(['ok' => false, 'missatge' => 'No tens autorització per modificar aquest apartat.']);
     exit;

@@ -91,7 +91,10 @@ window.PAGE_TITLE = 'Projectes';
             <h1 class="h3 mb-1">Projectes</h1>
             <p class="text-muted mb-0">Visió general i administració excepcional de tots els projectes.</p>
         </div>
-        <span class="text-muted"><?= count($proyectos) ?> projectes</span>
+        <div class="d-flex align-items-center gap-3">
+            <span class="text-muted"><?= count($proyectos) ?> projectes</span>
+            <a href="/index.php?main=proyectos_form&amp;curso=<?= rawurlencode($curso) ?>" class="btn btn-puig-solid rounded-pill px-4">Nou projecte</a>
+        </div>
     </div>
 
     <?php if (is_string($error) && $error !== ''): ?>

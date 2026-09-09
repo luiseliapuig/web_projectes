@@ -353,10 +353,6 @@ $rutasMigradas = [
         'archivo' => __DIR__ . '/paginas/admin/proyectos_accion.php',
         'area' => 'admin',
     ],
-    'projectes-grup' => [
-        'archivo' => __DIR__ . '/paginas/profesores/tutor/projectes-grup.php',
-        'area' => 'profesor',
-    ],
     'cambiar_password' => [
         'archivo' => __DIR__ . '/paginas/public/login/cambiar_password.php',
         'area' => 'public',
@@ -364,14 +360,6 @@ $rutasMigradas = [
     'cambiar_password_accion' => [
         'archivo' => __DIR__ . '/paginas/public/login/cambiar_password_accion.php',
         'area' => 'public',
-    ],
-    'projectes-grup_form' => [
-        'archivo' => __DIR__ . '/paginas/profesores/tutor/projectes-grup_form.php',
-        'area' => 'profesor',
-    ],
-    'projectes-grup_accion' => [
-        'archivo' => __DIR__ . '/paginas/profesores/tutor/projectes-grup_accion.php',
-        'area' => 'profesor',
     ],
     'alumnat-tutor' => [
         'archivo' => __DIR__ . '/paginas/profesores/tutor/alumnat-tutor.php',
