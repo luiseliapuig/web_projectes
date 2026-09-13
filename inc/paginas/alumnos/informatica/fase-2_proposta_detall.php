@@ -12,17 +12,14 @@ declare(strict_types=1);
 // (vegeu docs/codex/arquitectura.md).
 
 require_once __DIR__ . '/fase-2_proposta_funcions.php';
+require_once __DIR__ . '/enlaces-recursos.php';
 
 // ─────────────────────────────────────────────────────────────────────────
-// Recursos/plantilles d'aquesta tasca. Configuració centralitzada: canvia
-// aquí el text o l'URL sense tocar la maquetació de més avall. Si un URL
-// queda buit, aquell recurs simplement no es mostra (no s'inventa cap URL).
+// Textos dels recursos d'aquesta tasca. Les URLs viuen exclusivament a
+// enlaces-recursos.php i es resolen més avall segons la categoria real.
 // ─────────────────────────────────────────────────────────────────────────
 $plantillaCaText = 'Proposta de projecte (ca)';
-$plantillaCaUrl = 'https://docs.google.com/document/d/1kv2C17lt8Qs7Cm-LzsS338uHhmPJ5KlkqOUuodexJX0/edit?tab=t.0';
-
 $plantillaEsText = 'Proposta de projecte (es)';
-$plantillaEsUrl = 'https://docs.google.com/document/d/1kv2C17lt8Qs7Cm-LzsS338uHhmPJ5KlkqOUuodexJX0/edit?tab=t.0';
 
 // ── Rol de qui visualitza: 'alumne' (per defecte) o 'professor'. Cada shell
 // (fase-2_proposta.php per a l'alumnat, fase-2-tutor_proposta.php per al
@@ -43,6 +40,20 @@ $classificacio = fase2ClassificacioObtenirEstat($pdo, $idProjecte);
 $pas1Completat = $classificacio['completat'];
 $categoriaSeleccionadaVisual = $classificacio['categoria_id'] ?? $classificacio['categoria_per_defecte'];
 $tiposCategoriaSeleccionada = $classificacio['tipos_per_categoria'][$categoriaSeleccionadaVisual] ?? [];
+
+$plantillaCaUrl = '';
+$plantillaEsUrl = '';
+switch ($classificacio['categoria_id']) {
+    case 2: // Projecte de desenvolupament
+        $plantillaCaUrl = $plantilla_propuesta_desarrollo_ca;
+        $plantillaEsUrl = $plantilla_propuesta_desarrollo_es;
+        break;
+    case 1: // Projecte d'investigació
+    case 5: // Projecte I+D: comparteix la família documental d'investigació
+        $plantillaCaUrl = $plantilla_propuesta_investigacion_ca;
+        $plantillaEsUrl = $plantilla_propuesta_investigacion_es;
+        break;
+}
 
 // ── PAS 2: el flux documental ja existent. Bloquejat mentre el Pas 1 no
 // estigui complet — no n'hi ha prou amb amagar-ho visualment: fase-2_accion.php

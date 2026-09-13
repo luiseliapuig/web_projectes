@@ -5,7 +5,7 @@ declare(strict_types=1);
 // la targeta de Fase 3 a "Fases del projecte".
 require_once dirname(__DIR__, 3) . '/fases/funciones.php';
 $faseNumero = 3;
-$faseTitulo = 'Document funcional';
+$faseTitulo = 'Definició del projecte';
 $faseIntroduccion = obtenerFasesArquitectura('informatica')[$faseNumero]['descripcio'] ?? '';
 $faseContenidoArchivo = __DIR__ . '/fase-3_tasques.php';
 $permitirSinProyecto = true;

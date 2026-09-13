@@ -1,12 +1,33 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__ . '/fase-3_document_funcional_funcions.php';
-require __DIR__ . '/fase-3_recursos.php';
+require_once __DIR__ . '/fase-2_proposta_funcions.php';
+require_once __DIR__ . '/enlaces-recursos.php';
 $rolVisualitzacio = $rolVisualitzacio ?? 'alumne';
 $esAlumnat = $rolVisualitzacio === 'alumne';
 $potValidarFuncional = !empty($potValidar);
 $idProjecte = (int) ($proyectoAlumno['id_proyecto'] ?? 0);
 $estat = fase3DocumentFuncionalObtenirEstat($pdo, $idProjecte);
+$classificacio = $classificacio ?? fase2ClassificacioObtenirEstat($pdo, $idProjecte);
+$esProjecteRecerca = $esProjecteRecerca ?? in_array($classificacio['categoria_id'], [1, 5], true);
+$nomDocumentFase3 = $nomDocumentFase3 ?? ($esProjecteRecerca ? 'Pla de recerca' : 'Document funcional');
+$nomDocumentFase3Minuscula = $esProjecteRecerca ? 'pla de recerca' : 'document funcional';
+$descripcioDocumentFase3 = $descripcioDocumentFase3 ?? ($esProjecteRecerca
+    ? 'Prepareu el document que definirà els objectius, l’abast i la metodologia de la recerca abans de començar-ne el desenvolupament.'
+    : 'Prepareu el document que definirà els requisits, l’abast i les funcionalitats del projecte abans de començar-ne el desenvolupament.');
+$fase3PlantillaCaUrl = '';
+$fase3PlantillaEsUrl = '';
+switch ($classificacio['categoria_id']) {
+    case 2: // Projecte de desenvolupament
+        $fase3PlantillaCaUrl = $plantilla_funcional_desarrollo_ca;
+        $fase3PlantillaEsUrl = $plantilla_funcional_desarrollo_es;
+        break;
+    case 1: // Projecte d'investigació
+    case 5: // Projecte I+D: comparteix la família documental d'investigació
+        $fase3PlantillaCaUrl = $plantilla_funcional_investigacion_ca;
+        $fase3PlantillaEsUrl = $plantilla_funcional_investigacion_es;
+        break;
+}
 $pas1Completat = $estat['validat'];
 $pas1Bloc = $pas1Completat ? 'bloc-completat' : ($estat['solicitud_oberta'] ? 'bloc-atencio' : 'bloc-activitat');
 $pas1Badge = $pas1Completat ? 'text-bg-success' : ($estat['solicitud_oberta'] ? 'text-bg-warning' : 'badge-activitat');
@@ -16,20 +37,20 @@ $pas2Bloc = $estat['completada'] ? 'bloc-completat' : ($pas1Completat ? 'bloc-ac
 <div class="d-grid gap-4">
 <section class="bloc <?= $pas1Bloc ?>">
  <div class="bloc-contingut">
-  <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2"><div><div class="bloc-tipus">Pas 1</div><h2>Document funcional</h2></div><span class="badge rounded-pill px-3 py-2 <?= $pas1Badge ?>"><?= htmlspecialchars($pas1Text, ENT_QUOTES, 'UTF-8') ?></span></div>
-  <p class="mb-3">Creeu el document funcional, compartiu-ne l’enllaç i demaneu-ne la revisió al tutor o tutora.</p>
+  <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2"><div><div class="bloc-tipus">Pas 1</div><h2><?= htmlspecialchars($nomDocumentFase3, ENT_QUOTES, 'UTF-8') ?></h2></div><span class="badge rounded-pill px-3 py-2 <?= $pas1Badge ?>"><?= htmlspecialchars($pas1Text, ENT_QUOTES, 'UTF-8') ?></span></div>
+  <p class="mb-3"><?= htmlspecialchars($descripcioDocumentFase3, ENT_QUOTES, 'UTF-8') ?></p>
   <?php if ($fase3PlantillaCaUrl !== '' || $fase3PlantillaEsUrl !== ''): ?>
       <div class="tasca-recursos mb-4">
-          <?php if ($fase3PlantillaCaUrl !== ''): ?><a href="<?= htmlspecialchars($fase3PlantillaCaUrl, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener noreferrer" class="tasca-recurs-link"><i class="bi bi-file-earmark-text" aria-hidden="true"></i> Document funcional (ca)</a><?php endif; ?>
+          <?php if ($fase3PlantillaCaUrl !== ''): ?><a href="<?= htmlspecialchars($fase3PlantillaCaUrl, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener noreferrer" class="tasca-recurs-link"><i class="bi bi-file-earmark-text" aria-hidden="true"></i> <?= htmlspecialchars($nomDocumentFase3, ENT_QUOTES, 'UTF-8') ?> (ca)</a><?php endif; ?>
           <?php if ($fase3PlantillaCaUrl !== '' && $fase3PlantillaEsUrl !== ''): ?><span class="tasca-recursos-separador" aria-hidden="true">·</span><?php endif; ?>
-          <?php if ($fase3PlantillaEsUrl !== ''): ?><a href="<?= htmlspecialchars($fase3PlantillaEsUrl, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener noreferrer" class="tasca-recurs-link"><i class="bi bi-file-earmark-text" aria-hidden="true"></i> Document funcional (es)</a><?php endif; ?>
+          <?php if ($fase3PlantillaEsUrl !== ''): ?><a href="<?= htmlspecialchars($fase3PlantillaEsUrl, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener noreferrer" class="tasca-recurs-link"><i class="bi bi-file-earmark-text" aria-hidden="true"></i> <?= htmlspecialchars($nomDocumentFase3, ENT_QUOTES, 'UTF-8') ?> (es)</a><?php endif; ?>
       </div>
   <?php endif; ?>
 
   <?php if (!$esAlumnat): ?>
       <h3 class="h6 mb-2">Documents adjunts</h3>
       <?php if ($estat['url'] !== ''): ?>
-          <div class="d-flex flex-wrap gap-2 mb-4"><a href="<?= htmlspecialchars($estat['url'], ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener noreferrer" class="btn btn-fase <?= $estat['classe_outline'] ?>"><i class="bi bi-file-earmark-text me-1" aria-hidden="true"></i> Document funcional</a></div>
+          <div class="d-flex flex-wrap gap-2 mb-4"><a href="<?= htmlspecialchars($estat['url'], ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener noreferrer" class="btn btn-fase <?= $estat['classe_outline'] ?>"><i class="bi bi-file-earmark-text me-1" aria-hidden="true"></i> <?= htmlspecialchars($nomDocumentFase3, ENT_QUOTES, 'UTF-8') ?></a></div>
       <?php else: ?>
           <p class="text-muted fst-italic mb-4">L’alumnat encara no ha desat cap enllaç.</p>
       <?php endif; ?>
@@ -45,7 +66,7 @@ $pas2Bloc = $estat['completada'] ? 'bloc-completat' : ($pas1Completat ? 'bloc-ac
           <p class="small text-muted mb-3">Recorda compartir el document amb el teu tutor o tutora perquè el pugui consultar i revisar.</p>
           <p class="small text-muted mb-3" id="fase3-url-missatge">&nbsp;</p>
           <?php if ($estat['validat']): ?>
-              <p class="small text-success mb-0"><i class="bi bi-check-circle-fill me-1" aria-hidden="true"></i> El document funcional ha estat validat. Continua al Pas 2 per pujar-ne la versió definitiva en PDF.</p>
+              <p class="small text-success mb-0"><i class="bi bi-check-circle-fill me-1" aria-hidden="true"></i> El <?= htmlspecialchars($nomDocumentFase3Minuscula, ENT_QUOTES, 'UTF-8') ?> ha estat validat. Continua al Pas 2 per pujar-ne la versió definitiva en PDF.</p>
           <?php elseif (!$estat['solicitud_oberta']): ?>
               <button type="button" class="btn btn-fase btn-puig-solid" id="fase3-sollicitar" <?= $estat['url'] === '' ? 'disabled' : '' ?>>Sol·licitar revisió</button>
               <p class="small text-muted mb-0 mt-2" id="fase3-solicitar-missatge">&nbsp;</p>
@@ -67,7 +88,7 @@ $pas2Bloc = $estat['completada'] ? 'bloc-completat' : ($pas1Completat ? 'bloc-ac
           <p class="mb-2">Revisió sol·licitada el <?= htmlspecialchars(fase3DocumentFuncionalData((string) $estat['solicitud_oberta']['solicitado_en']), ENT_QUOTES, 'UTF-8') ?>.</p>
           <?php if ($tutorInterventionVisible): ?>
               <div class="d-flex flex-wrap gap-2">
-                  <button type="button" class="btn btn-fase btn-atencio-solid" id="fase3-validar">Validar document funcional</button>
+                  <button type="button" class="btn btn-fase btn-atencio-solid" id="fase3-validar">Validar <?= htmlspecialchars($nomDocumentFase3Minuscula, ENT_QUOTES, 'UTF-8') ?></button>
               </div>
               <p class="small text-muted mb-0 mt-2" id="fase3-tutor-missatge">&nbsp;</p>
           <?php endif; ?>
@@ -76,7 +97,7 @@ $pas2Bloc = $estat['completada'] ? 'bloc-completat' : ($pas1Completat ? 'bloc-ac
  </div>
 </section>
 <section class="bloc <?= $pas2Bloc ?>"><div class="bloc-contingut"><div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2"><div><div class="bloc-tipus">Pas 2</div><h2>PDF definitiu</h2></div><span class="badge rounded-pill px-3 py-2 <?= $estat['completada'] ? 'text-bg-success' : ($estat['validat'] ? 'badge-activitat' : 'text-bg-secondary') ?>"><?= $estat['completada'] ? 'Completat' : ($estat['validat'] ? 'Pendent' : 'Bloquejat') ?></span></div>
-<?php if (!$estat['validat']): ?><p class="mb-0"><i class="bi bi-lock-fill me-1"></i> El tutor o tutora ha de validar abans el document.</p><?php elseif ($estat['pdf'] !== ''): ?><a href="<?= htmlspecialchars($estat['pdf'], ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener noreferrer" class="tasca-recurs-link tasca-recurs-resultat--completat"><i class="bi bi-file-earmark-pdf"></i> Document funcional definitiu</a><?php elseif ($esAlumnat): ?><div class="input-group"><input type="file" class="form-control" id="fase3-pdf" accept="application/pdf,.pdf"><button class="btn btn-fase btn-puig-solid" type="button" id="fase3-pujar-pdf">Pujar PDF</button></div><p class="small text-muted mb-0 mt-2" id="fase3-pdf-missatge">&nbsp;</p><?php else: ?><p class="mb-0">Pendent que l’alumnat pugi el PDF definitiu.</p><?php endif; ?></div></section>
+<?php if (!$estat['validat']): ?><p class="mb-0"><i class="bi bi-lock-fill me-1"></i> El tutor o tutora ha de validar abans el document.</p><?php elseif ($estat['pdf'] !== ''): ?><a href="<?= htmlspecialchars($estat['pdf'], ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener noreferrer" class="tasca-recurs-link tasca-recurs-resultat--completat"><i class="bi bi-file-earmark-pdf"></i> <?= htmlspecialchars($nomDocumentFase3, ENT_QUOTES, 'UTF-8') ?></a><?php elseif ($esAlumnat): ?><div class="input-group"><input type="file" class="form-control" id="fase3-pdf" accept="application/pdf,.pdf"><button class="btn btn-fase btn-puig-solid" type="button" id="fase3-pujar-pdf">Pujar PDF</button></div><p class="small text-muted mb-0 mt-2" id="fase3-pdf-missatge">&nbsp;</p><?php else: ?><p class="mb-0">Pendent que l’alumnat pugi el PDF definitiu.</p><?php endif; ?></div></section>
 </div>
 
 <?php if (!$esAlumnat && $potValidarFuncional && $estat['solicitud_oberta'] && !$estat['validat']): ?>

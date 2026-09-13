@@ -123,7 +123,7 @@ function fase2ClassificacioObtenirEstat(PDO $pdo, int $idProjecte): array
             SELECT id_categoria_proyecto, nombre
             FROM app.proyecto_categorias
             WHERE familia_ciclo_id = :familia AND (activo = true OR id_categoria_proyecto = :categoria_actual)
-            ORDER BY orden, nombre
+            ORDER BY orden ASC, id_categoria_proyecto ASC
         ");
         $stmt->execute([':familia' => $familiaId, ':categoria_actual' => $categoriaId ?? 0]);
         $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);

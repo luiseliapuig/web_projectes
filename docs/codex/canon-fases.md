@@ -94,26 +94,32 @@ Enseña:
 - subida del PDF definitivo pasando por la capa común (`pdfGuardarDefinitiu()`) — ver [§13](#13-capa-pdf-norma-obligatoria);
 - resumen final de evidencias reutilizado tal cual por la targeta-resum (`fase-2_tasques.php`) y por «Fases del projecte» (`fases_projecte.php`), ambos leyendo `fase2PropostaObtenirEstat()`/`fase2ClassificacioObtenirEstat()`.
 
+Las plantillas de Propuesta se obtienen de `enlaces-recursos.php` según `proyectos.categoria_proyecto_id`: Desarrollo (ID 2) usa la familia documental de Desarrollo; Investigación (ID 1) e I+D (ID 5) usan la familia documental de Investigación. I+D sigue siendo una categoría propia y no define una tercera familia de recursos.
+
+### Fase 3 — Definición del proyecto
+
+`Definició del projecte` es el nombre canónico y transversal de Fase 3. Desarrollo (categoría ID 2) la materializa mediante un `Document funcional`; Investigación (ID 1) e I+D (ID 5), mediante un `Pla de recerca`. Los tres casos reutilizan exactamente el mismo documento vivo, solicitud de revisión, validación del tutor y PDF resultante; solo cambia el lenguaje visible y la familia de plantillas. I+D conserva su categoría propia y consume deliberadamente la familia documental de Investigación.
+
 ### Fase 4 — dos tareas simples basadas en URL
 
 `Planificació temporal del projecte` y `Gestió del projecte` son tareas independientes. Sus fuentes únicas V2 son, respectivamente, `proyectos.planificacion_url` y `proyectos.gestion_url`; los adjuntos históricos `proyecto_adjuntos.planificacio/gestio` no se consultan ni se usan como fallback. Cada tarea queda completada cuando su URL no está vacía y la fase solo queda completada cuando ambas lo están. No hay revisión, intervención docente, PDF ni adjuntos: el alumnado puede modificar las URLs y el profesorado autorizado solo las consulta.
 
-### Fase 5 — cuatro tareas visibles en paralelo
+### Fase 5 — tareas aplicables en paralelo
 
-El orden canónico es: `Repositoris Git`, `Tecnologies i eines`, `Autoavaluació final` y `Entrega del projecte`. Las cuatro tareas están accesibles en paralelo desde que Fase 5 queda desbloqueada; ninguna actúa como prerrequisito de otra.
+El orden canónico es: `Repositoris Git` cuando sea aplicable, `Tecnologies i eines`, `Autoavaluació final` y `Entrega del projecte`. Las tareas aplicables están accesibles en paralelo desde que Fase 5 queda desbloqueada; ninguna actúa como prerrequisito de otra.
 
-- `Repositoris Git`: reúne `proyectos.git_url`/`git_etiqueta` y todos los `proyecto_adjuntos.tipo='git'` mediante `fase5RepositorisObtenirEstat()`. Visualmente todos son repositorios equivalentes y la tarea queda completada cuando la colección contiene al menos uno.
+- `Repositoris Git`: solo forma parte de Fase 5 para `categoria_proyecto_id` 2 (Desarrollo) y 5 (I+D). Para la categoría 1 (Investigación) no se renderiza ni se exige para completar la fase. Cuando es aplicable, reúne `proyectos.git_url`/`git_etiqueta` y todos los `proyecto_adjuntos.tipo='git'` mediante `fase5RepositorisObtenirEstat()`; la tarea queda completada cuando la colección contiene al menos uno. I+D comparte recursos documentales con Investigación en otras fases, pero en Fase 5 sí incluye desarrollo técnico y repositorios Git.
 - `Tecnologies i eines`: usa exclusivamente `app.rel_proyectos_tecnologias` y `app.rel_proyectos_herramientas` mediante `fase5StackObtenirEstat()`. Se completa con al menos una tecnología; las herramientas son opcionales. `proyectos.stack` no es fuente V2.
 - `Autoavaluació final`: usa `proyectos.autoev1..4`. `fase5AutoavaluacioPreguntes()` centraliza las preguntas y `fase5AutoavaluacioObtenirEstat()` exige las cuatro respuestas para completar la tarea.
 - `Entrega del projecte`: usa `proyectos.url_proyecto` mediante `fase5ProduccioObtenirEstat()` y queda completada cuando la URL está informada.
 
-`fase5ObtenirEstat()` es el agregador canónico: Fase 5 solo queda completada cuando las cuatro tareas anteriores están completas. Lo consumen la página de fase, «Fases del projecte», el sidebar y el eyebrow interior a través de `fasesEstatAparenca()`.
+`fase5ObtenirEstat()` es el agregador canónico: Fase 5 solo queda completada cuando todas las tareas aplicables están completas. En Investigación exige tecnologías, autoevaluación y entrega; en Desarrollo e I+D exige además Git. Lo consumen la página de fase, «Fases del projecte», el sidebar y el eyebrow interior a través de `fasesEstatAparenca()`.
 
 `Preparació de l’entorn de desenvolupament` permanece implementada y conserva routing, permisos, revisión y pipeline PDF, pero queda fuera del recorrido visible, del resumen y del completado global de Fase 5.
 
 ### Fase 6 — Document de la memòria
 
-La primera tarea real de Fase 6 pone en marcha el documento vivo de la memoria. Usa exclusivamente `proyectos.memoria_url`: `fase6MemoriaObtenirEstat()` la considera completada cuando la URL está informada y pendiente cuando está vacía. El alumnado puede crearla, modificarla o vaciarla; el profesorado autorizado reutiliza el mismo detalle en modo de solo lectura. Las dos plantillas oficiales viven como variables en `fase-6_recursos.php`.
+La primera tarea real de Fase 6 pone en marcha el documento vivo de la memoria. Usa exclusivamente `proyectos.memoria_url`: `fase6MemoriaObtenirEstat()` la considera completada cuando la URL está informada y pendiente cuando está vacía. El alumnado puede crearla, modificarla o vaciarla; el profesorado autorizado reutiliza el mismo detalle en modo de solo lectura. La tarjeta de guía y plantillas del resumen de la fase y los CTA contextuales del detalle obtienen las URLs estáticas de `enlaces-recursos.php` según `proyectos.categoria_proyecto_id`: Desarrollo (ID 2) usa su familia documental; Investigación (ID 1) e I+D (ID 5) usan la de Investigación. El índice de la tarjeta se alimenta de los apartados activos de `app.memoria_estructura` y conserva sus `enlace_guia`; los recursos siguen siendo consultables aunque la fase esté visualmente bloqueada.
 
 Esta tarea no representa la entrega definitiva y no consulta ni modifica `memoria_pdf` o `memoria_validada_en`.
 
@@ -151,7 +157,7 @@ La única actividad funcional de Fase 7 usa el campo canónico `proyectos.presen
 | 2 | `fase2PropostaObtenirEstat()` — devuelve array completo (`completada`, `atencion`, `pdf`, `url`, `validada`, `classe_badge`, `classe_cta`, `classe_outline`, …) | `(PDO $pdo, int $idProyecto): array` | `fase-2_proposta_funcions.php` |
 | 3 | `fase3DocumentFuncionalObtenirEstat()['completada']`: requiere `funcional_validado_en` y `funcional_pdf`. | Revisión funcional abierta o validación sin PDF definitivo. | `funcional_url`, `funcional_validado_en`, `funcional_pdf`, revisión `tipo='funcional'` |
 | 4 | `fase4PlanificacioGestioObtenirEstat()['completada']`: requiere ambas URLs no vacías. | Dos tareas simples e independientes, sin revisión docente. | `planificacion_url`, `gestion_url` |
-| 5 | `fase5ObtenirEstat()['completada']`: repositorio + tecnología + cuatro respuestas de autoevaluación + URL de producción. | Cuatro tareas visibles e independientes. | Git actual, `rel_proyectos_tecnologias`, `autoev1..4`, `url_proyecto` |
+| 5 | `fase5ObtenirEstat()['completada']`: tecnología + cuatro respuestas de autoevaluación + URL de producción; añade repositorio para Desarrollo (ID 2) e I+D (ID 5), pero no para Investigación (ID 1). | Tres o cuatro tareas visibles e independientes según categoría. | `categoria_proyecto_id`, Git aplicable, `rel_proyectos_tecnologias`, `autoev1..4`, `url_proyecto` |
 | 6 | `fase6ObtenirEstat()['completada']`, que exige simultáneamente documento vivo, fitxa pública y memoria definitiva. No altera la regla de Fase 7. | Documento vivo, fitxa pública y entrega definitiva editables e independientes. | `memoria_url`; `nombre`, `resumen`, `descripcion`, `ruta_imagen`; `memoria_pdf` |
 | 7 | `fase7PresentacioDefensaObtenirEstat()['completada']`: existe `presentacion_pdf`. Se desbloquea únicamente con Fase 5 y Fase 6 completas. | PDF de la presentación de defensa, sustituible mientras la fase sea editable. | `presentacion_pdf` |
 
@@ -376,7 +382,7 @@ Cuando una tarea requiere revisión formal, la solicitud abierta se representa d
 
 Cerrar una solicitud no equivale a rechazar, suspender ni pedir cambios formalmente: solo establece `resuelto_en` en `app.revisiones_solicitudes`, no crea un estado funcional nuevo, no altera la URL ni el documento, no desbloquea el PDF y no envía un correo de rechazo. El alumnado puede continuar trabajando y volver a solicitar revisión posteriormente. Tanto la X como su acción servidor solo están disponibles para quien tenga autoridad formal para intervenir; ocultarla en la vista nunca sustituye el gate servidor.
 
-Referencias reales: Fase 2 · Proposta de projecte ([`fase-2_proposta_detall.php`](../../inc/paginas/alumnos/informatica/fase-2_proposta_detall.php), [`fase-2-tutor_accion.php`](../../inc/paginas/profesores/tutor/fase-2-tutor_accion.php)), Fase 3 · Document funcional ([`fase-3_document_funcional_detall.php`](../../inc/paginas/alumnos/informatica/fase-3_document_funcional_detall.php), [`fase-3-tutor_accion.php`](../../inc/paginas/profesores/tutor/fase-3-tutor_accion.php)) y la primera etapa de Fase 5 ([`fase-5_preparacio_entorn_detall.php`](../../inc/paginas/alumnos/informatica/fase-5_preparacio_entorn_detall.php), [`fase-5-tutor_entorn_accion.php`](../../inc/paginas/profesores/tutor/fase-5-tutor_entorn_accion.php)).
+Referencias reales: Fase 2 · Proposta de projecte ([`fase-2_proposta_detall.php`](../../inc/paginas/alumnos/informatica/fase-2_proposta_detall.php), [`fase-2-tutor_accion.php`](../../inc/paginas/profesores/tutor/fase-2-tutor_accion.php)), Fase 3 · Definició del projecte ([`fase-3_document_funcional_detall.php`](../../inc/paginas/alumnos/informatica/fase-3_document_funcional_detall.php), [`fase-3-tutor_accion.php`](../../inc/paginas/profesores/tutor/fase-3-tutor_accion.php)) y la primera etapa de Fase 5 ([`fase-5_preparacio_entorn_detall.php`](../../inc/paginas/alumnos/informatica/fase-5_preparacio_entorn_detall.php), [`fase-5-tutor_entorn_accion.php`](../../inc/paginas/profesores/tutor/fase-5-tutor_entorn_accion.php)).
 
 Cabecera contextual del profesorado: [`fase-tutor_capcalera.php`](../../inc/paginas/profesores/tutor/fase-tutor_capcalera.php) — resuelve `$titolProjecteCapcalera` (nombres del alumnado del proyecto) y expone el flag `$capcaleraOcultarTornarResum` (§10).
 
@@ -489,7 +495,7 @@ Consumidores actuales (todos vía `pdfGuardarDefinitiu()`, ninguno con lógica p
 | `ficha_proyecto_adjunto_accion.php` | Adjuntos tipo `arxiu` en `proyecto_adjuntos` | V1 (legacy, todavía en producción) |
 | `ficha_proyecto_defensa_accion.php` | `presentacion_pdf` | V1 adaptada al pipeline PDF común |
 
-**Importante para Fase 3 (Document funcional) y Fase 6 (Memòria)**: las evidencias definitivas tienen como fuentes únicas `proyectos.funcional_pdf` y `proyectos.memoria_pdf`. La ficha V1 superviviente ya lee y escribe esas mismas columnas mediante `pdfGuardarDefinitiu()`. Las antiguas `ruta_funcional`/`ruta_memoria` se retiraron tras comprobar y migrar sus datos; no deben recrearse ni usarse como fallback.
+**Importante para Fase 3 (Definició del projecte) y Fase 6 (Memòria)**: las evidencias definitivas tienen como fuentes únicas `proyectos.funcional_pdf` y `proyectos.memoria_pdf`. La ficha V1 superviviente ya lee y escribe esas mismas columnas mediante `pdfGuardarDefinitiu()`. Las antiguas `ruta_funcional`/`ruta_memoria` se retiraron tras comprobar y migrar sus datos; no deben recrearse ni usarse como fallback.
 
 Qué hace la capa por dentro (sin que el consumidor lo reimplemente):
 

@@ -55,7 +55,22 @@ unset($_SESSION['fase_1_compromis_mensaje'], $_SESSION['fase_1_compromis_error']
 
     <p class="fase-introduccio mb-0"><?= htmlspecialchars($faseIntroduccion, ENT_QUOTES, 'UTF-8') ?></p>
 
-    <section class="bloc bloc-informacio">
+    <style>
+    .fase-1-exemples::before { background: #2563A6; }
+    .fase-1-exemples .bloc-tipus { color: #2563A6; }
+    .fase-1-exemples .btn-fase-informacio {
+        color: #fff;
+        background: #2563A6;
+        border-color: #2563A6;
+    }
+    .fase-1-exemples .btn-fase-informacio:hover,
+    .fase-1-exemples .btn-fase-informacio:focus-visible {
+        color: #fff;
+        background: #1f528a;
+        border-color: #1f528a;
+    }
+    </style>
+    <section class="bloc bloc-informacio fase-1-exemples">
         <div class="bloc-contingut">
             <div class="bloc-tipus">Exemples</div>
             <h2>Projectes d’altres cursos</h2>

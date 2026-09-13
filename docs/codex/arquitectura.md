@@ -144,6 +144,16 @@ Las páginas de las siete fases reutilizan las cajas definidas en `assets/css/es
 
 No intercambies el significado visual de ambas variantes al crear contenidos nuevos.
 
+### Recursos estáticos del recorrido de Informática
+
+`inc/paginas/alumnos/informatica/enlaces-recursos.php` es la fuente canónica de las URLs externas y recursos estáticos utilizados por las fases de Informática. Está concebido deliberadamente como un archivo de variables PHP simples, legible y editable directamente por una persona; no debe convertirse en un array de configuración, un helper genérico ni una capa nueva.
+
+Los materiales propios que la aplicación sirve directamente viven bajo `/materiales-de-apoyo/`. La URL pública de cada material consumido por el recorrido se declara en `enlaces-recursos.php`.
+
+Esta fuente no sustituye datos propios de un proyecto ni recursos administrables en base de datos. Deben continuar en su modelo actual, entre otros, los documentos vivos del alumnado, repositorios, URLs de proyectos desplegados y `memoria_estructura.enlace_guia` para las guías de apartados de Memoria.
+
+La creación del archivo canónico no implica por sí sola que todas las fases ya lo consuman: mientras se completa la integración pueden coexistir temporalmente variables legacy en archivos de fase. No dupliques nuevas URLs durante esa transición.
+
 ## Fases y tareas
 
 > **Antes de implementar o tocar cualquier fase (Fase 3-7 incluidas), lee

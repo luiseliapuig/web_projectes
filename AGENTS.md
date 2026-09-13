@@ -69,6 +69,12 @@ Lee [docs/codex/seguridad.md](docs/codex/seguridad.md) antes de tocar login, ses
 - Reutiliza clases y terminología de la sección existente.
 - No introduzcas un sistema de diseño o JavaScript complejo para una interacción sencilla.
 
+## Recursos del recorrido de Informática
+
+- `inc/paginas/alumnos/informatica/enlaces-recursos.php` es la fuente canónica, simple y editable por personas, de las URLs externas y recursos estáticos del recorrido de Proyecto en Informática. Conserva sus variables PHP simples; no las sustituyas por arrays, helpers ni otro sistema de configuración.
+- `/materiales-de-apoyo/` contiene materiales propios servidos directamente por la aplicación. Las URLs públicas hacia esos materiales se declaran también en `enlaces-recursos.php` cuando formen parte del recorrido de Informática.
+- No confundas estos recursos estáticos con URLs introducidas por el alumnado o modeladas en base de datos, como documentos vivos, repositorios, proyectos desplegados o guías por apartado de Memoria.
+
 ## Entrega
 
 - Valida el cambio de forma proporcional al riesgo.

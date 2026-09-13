@@ -81,14 +81,14 @@ $classeResultatPdf = $estatProposta === null
                         <?= htmlspecialchars((string) $classificacioTasca['categoria_nombre'], ENT_QUOTES, 'UTF-8') ?><?= $classificacioTasca['tipo_nombre'] !== null ? ' › ' . htmlspecialchars((string) $classificacioTasca['tipo_nombre'], ENT_QUOTES, 'UTF-8') : '' ?>
                     </p>
                 <?php endif; ?>
-                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
-                    <a href="<?= htmlspecialchars($enllacEntrarProposta, ENT_QUOTES, 'UTF-8') ?>" class="btn btn-fase <?= $estatProposta['classe_cta'] ?>">Entrar</a>
-                    <?php if ($enllacPdfTasca !== null): ?>
+                <?php if ($enllacPdfTasca !== null): ?>
+                    <div class="d-flex flex-column gap-2 mb-3">
                         <a href="<?= htmlspecialchars($enllacPdfTasca, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener noreferrer" class="tasca-recurs-link <?= $classeResultatPdf ?>">
-                            <i class="bi bi-file-earmark-pdf" aria-hidden="true"></i> PDF definitiu
+                            <i class="bi bi-file-earmark-pdf" aria-hidden="true"></i> Proposta de projecte
                         </a>
-                    <?php endif; ?>
-                </div>
+                    </div>
+                <?php endif; ?>
+                <a href="<?= htmlspecialchars($enllacEntrarProposta, ENT_QUOTES, 'UTF-8') ?>" class="btn btn-fase <?= $estatProposta['classe_cta'] ?>">Entrar</a>
             </div>
         </section>
     <?php endif; ?>

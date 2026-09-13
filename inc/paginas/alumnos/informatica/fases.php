@@ -34,8 +34,8 @@ return [
         'archivo' => 'fase-2.php',
     ],
     3 => [
-        'titulo' => 'Document funcional',
-        'descripcio' => 'Definiu amb claredat què voleu construir, a qui s’adreça el projecte, quins requisits ha de complir i quines funcionalitats tindrà abans de començar el desenvolupament.',
+        'titulo' => 'Definició del projecte',
+        'descripcio' => 'Definiu amb claredat què voleu fer, quin abast tindrà el projecte i com l’abordareu abans de començar-ne el desenvolupament o la recerca.',
         'ruta' => '/fases-del-projecte/fase-3',
         'main' => 'alumne-fase-3',
         'archivo' => 'fase-3.php',
@@ -49,7 +49,7 @@ return [
     ],
     5 => [
         'titulo' => "Desenvolupament\ndel projecte",
-        'descripcio' => 'Aquesta és la fase on el vostre projecte començarà a prendre forma i evolucionarà fins a convertir-se en un producte final preparat per posar-lo en producció.',
+        'descripcio' => 'Aquesta és la fase en què desenvolupareu el projecte, aplicareu la planificació i fareu evolucionar el treball fins a obtenir-ne el resultat final.',
         'ruta' => '/fases-del-projecte/fase-5',
         'main' => 'alumne-fase-5',
         'archivo' => 'fase-5.php',

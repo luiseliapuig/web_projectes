@@ -123,9 +123,10 @@ sudo install -m 0644 deploy/systemd/web-proyectos-autoseguiment-feedback.timer /
 sudo systemctl daemon-reload
 ```
 
-Abans d'activar el feedback cal haver aplicat la migració
-`migrations/20260902_autoseguiment_feedback_email.sql`. Les proves manuals,
-que poden encolar o enviar correu real segons el servei, s'executen una a una:
+Abans d'activar el feedback, l'esquema desplegat ha d'incloure els camps
+`feedback_email_habilitado` i `feedback_email_encolado_en` d'Autoseguiment.
+Les proves manuals, que poden encolar o enviar correu real segons el servei,
+s'executen una a una:
 
 ```bash
 sudo systemctl start web-proyectos-autoseguiment-feedback.service

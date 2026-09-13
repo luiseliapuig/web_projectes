@@ -21,7 +21,7 @@ function fase5RepositorisObtenirEstat(PDO $pdo, int $idProjecte): array
     $principal = [];
     $addicionals = [];
     if ($idProjecte > 0) {
-        $stmt = $pdo->prepare('SELECT git_url, git_etiqueta, entorno_desarrollo_url, entorno_desarrollo_pdf, entorno_desarrollo_validado_en FROM app.proyectos WHERE id_proyecto = :id');
+        $stmt = $pdo->prepare('SELECT categoria_proyecto_id, git_url, git_etiqueta, entorno_desarrollo_url, entorno_desarrollo_pdf, entorno_desarrollo_validado_en FROM app.proyectos WHERE id_proyecto = :id');
         $stmt->execute([':id' => $idProjecte]);
         $principal = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
 
@@ -31,6 +31,7 @@ function fase5RepositorisObtenirEstat(PDO $pdo, int $idProjecte): array
     }
 
     $url = trim((string) ($principal['git_url'] ?? ''));
+    $categoriaId = isset($principal['categoria_proyecto_id']) ? (int) $principal['categoria_proyecto_id'] : null;
     $etiqueta = trim((string) ($principal['git_etiqueta'] ?? ''));
     $entornUrl = trim((string) ($principal['entorno_desarrollo_url'] ?? ''));
     $entornPdf = trim((string) ($principal['entorno_desarrollo_pdf'] ?? ''));
@@ -56,6 +57,7 @@ function fase5RepositorisObtenirEstat(PDO $pdo, int $idProjecte): array
     $documentAtencio = ($entornValidat && !$documentCompletat) || $solicitudOberta !== null;
 
     return [
+        'categoria_id' => $categoriaId,
         'principal_url' => $url,
         'principal_etiqueta' => $etiqueta,
         'principal_literal' => fase5RepositoriLiteral($etiqueta),

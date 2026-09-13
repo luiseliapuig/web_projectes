@@ -1,12 +1,27 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__ . '/fase-6_memoria_funcions.php';
-require __DIR__ . '/fase-6_recursos.php';
+require_once __DIR__ . '/fase-2_proposta_funcions.php';
+require_once __DIR__ . '/enlaces-recursos.php';
 
 $rolVisualitzacio = $rolVisualitzacio ?? 'alumne';
 $esAlumnat = $rolVisualitzacio === 'alumne';
 $projecteId = (int) ($proyectoAlumno['id_proyecto'] ?? 0);
 $estatMemoria = fase6MemoriaObtenirEstat($pdo, $projecteId);
+$classificacio = fase2ClassificacioObtenirEstat($pdo, $projecteId);
+$plantillaMemoriaCaUrl = '';
+$plantillaMemoriaEsUrl = '';
+switch ($classificacio['categoria_id']) {
+    case 2: // Projecte de desenvolupament
+        $plantillaMemoriaCaUrl = $plantilla_memoria_desarrollo_ca;
+        $plantillaMemoriaEsUrl = $plantilla_memoria_desarrollo_es;
+        break;
+    case 1: // Projecte d'investigació
+    case 5: // Projecte I+D: comparteix la família documental d'investigació
+        $plantillaMemoriaCaUrl = $plantilla_memoria_investigacion_ca;
+        $plantillaMemoriaEsUrl = $plantilla_memoria_investigacion_es;
+        break;
+}
 $enlaceRevisioMemoria = '/memoria';
 ?>
 <section class="bloc <?= $estatMemoria['completada'] ? 'bloc-completat' : 'bloc-activitat' ?>">
@@ -15,16 +30,26 @@ $enlaceRevisioMemoria = '/memoria';
         <h2>Document de la memòria</h2>
         <p class="mb-3">Poseu en marxa el document viu de la memòria i manteniu-lo actualitzat durant el desenvolupament del projecte.</p>
 
-        <h3 class="h6 mb-2">Plantilla de la memòria</h3>
-        <div class="tasca-recursos mb-4">
-            <a href="<?= htmlspecialchars($fase6PlantillaMemoriaCaUrl, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener noreferrer" class="tasca-recurs-link"><i class="bi bi-file-earmark-text" aria-hidden="true"></i> Plantilla de la memòria (català)</a>
-            <span class="tasca-recursos-separador" aria-hidden="true">·</span>
-            <a href="<?= htmlspecialchars($fase6PlantillaMemoriaEsUrl, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener noreferrer" class="tasca-recurs-link"><i class="bi bi-file-earmark-text" aria-hidden="true"></i> Plantilla de la memòria (castellà)</a>
-        </div>
-
-        <ol class="mb-4 ps-3">
+        <ol class="mb-3 ps-3">
             <li class="mb-2">Escolliu una de les dues plantilles i creeu-ne la vostra pròpia còpia.</li>
-            <li class="mb-2">Utilitzeu aquesta còpia com a document viu de la memòria i aneu-la completant durant el projecte.</li>
+            <li>Utilitzeu aquesta còpia com a document viu de la memòria i aneu-la completant durant el projecte.</li>
+        </ol>
+
+        <?php if ($plantillaMemoriaCaUrl !== '' || $plantillaMemoriaEsUrl !== ''): ?>
+            <div class="tasca-recursos mb-4">
+                <?php if ($plantillaMemoriaCaUrl !== ''): ?>
+                    <a href="<?= htmlspecialchars($plantillaMemoriaCaUrl, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener noreferrer" class="tasca-recurs-link"><i class="bi bi-file-earmark-text" aria-hidden="true"></i> Memòria del projecte (ca)</a>
+                <?php endif; ?>
+                <?php if ($plantillaMemoriaCaUrl !== '' && $plantillaMemoriaEsUrl !== ''): ?>
+                    <span class="tasca-recursos-separador" aria-hidden="true">·</span>
+                <?php endif; ?>
+                <?php if ($plantillaMemoriaEsUrl !== ''): ?>
+                    <a href="<?= htmlspecialchars($plantillaMemoriaEsUrl, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener noreferrer" class="tasca-recurs-link"><i class="bi bi-file-earmark-text" aria-hidden="true"></i> Memòria del projecte (es)</a>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
+
+        <ol class="mb-4 ps-3" start="3">
             <li class="mb-2"><strong>Compartiu el document de manera que el professorat hi pugui accedir.</strong> No n’hi ha prou que només funcioni des del vostre compte.</li>
             <li>Enganxeu aquí l’enllaç de la vostra còpia, no l’enllaç de la plantilla.</li>
         </ol>

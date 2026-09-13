@@ -120,10 +120,13 @@ function fasesProjecteTargeta(
             $evidencies[] = ['tipo' => 'text', 'text' => $textClassificacio];
         }
         if ($estatFaseDos !== null && $estatFaseDos['pdf'] !== '') {
-            $evidencies[] = ['tipo' => 'pdf', 'text' => 'Proposta definitiva', 'href' => $estatFaseDos['pdf']];
+            $evidencies[] = ['tipo' => 'pdf', 'text' => 'Proposta de projecte', 'href' => $estatFaseDos['pdf']];
         }
     } elseif ($numeroFase === 3 && $estatFaseTres !== null && $estatFaseTres['completada']) {
-        $evidencies[] = ['tipo' => 'pdf', 'text' => 'Document funcional definitiu', 'href' => $estatFaseTres['pdf']];
+        $nomDocumentFaseTres = $classificacioTasca !== null && in_array($classificacioTasca['categoria_id'], [1, 5], true)
+            ? 'Pla de recerca'
+            : 'Document funcional';
+        $evidencies[] = ['tipo' => 'pdf', 'text' => $nomDocumentFaseTres, 'href' => $estatFaseTres['pdf']];
     } elseif ($numeroFase === 4 && $estatFaseQuatre !== null) {
         if ($estatFaseQuatre['planificacio_url'] !== '') {
             $evidencies[] = ['tipo' => 'link', 'text' => 'Planificació temporal', 'href' => $estatFaseQuatre['planificacio_url']];
@@ -199,6 +202,7 @@ function fasesProjecteTargeta(
 
                                     <?php if ((int) $numeroFase === 5 && !$aparenca['bloquejada']): ?>
                                         <div class="d-grid gap-3 mb-3">
+                                            <?php if ($estatFaseCinc['git_aplica']): ?>
                                             <div class="pb-3 border-bottom">
                                                 <?php if ($estatFaseCinc['repositoris']['repositoris'] !== []): ?>
                                                     <div class="d-grid gap-2">
@@ -210,6 +214,7 @@ function fasesProjecteTargeta(
                                                     </div>
                                                 <?php endif; ?>
                                             </div>
+                                            <?php endif; ?>
 
                                             <div class="pb-3 border-bottom">
                                                 <div class="stack-resum-titol<?= $estatFaseCinc['stack']['tecnologies'] === [] ? ' mb-3' : '' ?>">Tecnologies</div>

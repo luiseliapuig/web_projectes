@@ -10,6 +10,7 @@ require_once dirname(__DIR__, 3) . '/fases/funciones.php';
 require_once dirname(__DIR__, 3) . '/memoria/funciones.php';
 require_once __DIR__ . '/resum-tutor_fases_funcions.php';
 require_once __DIR__ . '/grup-actiu_funcions.php';
+require_once dirname(__DIR__, 2) . '/alumnos/informatica/enlaces-recursos.php';
 
 $profesorId = (int) $_SESSION['professor_id'];
 $cursoAcademico = cursoAcademicoActual();
@@ -478,6 +479,10 @@ if ($idsGruposAutorizados !== []) {
     background: #fff;
     overflow: hidden;
 }
+.resum-panell > .table-responsive {
+    padding-bottom: .75rem;
+    background: #fff;
+}
 .resum-panell-cap {
     padding: 1.5rem 1.5rem 1rem;
 }
@@ -804,6 +809,16 @@ if ($idsGruposAutorizados !== []) {
                         <?php require __DIR__ . '/resum-tutor_tutors.php'; ?>
                     <?php endif; ?>
                 <?php endif; ?>
+
+                <div class="mt-4 px-1">
+                    <h2 class="h6 text-uppercase text-muted mb-2">Recursos</h2>
+                    <a href="<?= htmlspecialchars($presentacion_modulo, ENT_QUOTES, 'UTF-8') ?>"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="link-secondary text-decoration-none">
+                        <i class="bi bi-easel me-1" aria-hidden="true"></i> Presentació del mòdul
+                    </a>
+                </div>
             </div>
 
             <!-- ══════════════════════════════════════════════════════════
@@ -853,4 +868,5 @@ if ($idsGruposAutorizados !== []) {
             </div>
         </div>
     <?php endif; ?>
+
 </div>

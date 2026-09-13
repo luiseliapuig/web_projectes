@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guión de Defensa TFG</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #FAFAF7;
+  --surface: #FFFFFF;
+  --ink: #1C1B18;
+  --ink-muted: #6A6860;
+  --ink-faint: #AEACA6;
+  --warm: #C8521A;
+  --warm-light: #FDF0E8;
+  --warm-mid: #F4C9A8;
+  --teal: #1A6670;
+  --teal-light: #E6F2F3;
+  --border: rgba(28,27,24,0.09);
+  --border-strong: rgba(28,27,24,0.18);
+  --nav-h: 54px;
+  --radius: 6px;
+  --radius-lg: 14px;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+/* ── HERO ── */
+.hero {
+  background: var(--ink);
+  color: #fff;
+  padding: 90px 48px 80px;
+  position: relative;
+  overflow: hidden;
+}
+.hero-pattern {
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    0deg, transparent, transparent 39px, rgba(255,255,255,0.03) 39px, rgba(255,255,255,0.03) 40px
+  ), repeating-linear-gradient(
+    90deg, transparent, transparent 39px, rgba(255,255,255,0.03) 39px, rgba(255,255,255,0.03) 40px
+  );
+}
+.hero-inner { position: relative; max-width: 900px; margin: 0 auto; }
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--warm-mid);
+  margin-bottom: 28px;
+}
+.hero-eyebrow::before {
+  content: '';
+  display: inline-block;
+  width: 28px; height: 1px;
+  background: var(--warm-mid);
+}
+.hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(38px, 6vw, 68px);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  color: #fff;
+  max-width: 700px;
+  margin-bottom: 24px;
+}
+.hero h1 em {
+  font-style: italic;
+  color: var(--warm-mid);
+}
+.hero-desc {
+  font-size: 16px;
+  font-weight: 300;
+  color: rgba(255,255,255,0.55);
+  max-width: 520px;
+  line-height: 1.7;
+  margin-bottom: 48px;
+}
+.hero-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.hero-pill {
+  font-size: 12px;
+  font-weight: 400;
+  color: rgba(255,255,255,0.55);
+  border: 1px solid rgba(255,255,255,0.15);
+  padding: 5px 14px;
+  border-radius: 100px;
+}
+.hero-pill strong {
+  color: rgba(255,255,255,0.85);
+  font-weight: 500;
+}
+
+/* ── STICKY NAV ── */
+.sticky-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--ink);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.sticky-nav-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 48px;
+  height: var(--nav-h);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.sticky-nav-inner::-webkit-scrollbar { display: none; }
+.sticky-nav a {
+  font-size: 12px;
+  font-weight: 400;
+  color: rgba(255,255,255,0.45);
+  text-decoration: none;
+  white-space: nowrap;
+  padding: 5px 13px;
+  border-radius: 100px;
+  border: 1px solid transparent;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+  flex-shrink: 0;
+}
+.sticky-nav a:hover { color: rgba(255,255,255,0.8); }
+.sticky-nav a.active {
+  color: #fff;
+  border-color: rgba(255,255,255,0.3);
+  background: rgba(255,255,255,0.08);
+  font-weight: 500;
+}
+
+/* ── INTRO GENERAL ── */
+.intro-general {
+  background: var(--warm-light);
+  border-bottom: 1px solid var(--warm-mid);
+  padding: 40px 48px;
+}
+.intro-general-inner {
+  max-width: 900px;
+  margin: 0 auto;
+}
+.intro-general h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--warm);
+  margin-bottom: 20px;
+}
+.tips-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+.tip-card {
+  background: #fff;
+  border: 1px solid var(--warm-mid);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+}
+.tip-card-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--warm);
+  margin-bottom: 6px;
+}
+.tip-card p {
+  font-size: 13.5px;
+  color: var(--ink-muted);
+  line-height: 1.65;
+}
+
+/* ── LAYOUT ── */
+.page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 48px;
+}
+
+/* ── SECTION ── */
+.section {
+  padding: 72px 0;
+  border-bottom: 1px solid var(--border);
+  scroll-margin-top: var(--nav-h);
+}
+.section:last-child { border-bottom: none; }
+
+.section-head {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  align-items: start;
+  gap: 0 20px;
+  margin-bottom: 44px;
+}
+.section-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 44px;
+  font-weight: 900;
+  line-height: 1;
+  color: var(--border-strong);
+  padding-top: 4px;
+}
+.section-meta { }
+.section-kicker {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 6px;
+}
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(24px, 3.5vw, 36px);
+  font-weight: 900;
+  line-height: 1.1;
+  color: var(--ink);
+}
+.section-title em {
+  font-style: italic;
+  color: var(--warm);
+}
+
+/* ── TWO-COLUMN LAYOUT ── */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+@media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+
+/* ── BLOCK: diapositiva / exposición ── */
+.block {
+  border-radius: var(--radius-lg);
+  padding: 28px 28px 32px;
+}
+.block-slide {
+  background: var(--teal-light);
+  border: 1px solid rgba(26,102,112,0.18);
+}
+.block-talk {
+  background: var(--warm-light);
+  border: 1px solid rgba(200,82,26,0.15);
+}
+.block-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  margin-bottom: 18px;
+}
+.block-label-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.block-slide .block-label { color: var(--teal); }
+.block-slide .block-label-dot { background: var(--teal); }
+.block-talk .block-label { color: var(--warm); }
+.block-talk .block-label-dot { background: var(--warm); }
+
+.block ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.block ul li {
+  font-size: 14px;
+  color: var(--ink);
+  line-height: 1.6;
+  padding-left: 18px;
+  position: relative;
+}
+.block-slide ul li::before {
+  content: '▸';
+  position: absolute; left: 0;
+  color: var(--teal);
+  font-size: 11px;
+  top: 3px;
+}
+.block-talk ul li::before {
+  content: '▸';
+  position: absolute; left: 0;
+  color: var(--warm);
+  font-size: 11px;
+  top: 3px;
+}
+.block p {
+  font-size: 14px;
+  color: var(--ink-muted);
+  line-height: 1.7;
+  margin-bottom: 12px;
+}
+.block p:last-child { margin-bottom: 0; }
+
+/* ── EXAMPLE QUOTE ── */
+.example {
+  margin-top: 16px;
+  padding: 14px 16px;
+  background: rgba(0,0,0,0.04);
+  border-radius: var(--radius);
+  border-left: 3px solid currentColor;
+}
+.block-slide .example { border-color: var(--teal); }
+.block-talk .example { border-color: var(--warm); }
+.example-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 6px;
+}
+.example p {
+  font-size: 13px;
+  color: var(--ink);
+  font-style: italic;
+  line-height: 1.65;
+  margin-bottom: 0;
+}
+
+/* ── NOTA ESPECIAL (consejo) ── */
+.nota {
+  margin-top: 28px;
+  padding: 18px 22px;
+  background: #fff;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.nota-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.nota p {
+  font-size: 13.5px;
+  color: var(--ink-muted);
+  line-height: 1.65;
+  margin: 0;
+}
+.nota p strong { color: var(--ink); font-weight: 500; }
+
+/* ── OPTIONAL BADGE ── */
+.optional-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: rgba(28,27,24,0.07);
+  color: var(--ink-muted);
+  padding: 3px 10px;
+  border-radius: 100px;
+  margin-left: 10px;
+  vertical-align: middle;
+}
+
+/* ── TIME BADGE ── */
+.time-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 44px;
+  padding: 14px 18px;
+  background: var(--ink);
+  border-radius: var(--radius-lg);
+  color: #fff;
+}
+.time-bar-label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.4);
+  white-space: nowrap;
+}
+.time-bar-value {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--warm-mid);
+  white-space: nowrap;
+}
+.time-bar-desc {
+  font-size: 13px;
+  color: rgba(255,255,255,0.5);
+  line-height: 1.5;
+}
+
+/* ── FOOTER ── */
+footer {
+  background: var(--ink);
+  color: rgba(255,255,255,0.35);
+  text-align: center;
+  padding: 36px 24px;
+  font-size: 13px;
+}
+footer strong { color: rgba(255,255,255,0.6); font-weight: 500; }
+
+@media (max-width: 600px) {
+  .hero { padding: 56px 24px 60px; }
+  .page { padding: 0 20px; }
+  .sticky-nav-inner { padding: 0 20px; }
+  .intro-general { padding: 32px 24px; }
+  .section-num { font-size: 32px; }
+  .section-head { grid-template-columns: 48px 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-pattern"></div>
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Guía de presentación · TFG / TFM</div>
+    <h1>Cómo defender<br>tu proyecto <em>con nota</em></h1>
+    <p class="hero-desc">Un guión completo, sección a sección, con lo que debes poner en cada diapositiva y cómo explicarlo ante el tribunal.</p>
+    <div class="hero-pills">
+      <span class="hero-pill"><strong>10 secciones</strong></span>
+      <span class="hero-pill"><strong>20 min</strong> de presentación</span>
+      <span class="hero-pill">Diapositiva + exposición para cada punto</span>
+    </div>
+  </div>
+</header>
+
+<!-- STICKY NAV -->
+<nav class="sticky-nav">
+  <div class="sticky-nav-inner">
+    <a href="#intro-general" data-section="intro-general">Consejos generales</a>
+    <a href="#s1" data-section="s1">1 · Portada</a>
+    <a href="#s2" data-section="s2">2 · Introducción</a>
+    <a href="#s3" data-section="s3">3 · Objetivos</a>
+    <a href="#s4" data-section="s4">4 · Tecnologías</a>
+    <a href="#s5" data-section="s5">5 · Metodología</a>
+    <a href="#s6" data-section="s6">6 · Arquitectura</a>
+    <a href="#s7" data-section="s7">7 · Demo</a>
+    <a href="#s8" data-section="s8">8 · Conclusiones</a>
+    <a href="#s9" data-section="s9">9 · Trabajo futuro</a>
+    <a href="#s10" data-section="s10">10 · Preguntas</a>
+  </div>
+</nav>
+
+<!-- CONSEJOS GENERALES -->
+<section id="intro-general" class="intro-general" style="scroll-margin-top: 54px;">
+  <div class="intro-general-inner">
+    <h2>Antes de empezar: aspectos clave de la defensa oral</h2>
+    <div class="tips-grid">
+      <div class="tip-card">
+        <div class="tip-card-label">Presencia escénica</div>
+        <p>Gesticula de forma natural. Usa las manos para acompañar tus palabras — no las escondas. Mantén el contacto visual con el tribunal.</p>
+      </div>
+      <div class="tip-card">
+        <div class="tip-card-label">Vestimenta</div>
+        <p>Ni traje ni camiseta. Polo, camisa o similar. Pantalón largo. Piensa en una entrevista de trabajo: correcto sin ser excesivo.</p>
+      </div>
+      <div class="tip-card">
+        <div class="tip-card-label">Cómo hablar</div>
+        <p>Claro y honesto. Sin silencios largos ni avalancha de datos. Recuerda que les estás <em>explicando</em> tu proyecto, no recitando un guión.</p>
+      </div>
+      <div class="tip-card">
+        <div class="tip-card-label">En grupo</div>
+        <p>Asignad un portavoz por diapositiva. No interrumpáis a un compañero aunque detectéis un error. Si necesitáis apoyo, cedédle la palabra de forma natural.</p>
+      </div>
+      <div class="tip-card">
+        <div class="tip-card-label">Diapositivas</div>
+        <p>Son una guía visual, no un teleprompter. Poco texto, colores coherentes, alguna imagen. Nunca las sobrecarguéis de información.</p>
+      </div>
+      <div class="tip-card">
+        <div class="tip-card-label">Tiempo total</div>
+        <p>Disponéis de <strong>20 minutos</strong>. Eso incluye exposición y demostración. Ensayad con cronómetro.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<main class="page">
+
+<!-- S1: PORTADA -->
+<section class="section" id="s1">
+  <div class="section-head">
+    <div class="section-num">1</div>
+    <div class="section-meta">
+      <div class="section-kicker">Primera diapositiva</div>
+      <h2 class="section-title">Portada</h2>
+    </div>
+  </div>
+  <div class="two-col">
+    <div class="block block-slide">
+      <div class="block-label"><span class="block-label-dot"></span>Diapositiva</div>
+      <ul>
+        <li>Título exacto del proyecto + logotipo o imagen representativa</li>
+        <li>Nombre y apellidos del autor o autores</li>
+        <li>Nombre del centro educativo</li>
+        <li>Grado / titulación</li>
+        <li>Nombre del tutor o tutora del TFG</li>
+        <li>Curso académico (ej. 2024-25)</li>
+      </ul>
+    </div>
+    <div class="block block-talk">
+      <div class="block-label"><span class="block-label-dot"></span>Qué decir</div>
+      <p>Saludo, presentación formal de los integrantes y presentación mínima del proyecto: qué es y para qué sirve. Breve, directo y seguro.</p>
+      <div class="example">
+        <div class="example-label">Ejemplo</div>
+        <p>"Buenos días, somos [nombre/s] y presentamos nuestro TFG: una [aplicación / plataforma web / lo que sea] orientada a [objetivo principal del proyecto]."</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- S2: INTRODUCCIÓN -->
+<section class="section" id="s2">
+  <div class="section-head">
+    <div class="section-num">2</div>
+    <div class="section-meta">
+      <div class="section-kicker">Segunda diapositiva</div>
+      <h2 class="section-title">Introducción <em>y contexto</em></h2>
+    </div>
+  </div>
+  <div class="two-col">
+    <div class="block block-slide">
+      <div class="block-label"><span class="block-label-dot"></span>Diapositiva</div>
+      <ul>
+        <li>Contexto y problema o motivación de partida</li>
+        <li>Situación actual del mercado o del ámbito elegido</li>
+        <li>Necesidad concreta que el proyecto pretende resolver</li>
+        <li>Solución o producto que habéis planteado</li>
+      </ul>
+    </div>
+    <div class="block block-talk">
+      <div class="block-label"><span class="block-label-dot"></span>Qué decir</div>
+      <p>Ponéd en contexto vuestro proyecto. Explicad qué os motivó, qué problema o vacío detectasteis, y cómo lo habéis abordado.</p>
+      <div class="example">
+        <div class="example-label">Ejemplo</div>
+        <p>"Este proyecto nace de [un problema que detectamos en… / nuestra motivación por…]. Las soluciones existentes son [descripción breve]. Nosotros nos propusimos crear [solución] para [beneficio concreto]."</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- S3: OBJETIVOS -->
+<section class="section" id="s3">
+  <div class="section-head">
+    <div class="section-num">3</div>
+    <div class="section-meta">
+      <div class="section-kicker">Tercera diapositiva</div>
+      <h2 class="section-title">Objetivos</h2>
+    </div>
+  </div>
+  <div class="two-col">
+    <div class="block block-slide">
+      <div class="block-label"><span class="block-label-dot"></span>Diapositiva</div>
+      <ul>
+        <li><strong>Objetivo general</strong> — una frase potente que resuma la finalidad global del proyecto</li>
+        <li><strong>Objetivos específicos</strong> — 3 a 5 bullets con funcionalidades o metas medibles y concretas</li>
+      </ul>
+      <div class="nota" style="margin-top: 16px; background: rgba(26,102,112,0.05);">
+        <span class="nota-icon">💡</span>
+        <p>Los objetivos específicos deben ser <strong>verificables</strong>: el tribunal comprobará si los habéis cumplido en las conclusiones.</p>
+      </div>
+    </div>
+    <div class="block block-talk">
+      <div class="block-label"><span class="block-label-dot"></span>Qué decir</div>
+      <p>Explicad primero el objetivo general con lenguaje simple. Después, bajad al detalle de cada objetivo específico conectándolo con el problema expuesto en la introducción.</p>
+      <div class="example">
+        <div class="example-label">Ejemplo</div>
+        <p>"Nuestro objetivo general es digitalizar el proceso de préstamo en bibliotecas pequeñas. Entre los específicos: desarrollar un sistema de registro y login, crear mensajería instantánea y enviar notificaciones al móvil."</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- S4: TECNOLOGÍAS -->
+<section class="section" id="s4">
+  <div class="section-head">
+    <div class="section-num">4</div>
+    <div class="section-meta">
+      <div class="section-kicker">Cuarta diapositiva</div>
+      <h2 class="section-title">Tecnologías <em>usadas</em></h2>
+    </div>
+  </div>
+  <div class="two-col">
+    <div class="block block-slide">
+      <div class="block-label"><span class="block-label-dot"></span>Diapositiva</div>
+      <ul>
+        <li>Lista de lenguajes, frameworks, bases de datos y servicios cloud — con iconos si es posible</li>
+        <li>Versiones principales (ej. Python 3.12, React 18, PostgreSQL 16)</li>
+        <li>Criterios de selección: rendimiento, curva de aprendizaje, comunidad, licencias</li>
+        <li>Mapa sintetizado de cómo encajan entre sí</li>
+      </ul>
+    </div>
+    <div class="block block-talk">
+      <div class="block-label"><span class="block-label-dot"></span>Qué decir</div>
+      <p>Justificad por qué cada tecnología era la más adecuada frente a las alternativas. Destacad sinergias clave. Mencionad limitaciones conocidas y cómo las mitigasteis.</p>
+      <div class="example">
+        <div class="example-label">Ejemplo</div>
+        <p>"Elegimos React por su ecosistema maduro y la necesidad de una SPA rápida; FastAPI por su rendimiento en Python; y PostgreSQL por cubrir nuestras necesidades relacionales."</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- S5: METODOLOGÍA -->
+<section class="section" id="s5">
+  <div class="section-head">
+    <div class="section-num">5</div>
+    <div class="section-meta">
+      <div class="section-kicker">Quinta diapositiva</div>
+      <h2 class="section-title">Metodología <em>de desarrollo</em></h2>
+    </div>
+  </div>
+  <div class="two-col">
+    <div class="block block-slide">
+      <div class="block-label"><span class="block-label-dot"></span>Diapositiva</div>
+      <ul>
+        <li>Modelo de proceso utilizado (Gantt, Scrum, Kanban…)</li>
+        <li>Herramientas: GitHub, Jira, Trello, GitLab CI, etc.</li>
+        <li>Duración de los sprints e hitos clave</li>
+        <li>Estrategias de testing aplicadas (si las hay)</li>
+      </ul>
+    </div>
+    <div class="block block-talk">
+      <div class="block-label"><span class="block-label-dot"></span>Qué decir</div>
+      <p>Explicad cómo planificasteis, seguisteis y ajustateis el trabajo. Indicad la frecuencia de revisiones. Subrayad cómo la metodología redujo riesgos o detectó problemas a tiempo.</p>
+      <div class="example">
+        <div class="example-label">Ejemplo</div>
+        <p>"Planificamos con un diagrama de Gantt y trabajamos en sprints de dos semanas. Cada sprint definía las tareas, el responsable y los criterios de aceptación."</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- S6: ARQUITECTURA -->
+<section class="section" id="s6">
+  <div class="section-head">
+    <div class="section-num">6</div>
+    <div class="section-meta">
+      <div class="section-kicker">Sexta diapositiva</div>
+      <h2 class="section-title">Arquitectura <em>y diseño</em></h2>
+    </div>
+  </div>
+  <div class="two-col">
+    <div class="block block-slide">
+      <div class="block-label"><span class="block-label-dot"></span>Diapositiva</div>
+      <ul>
+        <li>Diagrama de arquitectura: capas, microservicios, APIs, base de datos</li>
+        <li>Flujos principales de datos y módulos responsables</li>
+        <li>Puntos clave: frameworks, clases, objetos, modelo de datos</li>
+        <li>Puntos críticos: seguridad, escalabilidad, tolerancia a fallos</li>
+      </ul>
+    </div>
+    <div class="block block-talk">
+      <div class="block-label"><span class="block-label-dot"></span>Qué decir</div>
+      <p>Haced un recorrido lógico por el diagrama — de la interfaz al almacenamiento. Explicad decisiones de partición y cómo se garantiza la escalabilidad y la seguridad de las comunicaciones.</p>
+      <div class="example">
+        <div class="example-label">Ejemplo</div>
+        <p>"El front-end se comunica con la API Gateway por HTTPS; esta enruta peticiones a microservicios Docker orquestados con Kubernetes, mientras PostgreSQL actúa como única fuente de verdad."</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- S7: DEMO -->
+<section class="section" id="s7">
+  <div class="section-head">
+    <div class="section-num">7</div>
+    <div class="section-meta">
+      <div class="section-kicker">Séptima diapositiva</div>
+      <h2 class="section-title">Demostración <em>en vivo</em></h2>
+    </div>
+  </div>
+  <div class="two-col">
+    <div class="block block-slide">
+      <div class="block-label"><span class="block-label-dot"></span>Diapositiva</div>
+      <ul>
+        <li>Capturas de pantalla representativas del producto final</li>
+        <li>Enlace o código QR a la demo en vivo</li>
+        <li>Mensaje de transición claro hacia la demostración práctica</li>
+      </ul>
+    </div>
+    <div class="block block-talk">
+      <div class="block-label"><span class="block-label-dot"></span>Qué decir</div>
+      <p>Primero introducid el producto con capturas y una explicación breve de lo que habéis logrado. Luego pasad directamente a la demostración práctica.</p>
+      <div class="example">
+        <div class="example-label">Ejemplo</div>
+        <p>"El resultado es una aplicación plenamente funcional que cumple los objetivos planteados. A continuación os hacemos una demostración en vivo."</p>
+      </div>
+    </div>
+  </div>
+  <div class="nota">
+    <span class="nota-icon">⚠️</span>
+    <p><strong>Preparad un plan B.</strong> Si la demo falla en directo, tened grabado un vídeo de respaldo. Los imprevistos técnicos son más frecuentes de lo que parece.</p>
+  </div>
+</section>
+
+<!-- S8: CONCLUSIONES -->
+<section class="section" id="s8">
+  <div class="section-head">
+    <div class="section-num">8</div>
+    <div class="section-meta">
+      <div class="section-kicker">Octava diapositiva</div>
+      <h2 class="section-title">Evaluación <em>y conclusiones</em></h2>
+    </div>
+  </div>
+  <div class="two-col">
+    <div class="block block-slide">
+      <div class="block-label"><span class="block-label-dot"></span>Diapositiva</div>
+      <ul>
+        <li>Tabla objetivo → resultado (logrado / parcial / pendiente)</li>
+        <li>Principales retos técnicos y cómo los resolvisteis</li>
+        <li>Limitaciones actuales del proyecto</li>
+        <li>Aprendizajes más relevantes del proceso</li>
+      </ul>
+    </div>
+    <div class="block block-talk">
+      <div class="block-label"><span class="block-label-dot"></span>Qué decir</div>
+      <p>Sed honestos: explicad qué conseguisteis y qué no salió como esperabais. Enfatizad lo que aprendisteis. Dejad claro el valor que aporta y que el proyecto es extensible.</p>
+      <div class="example">
+        <div class="example-label">Ejemplo</div>
+        <p>"Los resultados han sido muy satisfactorios en cuanto a [X]. Sin embargo, nos hemos enfrentado a [Y], que no hemos podido resolver al nivel deseado. Aún así, el proyecto cumple los objetivos de [Z] y hemos aprendido a [aprendizaje]."</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- S9: TRABAJO FUTURO -->
+<section class="section" id="s9">
+  <div class="section-head">
+    <div class="section-num">9</div>
+    <div class="section-meta">
+      <div class="section-kicker">Novena diapositiva</div>
+      <h2 class="section-title">Trabajo <em>futuro</em></h2>
+    </div>
+  </div>
+  <div class="two-col">
+    <div class="block block-slide">
+      <div class="block-label"><span class="block-label-dot"></span>Diapositiva</div>
+      <ul>
+        <li>Listado de mejoras y ampliaciones identificadas</li>
+        <li>Ideas de difusión y perfil de posibles usuarios</li>
+        <li>Potencial de escalado o monetización, si aplica</li>
+      </ul>
+    </div>
+    <div class="block block-talk">
+      <div class="block-label"><span class="block-label-dot"></span>Qué decir</div>
+      <p>Explicad los pasos concretos para llevar el proyecto al siguiente nivel: qué añadiríais, cómo lo escalaríais y a quién llegaríais. Transmitid que el proyecto tiene recorrido.</p>
+      <div class="example">
+        <div class="example-label">Ejemplo</div>
+        <p>"A corto plazo planeamos añadir [funcionalidad X]. A medio plazo, explorar [expansión Y], lo que abriría el producto a [tipo de usuario o mercado]."</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- S10: PREGUNTAS -->
+<section class="section" id="s10">
+  <div class="section-head">
+    <div class="section-num">10</div>
+    <div class="section-meta">
+      <div class="section-kicker">Diapositiva final</div>
+      <h2 class="section-title">Turno de <em>preguntas</em></h2>
+    </div>
+  </div>
+  <div class="two-col">
+    <div class="block block-slide">
+      <div class="block-label"><span class="block-label-dot"></span>Diapositiva</div>
+      <ul>
+        <li>Texto mínimo: "¿Preguntas?" o "Gracias por vuestra atención"</li>
+        <li>Datos de contacto: LinkedIn, correo, QR al repositorio</li>
+        <li>Nada más — la diapositiva más limpia de toda la presentación</li>
+      </ul>
+    </div>
+    <div class="block block-talk">
+      <div class="block-label"><span class="block-label-dot"></span>Qué decir</div>
+      <p>Invitad al tribunal a preguntar. Mostrad apertura y seguridad. Si no sabéis algo, decirlo con honestidad es mejor que inventar una respuesta. <strong>Respirad antes de responder.</strong></p>
+      <div class="example">
+        <div class="example-label">Ejemplo</div>
+        <p>"Muchas gracias por vuestra atención. Estaremos encantados de ampliar cualquier aspecto técnico, de diseño o del plan de futuro."</p>
+      </div>
+    </div>
+  </div>
+  <div class="nota">
+    <span class="nota-icon">🎯</span>
+    <p><strong>Dejad cosas sin explicar a propósito.</strong> Omitir algún detalle no esencial da pie a preguntas del tribunal — y vosotros ya conocéis las respuestas.</p>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <strong>Guión de Defensa · TFG / TFM</strong> — Guía de presentación para el tribunal
+</footer>
+
+<script>
+(function() {
+  var ids = ['intro-general','s1','s2','s3','s4','s5','s6','s7','s8','s9','s10'];
+  var links = {};
+  ids.forEach(function(id) {
+    links[id] = document.querySelector('.sticky-nav a[data-section="' + id + '"]');
+  });
+
+  var navInner = document.querySelector('.sticky-nav-inner');
+
+  function scrollNavToActive(link) {
+    if (!link || !navInner) return;
+    var navRect = navInner.getBoundingClientRect();
+    var linkRect = link.getBoundingClientRect();
+    var offset = linkRect.left - navRect.left - navRect.width / 2 + linkRect.width / 2;
+    navInner.scrollTo({ left: navInner.scrollLeft + offset, behavior: 'smooth' });
+  }
+
+  function setActive(id) {
+    ids.forEach(function(sid) {
+      var l = links[sid];
+      if (!l) return;
+      l.classList.toggle('active', sid === id);
+    });
+    scrollNavToActive(links[id]);
+  }
+
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) {
+      if (e.isIntersecting) setActive(e.target.id);
+    });
+  }, { rootMargin: '-8% 0px -78% 0px', threshold: 0 });
+
+  ids.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) observer.observe(el);
+  });
+
+  document.querySelectorAll('.sticky-nav a').forEach(function(a) {
+    a.addEventListener('click', function(e) {
+      e.preventDefault();
+      var el = document.getElementById(this.dataset.section);
+      if (el) {
+        var top = el.getBoundingClientRect().top + window.scrollY - 58;
+        window.scrollTo({ top: top, behavior: 'smooth' });
+      }
+    });
+  });
+})();
+</script>
+</body>
+</html>

@@ -5,6 +5,7 @@ $rolVisualitzacio = $rolVisualitzacio ?? 'alumne';
 $idProjecte = (int) ($proyectoAlumno['id_proyecto'] ?? 0);
 $faseBloquejada = $rolVisualitzacio === 'alumne' && !empty($aparencaFaseActiva['bloquejada']);
 $estatFaseCinc = fase5ObtenirEstat($pdo, $idProjecte);
+$gitAplica = $estatFaseCinc['git_aplica'];
 $estatRepositoris = $estatFaseCinc['repositoris'];
 $estatStack = $estatFaseCinc['stack'];
 $estatAutoavaluacio = $estatFaseCinc['autoavaluacio'];
@@ -28,12 +29,15 @@ if (!$faseBloquejada) {
     <p class="fase-introduccio mb-0"><?= htmlspecialchars($faseIntroduccion, ENT_QUOTES, 'UTF-8') ?></p>
     <?php if ($faseBloquejada): ?>
         <?php
-        $tasquesBloquejades = [
-            ['titol' => 'Repositoris Git', 'descripcio' => 'Afegiu els repositoris Git associats al projecte i identifiqueu-los amb etiquetes breus quan calgui.'],
+        $tasquesBloquejades = [];
+        if ($gitAplica) {
+            $tasquesBloquejades[] = ['titol' => 'Repositoris Git', 'descripcio' => 'Afegiu els repositoris Git associats al projecte i identifiqueu-los amb etiquetes breus quan calgui.'];
+        }
+        $tasquesBloquejades = array_merge($tasquesBloquejades, [
             ['titol' => 'Tecnologies i eines', 'descripcio' => 'Identifiqueu les tecnologies i les eines que utilitzareu durant el desenvolupament del projecte.'],
             ['titol' => 'Autoavaluació final', 'descripcio' => 'Reflexioneu sobre l’aprenentatge, el resultat i les millores del projecte.'],
             ['titol' => 'Entrega del projecte', 'descripcio' => 'És el moment de publicar el resultat final del vostre projecte i deixar-lo accessible des de fora.'],
-        ];
+        ]);
         ?>
         <?php foreach ($tasquesBloquejades as $tasca): ?>
             <section class="bloc bloc-bloquejat">
@@ -46,6 +50,7 @@ if (!$faseBloquejada) {
             </section>
         <?php endforeach; ?>
     <?php else: ?>
+    <?php if ($gitAplica): ?>
     <section class="bloc <?= $estatRepositoris['repositoris_informats'] ? 'bloc-completat' : 'bloc-activitat' ?>">
         <div class="bloc-contingut">
             <div class="bloc-tipus"><?= $estatRepositoris['repositoris_informats'] ? 'Completada' : 'Activitat' ?></div>
@@ -61,6 +66,7 @@ if (!$faseBloquejada) {
             <a href="<?= htmlspecialchars($hrefGit, ENT_QUOTES, 'UTF-8') ?>" class="btn btn-fase <?= $estatRepositoris['repositoris_informats'] ? 'btn-outline-success' : 'btn-puig-solid' ?>">Entrar</a>
         </div>
     </section>
+    <?php endif; ?>
     <section class="bloc <?= $estatStack['completada'] ? 'bloc-completat' : 'bloc-activitat' ?>">
         <div class="bloc-contingut">
             <div class="bloc-tipus"><?= $estatStack['completada'] ? 'Completada' : 'Activitat' ?></div>
