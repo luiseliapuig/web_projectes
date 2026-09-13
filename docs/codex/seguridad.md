@@ -56,6 +56,7 @@ La autorización general del área no basta:
 - El panel docente de alumnado se limita a las matrículas de `rel_alumnos_grupos` cuyos grupos y cursos estén asignados al profesor mediante `rel_profesores_grupos`. Listado, formulario y acción repiten este alcance.
 - Un tutor puede desactivar una identidad de su alumnado. Solo puede eliminarla si no pertenece a ningún proyecto ni conserva matrículas de otros cursos; en caso contrario debe desactivarla para preservar el historial.
 - El envío colectivo de invitaciones exige un grupo concreto asignado al profesor y solo selecciona alumnado activo de ese grupo que todavía no tenga contraseña.
+- `Administrar alumnat` y `Resum` reutilizan `alumnat-tutor_invitaciones_accion.php` para las invitaciones individuales y colectivas. En `Resum`, los estados anteriores al proyecto se derivan de la contraseña existente y de la pertenencia a un proyecto del curso actual; no se guardan como estados nuevos.
 - Un tribunal solo puede actuar si existe una asignación vigente del profesor al proyecto.
 - Una acción vuelve a comprobar la relación en base de datos antes de escribir.
 - Nunca confíes como prueba de permiso en un ID, UUID, campo oculto, botón o URL.

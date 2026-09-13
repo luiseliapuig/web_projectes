@@ -12,9 +12,12 @@ $grupoId=isset($_POST['grupo_id']) ? (int)$_POST['grupo_id'] : 0;
 $alumnoId=isset($_POST['alumno_id']) ? (int)$_POST['alumno_id'] : 0;
 $returnCicloId=isset($_POST['return_ciclo_id']) ? max(0,(int)$_POST['return_ciclo_id']) : $cicloId;
 $returnGrupoId=isset($_POST['return_grupo_id']) ? max(0,(int)$_POST['return_grupo_id']) : $grupoId;
-$redirigir=static function(string $curso,int $cicloId,int $grupoId):never {
+$returnTo=isset($_POST['return_to']) && $_POST['return_to']==='resum' ? 'resum' : 'alumnat';
+$redirigir=static function(string $curso,int $cicloId,int $grupoId) use ($returnTo):never {
     if(!preg_match('/^[0-9]{4}-[0-9]{2}$/',$curso))$curso=cursoAcademicoActual();
-    $url='/index.php?main=alumnat-tutor&curso='.rawurlencode($curso).'&ciclo_id='.$cicloId.'&grupo_id='.$grupoId;
+    $url=$returnTo==='resum'
+        ? '/resum?grupo_id='.$grupoId
+        : '/index.php?main=alumnat-tutor&curso='.rawurlencode($curso).'&ciclo_id='.$cicloId.'&grupo_id='.$grupoId;
     echo '<script>location.href='.json_encode($url).';</script>';
     echo '<noscript><meta http-equiv="refresh" content="0;url='.htmlspecialchars($url,ENT_QUOTES,'UTF-8').'"></noscript>';
     exit;

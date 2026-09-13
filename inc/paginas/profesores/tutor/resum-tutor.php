@@ -127,6 +127,48 @@ if ($proyectos !== []) {
     }
 }
 
+// Alumnat actiu matriculat al grup actual. El mateix conjunt permet obtenir
+// les files sense projecte del curs i saber si el grup té invitacions pendents.
+$alumnesSenseProjecte = [];
+$hiHaInvitacionsPendents = false;
+if ($grupoId > 0) {
+    $stmt = $pdo->prepare("
+        SELECT a.id_alumno, a.nombre, a.apellidos,
+               (a.password_hash IS NULL OR a.password_hash = '') AS pendent_invitacio,
+               NOT EXISTS (
+                   SELECT 1
+                   FROM app.rel_proyectos_alumnos rpa
+                   INNER JOIN app.proyectos p ON p.id_proyecto = rpa.proyecto_id
+                   WHERE rpa.alumno_id = a.id_alumno
+                     AND p.curso_academico = :curso_projectes
+               ) AS sense_projecte
+        FROM app.rel_alumnos_grupos rag
+        INNER JOIN app.alumnos a ON a.id_alumno = rag.alumno_id
+        INNER JOIN app.rel_profesores_grupos rpg
+            ON rpg.grupo_id = rag.grupo_id
+           AND rpg.curso_academico = rag.curso_academico
+           AND rpg.profesor_id = :profesor_id
+        WHERE rag.grupo_id = :grupo_id
+          AND rag.curso_academico = :curso_academico
+          AND a.activo = true
+        ORDER BY a.nombre, a.apellidos, a.id_alumno
+    ");
+    $stmt->execute([
+        ':curso_projectes' => $cursoAcademico,
+        ':profesor_id' => $profesorId,
+        ':grupo_id' => $grupoId,
+        ':curso_academico' => $cursoAcademico,
+    ]);
+    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $alumneGrup) {
+        $pendentInvitacio = resumTutorValorBoolea($alumneGrup['pendent_invitacio'] ?? false);
+        $hiHaInvitacionsPendents = $hiHaInvitacionsPendents || $pendentInvitacio;
+        if (resumTutorValorBoolea($alumneGrup['sense_projecte'] ?? false)) {
+            $alumneGrup['pendent_invitacio'] = $pendentInvitacio;
+            $alumnesSenseProjecte[] = $alumneGrup;
+        }
+    }
+}
+
 // -----------------------------------------------------------------------------
 // 4. Estat de fases: PROTOTIP. Encara no hi ha una definició homogènia de
 // quan cada fase és pendent/en procés/completa, i no s'inventa aquí.
@@ -204,6 +246,10 @@ $mostrarGestioTutors = $modeTutorsManual || $projectesSenseTutor !== [];
 $feedbackTutorActualitzat = isset($_GET['tutor_actualitzat']) && (string) $_GET['tutor_actualitzat'] === '1';
 $errorGestioTutors = isset($_SESSION['resum_tutors_error']) ? (string) $_SESSION['resum_tutors_error'] : '';
 unset($_SESSION['resum_tutors_error']);
+$errorInvitacions = isset($_SESSION['alumnat_tutor_error']) ? (string) $_SESSION['alumnat_tutor_error'] : '';
+$avisInvitacions = isset($_SESSION['alumnat_tutor_warning']) ? (string) $_SESSION['alumnat_tutor_warning'] : '';
+$confirmacioInvitacions = isset($_SESSION['alumnat_tutor_notice']) ? (string) $_SESSION['alumnat_tutor_notice'] : '';
+unset($_SESSION['alumnat_tutor_error'], $_SESSION['alumnat_tutor_warning'], $_SESSION['alumnat_tutor_notice']);
 
 // -----------------------------------------------------------------------------
 // 5. Autoseguiments pendents del grup seleccionat: mateixa definició exacta
@@ -477,10 +523,8 @@ if ($idsGruposAutorizados !== []) {
 }
 .resum-panell {
     background: #fff;
-    overflow: hidden;
 }
 .resum-panell > .table-responsive {
-    padding-bottom: .75rem;
     background: #fff;
 }
 .resum-panell-cap {
@@ -521,13 +565,21 @@ if ($idsGruposAutorizados !== []) {
 .resum-fases-table td.text-muted {
     font-size: 1rem;
 }
-.resum-fases-table tbody tr:nth-child(odd) > * {
-    --bs-table-bg: #fff;
+.resum-fases-table tbody tr:nth-child(odd) {
+    --resum-fila-bg: #fff;
+}
+.resum-fases-table tbody tr:nth-child(even) {
+    --resum-fila-bg: #f8f9fa;
+}
+.resum-fases-table tbody tr {
+    background-color: var(--resum-fila-bg);
+}
+.resum-fases-table tbody tr > * {
+    --bs-table-bg: var(--resum-fila-bg);
     background-color: var(--bs-table-bg);
 }
-.resum-fases-table tbody tr:nth-child(even) > * {
-    --bs-table-bg: #f8f9fa;
-    background-color: var(--bs-table-bg);
+.resum-fases-table tbody tr:last-child > * {
+    padding-bottom: 1.0rem;
 }
 .resum-fases-table th:first-child,
 .resum-fases-table td:first-child {
@@ -681,6 +733,14 @@ if ($idsGruposAutorizados !== []) {
             </div>
         <?php endif; ?>
 
+        <?php if ($errorInvitacions !== ''): ?>
+            <div class="alert alert-danger" role="alert"><?= htmlspecialchars($errorInvitacions, ENT_QUOTES, 'UTF-8') ?></div>
+        <?php elseif ($avisInvitacions !== ''): ?>
+            <div class="alert alert-warning" role="alert"><?= htmlspecialchars($avisInvitacions, ENT_QUOTES, 'UTF-8') ?></div>
+        <?php elseif ($confirmacioInvitacions !== ''): ?>
+            <div class="alert alert-success" role="status"><?= htmlspecialchars($confirmacioInvitacions, ENT_QUOTES, 'UTF-8') ?></div>
+        <?php endif; ?>
+
         <div class="row g-4">
             <!-- ══════════════════════════════════════════════════════════
                  ZONA PRINCIPAL: mapa de projectes i fases
@@ -692,7 +752,7 @@ if ($idsGruposAutorizados !== []) {
                             Projectes · <?= htmlspecialchars(trim((string) ($grupoSeleccionado['abr'] ?? '') . ' ' . (string) ($grupoSeleccionado['grupo'] ?? '')), ENT_QUOTES, 'UTF-8') ?>
                         </h2>
                     </div>
-                    <?php if ($proyectos === []): ?>
+                    <?php if ($proyectos === [] && $alumnesSenseProjecte === []): ?>
                         <div class="resum-panell-contingut">
                             <p class="text-muted mb-0">Aquest grup no té cap projecte actiu.</p>
                         </div>
@@ -789,9 +849,47 @@ if ($idsGruposAutorizados !== []) {
                                             <?php endforeach; ?>
                                         </tr>
                                     <?php endforeach; ?>
+                                    <?php foreach ($alumnesSenseProjecte as $alumneSenseProjecte): ?>
+                                        <?php $pendentInvitacio = !empty($alumneSenseProjecte['pendent_invitacio']); ?>
+                                        <tr>
+                                            <td class="fw-semibold">
+                                                <?= htmlspecialchars(trim((string) $alumneSenseProjecte['nombre'] . ' ' . (string) $alumneSenseProjecte['apellidos']), ENT_QUOTES, 'UTF-8') ?>
+                                            </td>
+                                            <td colspan="<?= count($fasesArquitectura) ?>">
+                                                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                                                    <span class="text-muted">
+                                                        <?= $pendentInvitacio ? 'Encara no ha entrat a la plataforma' : 'Encara no ha definit el grup' ?>
+                                                    </span>
+                                                    <?php if ($pendentInvitacio): ?>
+                                                        <form method="post" action="/index.php?main=alumnat-tutor_invitaciones_accion">
+                                                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(tokenCsrf(), ENT_QUOTES, 'UTF-8') ?>">
+                                                            <input type="hidden" name="curso" value="<?= htmlspecialchars($cursoAcademico, ENT_QUOTES, 'UTF-8') ?>">
+                                                            <input type="hidden" name="grupo_id" value="<?= $grupoId ?>">
+                                                            <input type="hidden" name="alumno_id" value="<?= (int) $alumneSenseProjecte['id_alumno'] ?>">
+                                                            <input type="hidden" name="return_grupo_id" value="<?= $grupoId ?>">
+                                                            <input type="hidden" name="return_to" value="resum">
+                                                            <button type="submit" class="btn btn-fase btn-puig text-nowrap" style="margin-right: 18px;">Enviar invitació</button>
+                                                        </form>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
                                 </tbody>
                             </table>
                         </div>
+                        <?php if ($hiHaInvitacionsPendents): ?>
+                            <div class="d-flex justify-content-end border-top rounded-bottom-4 bg-white px-4 py-3">
+                                <form method="post" action="/index.php?main=alumnat-tutor_invitaciones_accion">
+                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(tokenCsrf(), ENT_QUOTES, 'UTF-8') ?>">
+                                    <input type="hidden" name="curso" value="<?= htmlspecialchars($cursoAcademico, ENT_QUOTES, 'UTF-8') ?>">
+                                    <input type="hidden" name="grupo_id" value="<?= $grupoId ?>">
+                                    <input type="hidden" name="return_grupo_id" value="<?= $grupoId ?>">
+                                    <input type="hidden" name="return_to" value="resum">
+                                    <button type="submit" class="btn btn-fase btn-puig-solid">Enviar invitacions pendents</button>
+                                </form>
+                            </div>
+                        <?php endif; ?>
                     <?php endif; ?>
                 </div>
                 <?php if ($proyectos !== []): ?>
