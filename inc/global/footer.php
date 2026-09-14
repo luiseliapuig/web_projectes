@@ -37,7 +37,7 @@
         </div>
         <div class="col-md-4 text-md-end">
           <div class="small text-muted">
-            Curs 2025–2026
+            Curs <?= htmlspecialchars(cursActual(), ENT_QUOTES, 'UTF-8') ?>
           </div>
         </div>
       </div>

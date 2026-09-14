@@ -21,6 +21,15 @@ function cursoAcademicoActual(?DateTimeImmutable $fecha = null): string
     return sprintf('%d-%02d', $inicio, $fin % 100);
 }
 
+function cursActual(): string
+{
+    $fecha = new DateTimeImmutable('now', new DateTimeZone('Europe/Madrid'));
+    $year = (int) $fecha->format('Y');
+    $inicio = (int) $fecha->format('n') < 9 ? $year - 1 : $year;
+
+    return $inicio . '–' . ($inicio + 1);
+}
+
 // -----------------------------------------------------------------------------
 // Curso utilizado por el flujo de defensas.
 // Se mantiene como función específica para que todas sus pantallas y acciones
