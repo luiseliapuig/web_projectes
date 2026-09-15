@@ -215,6 +215,7 @@ if ($proyectos !== []) {
         INNER JOIN app.profesores pr
             ON pr.id_profesor = rpg.profesor_id
            AND pr.activo = true
+           AND pr.rol IS DISTINCT FROM 'superadmin'
         INNER JOIN app.rel_proyectos_profesores rpp
             ON rpp.proyecto_id = p.id_proyecto
            AND rpp.profesor_id = pr.id_profesor

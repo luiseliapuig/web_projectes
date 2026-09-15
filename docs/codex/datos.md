@@ -33,6 +33,7 @@ Motor: PostgreSQL. Base: `web_proyectos`. Esquema: `app`.
 - Un alumno no puede estar vinculado a más de un proyecto activo durante el mismo curso académico.
 - Eliminar un proyecto elimina en cascada sus relaciones, incluidas las asignaciones de tribunal, pero conserva las identidades de `alumnos` y sus matrículas históricas.
 - La consulta docente del recorrido se limita a proyectos de grupos y cursos asignados mediante `rel_profesores_grupos`; las intervenciones formales exigen además la relación específica y el rol correspondiente en `rel_proyectos_profesores`.
+- La pertenencia a un grupo no implica por sí sola elegibilidad como tutor de proyecto. El profesorado con `profesores.rol = 'superadmin'` puede estar asignado a grupos para supervisarlos, pero queda excluido de la selección de tutores.
 - El grupo del proyecto se identifica exclusivamente mediante `proyectos.grupo_id`.
 - El ciclo y la familia de un proyecto se derivan de `proyectos.grupo_id -> grupos.id_ciclo -> ciclos.familia_ciclo_id`; no se duplican en `proyectos`.
 - `evaluacion_tribunal` impone `UNIQUE (proyecto_id, profesor_id)`.

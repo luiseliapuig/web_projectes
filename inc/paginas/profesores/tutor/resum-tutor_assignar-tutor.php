@@ -66,6 +66,7 @@ try {
         INNER JOIN app.profesores pr
             ON pr.id_profesor = rpp.profesor_id
            AND pr.activo = true
+           AND pr.rol IS DISTINCT FROM 'superadmin'
         INNER JOIN app.rel_profesores_grupos rpg
             ON rpg.profesor_id = rpp.profesor_id
            AND rpg.grupo_id = :grupo_id
