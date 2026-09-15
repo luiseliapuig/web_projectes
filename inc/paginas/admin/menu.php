@@ -2,10 +2,15 @@
 declare(strict_types=1);
 
 $menuAdminMain = isset($main) && is_string($main) ? $main : '';
+$resumTutorActiu = $menuAdminMain === 'resum-tutor';
+$autoseguimentTutorActiu = $menuAdminMain === 'autoseguiment-tutor';
+$memoriaTutorActiva = $menuAdminMain === 'memoria-tutor';
 $configuracionActiva = str_starts_with($menuAdminMain, 'configuracion');
 $autoseguimentActiu = str_starts_with($menuAdminMain, 'autoseguiment-control');
 $proyectosActivos = str_starts_with($menuAdminMain, 'proyectos');
-$administracionActiva = in_array($menuAdminMain, [
+$memoriaActiva = str_starts_with($menuAdminMain, 'memoria-estructura');
+$stackActiu = str_starts_with($menuAdminMain, 'stack-');
+$administracionActiva = $configuracionActiva || $proyectosActivos || $memoriaActiva || $stackActiu || in_array($menuAdminMain, [
     'professorat', 'professorat_form', 'alumnat', 'alumnat_form',
     'families-cicles', 'families-cicles_form', 'cicles', 'cicles_form',
     'grups-cicle', 'grups-cicle_form', 'aules', 'aules_form',
@@ -18,8 +23,6 @@ $defensasActivas = in_array($menuAdminMain, [
 $mensajeriaActiva = $menuAdminMain === 'emails'
     || str_starts_with($menuAdminMain, 'enviar-emails-')
     || str_starts_with($menuAdminMain, 'lista-emails-');
-$memoriaActiva = str_starts_with($menuAdminMain, 'memoria-estructura');
-$stackActiu = str_starts_with($menuAdminMain, 'stack-');
 ?>
 <nav class="navbar navbar-expand-lg py-0 area-nav" aria-label="Administració">
     <div class="container-fluid px-4 header-wrapper">
@@ -28,13 +31,20 @@ $stackActiu = str_starts_with($menuAdminMain, 'stack-');
         </button>
         <div class="collapse navbar-collapse" id="adminAreaNavbar">
             <ul class="navbar-nav mb-0">
-                <li class="nav-item"><a class="nav-link <?= $configuracionActiva ? 'active' : '' ?>" href="/index.php?main=configuracion">Configuració</a></li>
+                <li class="nav-item"><a class="nav-link <?= $resumTutorActiu ? 'active' : '' ?>" href="/resum">Resum</a></li>
+                <li class="nav-item"><a class="nav-link <?= $autoseguimentTutorActiu ? 'active' : '' ?>" href="/seguiment-setmanal">Autoseguiment</a></li>
+                <li class="nav-item"><a class="nav-link <?= $memoriaTutorActiva ? 'active' : '' ?>" href="/revisio-memoria">Memòria</a></li>
+
+                <li class="nav-item area-nav-separador" role="separator" aria-hidden="true"></li>
+
                 <li class="nav-item"><a class="nav-link <?= $autoseguimentActiu ? 'active' : '' ?>" href="/index.php?main=autoseguiment-control">Autoseguiment</a></li>
-                <li class="nav-item"><a class="nav-link <?= $proyectosActivos ? 'active' : '' ?>" href="/index.php?main=proyectos">Projectes</a></li>
 
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle <?= $administracionActiva ? 'active' : '' ?>" href="#" id="areaAdminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Administració</a>
                     <ul class="dropdown-menu" aria-labelledby="areaAdminDropdown">
+                        <li><a class="dropdown-item <?= $configuracionActiva ? 'active' : '' ?>" href="/index.php?main=configuracion">Configuració</a></li>
+                        <li><a class="dropdown-item <?= $proyectosActivos ? 'active' : '' ?>" href="/index.php?main=proyectos">Projectes</a></li>
+                        <li><hr class="dropdown-divider"></li>
                         <li class="dropdown-submenu">
                             <button type="button" class="dropdown-item dropdown-submenu-toggle" aria-haspopup="true">Comunitat educativa</button>
                             <ul class="dropdown-menu" aria-label="Comunitat educativa">
@@ -58,14 +68,19 @@ $stackActiu = str_starts_with($menuAdminMain, 'stack-');
                                 <li><a class="dropdown-item" href="/index.php?main=tipus-projectes">Tipus</a></li>
                             </ul>
                         </li>
-                    </ul>
-                </li>
-
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle <?= $stackActiu ? 'active' : '' ?>" href="#" id="areaStackDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Stack</a>
-                    <ul class="dropdown-menu" aria-labelledby="areaStackDropdown">
-                        <li><a class="dropdown-item <?= str_starts_with($menuAdminMain, 'stack-tecnologies') ? 'active' : '' ?>" href="/index.php?main=stack-tecnologies">Tecnologies</a></li>
-                        <li><a class="dropdown-item <?= str_starts_with($menuAdminMain, 'stack-eines') ? 'active' : '' ?>" href="/index.php?main=stack-eines">Eines</a></li>
+                        <li class="dropdown-submenu">
+                            <button type="button" class="dropdown-item dropdown-submenu-toggle <?= $stackActiu ? 'active' : '' ?>" aria-haspopup="true">Stack</button>
+                            <ul class="dropdown-menu" aria-label="Stack">
+                                <li><a class="dropdown-item <?= str_starts_with($menuAdminMain, 'stack-tecnologies') ? 'active' : '' ?>" href="/index.php?main=stack-tecnologies">Tecnologies</a></li>
+                                <li><a class="dropdown-item <?= str_starts_with($menuAdminMain, 'stack-eines') ? 'active' : '' ?>" href="/index.php?main=stack-eines">Eines</a></li>
+                            </ul>
+                        </li>
+                        <li class="dropdown-submenu">
+                            <button type="button" class="dropdown-item dropdown-submenu-toggle <?= $memoriaActiva ? 'active' : '' ?>" aria-haspopup="true">Memòria</button>
+                            <ul class="dropdown-menu" aria-label="Memòria">
+                                <li><a class="dropdown-item <?= $memoriaActiva ? 'active' : '' ?>" href="/index.php?main=memoria-estructura">Estructura de la memòria</a></li>
+                            </ul>
+                        </li>
                     </ul>
                 </li>
 
@@ -76,13 +91,6 @@ $stackActiu = str_starts_with($menuAdminMain, 'stack-');
                         <li><a class="dropdown-item" href="/index.php?main=calendari_drag">Modificar defenses</a></li>
                         <li><a class="dropdown-item" href="/index.php?main=planificacio">Generar proposta</a></li>
                         <li><a class="dropdown-item" href="/index.php?main=defensas_print">Imprimir defenses</a></li>
-                    </ul>
-                </li>
-
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle <?= $memoriaActiva ? 'active' : '' ?>" href="#" id="areaMemoriaDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Memòria</a>
-                    <ul class="dropdown-menu" aria-labelledby="areaMemoriaDropdown">
-                        <li><a class="dropdown-item" href="/index.php?main=memoria-estructura">Estructura de la memòria</a></li>
                     </ul>
                 </li>
 
